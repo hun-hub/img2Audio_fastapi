@@ -91,14 +91,13 @@ def load_iclight_condition_applier() :
 
 
 def construct_condition(unet,
-                        cached_model_dict,
                         iclight_model,
                         positive,
                         negative,
                         init_noise
                         ):
     # iclight unet apply
-    unet = load_and_apply_iclight(unet, os.path.join('/checkpoints/unet', iclight_model))
+    unet = load_and_apply_iclight(unet, iclight_model)
     # ic light conditioning
     iclight_conditioning = load_iclight_condition_applier()
     positive, negative, _ = iclight_conditioning.encode(positive,

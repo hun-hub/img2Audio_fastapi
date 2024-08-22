@@ -1,9 +1,5 @@
 import argparse
 from architecture.inference_architecture import Inference_API
-from utils import set_comfyui_packages
-import yaml, os
-from ComfyUI import folder_paths
-set_comfyui_packages()
 
 
 parser = argparse.ArgumentParser(description="Run FastAPI server with specified model")

@@ -57,7 +57,6 @@ def generate_image(cached_model_dict, request_data):
                                                  request_data.prompt_negative)
 
     unet, positive_cond, negative_cond = construct_condition(unet,
-                                                             cached_model_dict,
                                                              request_data.iclight_model,
                                                              positive_cond,
                                                              negative_cond,

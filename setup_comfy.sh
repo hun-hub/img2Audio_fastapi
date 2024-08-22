@@ -2,6 +2,7 @@
 
 # ComfyUI clone
 git clone https://github.com/comfyanonymous/ComfyUI.git
+cp extra_model_paths.yaml ComfyUI
 cd ComfyUI/custom_nodes
 
 # Custom nodes clone
@@ -23,3 +24,6 @@ git clone https://github.com/Fannovel16/comfyui_controlnet_aux.git
 git clone https://github.com/storyicon/comfyui_segment_anything.git
 git clone https://github.com/rgthree/rgthree-comfy.git
 git clone https://github.com/WASasquatch/was-node-suite-comfyui.git
+git clone https://github.com/Layer-norm/comfyui-lama-remover.git
+git clone https://github.com/jamesWalker55/comfyui-various.git
+wget -P ComfyUI-LaMA-Preprocessor/annotator/lama/models/lama/lama/ https://huggingface.co/lllyasviel/Annotators/resolve/main/ControlNetLama.pth

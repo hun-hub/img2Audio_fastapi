@@ -2,7 +2,9 @@ import importlib, sys, os
 import torch
 import numpy as np
 import yaml, os
-from ComfyUI import folder_paths
+from utils import set_comfyui_packages
+set_comfyui_packages()
+import folder_paths
 CHECKPOINT_ROOT = '/checkpoints'
 
 def load_extra_path_config(yaml_path):
@@ -45,11 +47,12 @@ def get_class_from_module(module, name):
     except AttributeError:
         raise ImportError(f"Module '{module.__name__}' does not define a '{name}' class or function")
 
-def get_function_from_comfyui(module_path, func_name) :
+def get_function_from_comfyui(module_path, func_name = None) :
     module_name = os.path.basename(module_path)
     module = import_module_from_path(module_name, module_path)
-    for m in func_name.split('.') :
-        module = get_class_from_module(module, m)
+    if func_name:
+        for m in func_name.split('.') :
+            module = get_class_from_module(module, m)
     return module
 
 # TODO: clip_vision 가지고 다니면 IP-adapter 할 때 굳이 안불러와도됨.
@@ -73,8 +76,8 @@ def load_controlnet(model_name) :
 
 @torch.inference_mode()
 def load_fooocus(model_name) :
-    head = os.path.join(CHECKPOINT_ROOT, 'inpaint','SDXL_fooocus_inpaint_head.pth')
-    patch = os.path.join(CHECKPOINT_ROOT, 'inpaint', model_name)
+    head = 'SDXL_fooocus_inpaint_head.pth'
+    patch = model_name
     module_path = 'ComfyUI/custom_nodes/comfyui-inpaint-nodes'
     func_name = 'nodes.LoadFooocusInpaint'
     fooocus_loader = get_function_from_comfyui(module_path, func_name)
