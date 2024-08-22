@@ -20,5 +20,6 @@ if __name__ == "__main__":
                 reload_excludes=['test/*',
                                  'ComfyUI/*',
                                  'architecture/gradio_architecture.py',
-                                 'architecture/ui/*']
+                                 'architecture/ui/*',
+                                 'docs/*']
                 )

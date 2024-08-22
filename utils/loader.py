@@ -85,6 +85,13 @@ def load_fooocus(model_name) :
     return fooocus
 
 @torch.inference_mode()
+def load_upscaler(model_name) :
+    from ComfyUI.comfy_extras.nodes_upscale_model import UpscaleModelLoader
+    loader = UpscaleModelLoader()
+    upsclae_model = loader.load_model(model_name)[0]
+    return upsclae_model
+
+@torch.inference_mode()
 def load_clip_vision(model_name) :
     from ComfyUI.comfy.clip_vision import load
     model_path = os.path.join(CHECKPOINT_ROOT, 'clip_vision', model_name)

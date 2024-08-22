@@ -24,7 +24,7 @@ class ControlNet_RequestData(BaseModel):
     end_percent: float
 
 class RequestData(BaseModel):
-    basemodel: str
+    basemodel: str = 'SDXL_copaxTimelessxlSDXL1_v12.safetensors'
     init_image: Optional[str] = None
     mask: Optional[str] = None
     prompt_positive: str = 'high quality, 4K, expert.'

@@ -7,6 +7,8 @@ from functions.sd15.params import SD15_RequestData
 import functions.sd15.generate
 from functions.object_remove.params import Object_Remove_RequestData
 import functions.object_remove.generate
+from functions.upscale.params import Upscale_RequestData
+import functions.upscale.generate
 from functions.iclight.params import ICLight_RequestData
 import functions.iclight.generate
 from functions.gemini.params import Gemini_RequestData
@@ -27,6 +29,7 @@ class Inference_API(CntGenAPI):
         self.app.post('/sdxl/generate')(self.sdxl_generate)
         self.app.post('/sd15/generate')(self.sd15_generate)
         self.app.post('/object_remove')(self.object_remove)
+        self.app.post('/upscale')(self.upscale)
         self.app.post('/iclight/generate')(self.iclight_generate)
         self.app.post('/gemini')(self.gemini_generate)
 
@@ -45,6 +48,10 @@ class Inference_API(CntGenAPI):
 
     def object_remove(self, request_data: Object_Remove_RequestData):
         image_base64 = self.generate_blueprint(functions.object_remove.generate.remove, request_data)
+        return {"image_base64": image_base64}
+
+    def upscale(self, request_data: Upscale_RequestData):
+        image_base64 = self.generate_blueprint(functions.upscale.generate.upscale, request_data)
         return {"image_base64": image_base64}
 
     def iclight_generate(self, request_data: ICLight_RequestData):

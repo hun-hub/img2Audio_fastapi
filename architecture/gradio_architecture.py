@@ -1,18 +1,20 @@
 import gradio as gr
-from functions.sd3 import sned_sd3_request_to_api
+from functions.sd3.utils import sned_sd3_request_to_api
 from .ui.sd3_ui import build_sd3_ui
-from functions.sdxl import sned_sdxl_request_to_api
+from functions.sdxl.utils import sned_sdxl_request_to_api
 from .ui.sdxl_ui import build_sdxl_ui
-from functions.sd15 import sned_sd15_request_to_api
+from functions.sd15.utils import sned_sd15_request_to_api
 from .ui.sd15_ui import build_sd15_ui
 from functions.object_remove.utils import sned_object_remove_request_to_api
 from .ui.obj_remove_ui import build_object_remove_ui
-from functions.iclight import sned_iclight_request_to_api
+from functions.upscale.utils import sned_upscale_request_to_api
+from .ui.upscale_ui import build_upscale_ui
+from functions.iclight.utils import sned_iclight_request_to_api
 from .ui.iclight_ui import build_iclight_ui
 
 from .ui.gemini_ui import build_gemini_ui
-from functions.gemini import send_gemini_request_to_api
-from functions.gemini import query_dict
+from functions.gemini.utils import send_gemini_request_to_api
+from functions.gemini.params import query_dict
 
 
 class GradioApp:
@@ -49,6 +51,8 @@ class GradioApp:
                         sd15_inputs, sd15_generate = build_sd15_ui(image, mask, gemini_prompt, self.ip_addr)
                     with gr.Tab("Object Removal"):
                         obj_remove_inputs, obj_remove_generate = build_object_remove_ui(gemini_prompt, self.ip_addr)
+                    with gr.Tab("UP-scale"):
+                        upscale_inputs, upscale_generate = build_upscale_ui(self.ip_addr)
                     with gr.Tab("IC-Light"):
                         iclight_inputs, iclight_generate = build_iclight_ui(image, mask, gemini_prompt, self.ip_addr)
                     with gr.Tab("Segment Anything"):
@@ -76,6 +80,8 @@ class GradioApp:
             sd15_generate.click(fn=sned_sd15_request_to_api, inputs=sd15_inputs, outputs=generated_image)
             # Object Removal Tab
             obj_remove_generate.click(fn=sned_object_remove_request_to_api, inputs=obj_remove_inputs, outputs=generated_image)
+            # Upscale
+            upscale_generate.click(fn= sned_upscale_request_to_api, inputs=upscale_inputs, outputs=generated_image)
             # IC-Light
             iclight_generate.click(fn=sned_iclight_request_to_api, inputs=iclight_inputs, outputs=generated_image)
 
