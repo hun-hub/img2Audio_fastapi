@@ -1,24 +1,18 @@
 import gradio as gr
-from sd3.utils import sned_sd3_request_to_api
+from functions.sd3 import sned_sd3_request_to_api
 from .ui.sd3_ui import build_sd3_ui
-from sdxl.utils import sned_sdxl_request_to_api
+from functions.sdxl import sned_sdxl_request_to_api
 from .ui.sdxl_ui import build_sdxl_ui
-from sd15.utils import sned_sd15_request_to_api
+from functions.sd15 import sned_sd15_request_to_api
 from .ui.sd15_ui import build_sd15_ui
-from object_remove.utils import sned_object_remove_request_to_api
+from functions.object_remove.utils import sned_object_remove_request_to_api
 from .ui.obj_remove_ui import build_object_remove_ui
-from sub_iclight.utils import sned_iclight_request_to_api
+from functions.iclight import sned_iclight_request_to_api
 from .ui.iclight_ui import build_iclight_ui
 
 from .ui.gemini_ui import build_gemini_ui
-from gemini.utils import send_gemini_request_to_api
-from gemini.params import query_dict
-import requests
-from utils.handler import handle_response
-from utils.image_process import resize_image_for_sd
-from PIL import Image
-import numpy as np
-
+from functions.gemini import send_gemini_request_to_api
+from functions.gemini import query_dict
 
 
 class GradioApp:

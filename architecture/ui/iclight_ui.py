@@ -1,7 +1,7 @@
 from types import NoneType
 
 import gradio as gr
-from sub_iclight.utils import generate_gradation, expand_mask
+from functions.iclight import generate_gradation, expand_mask
 import os
 import numpy as np
 from PIL import Image
