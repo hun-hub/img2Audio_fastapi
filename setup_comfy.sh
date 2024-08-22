@@ -26,4 +26,6 @@ git clone https://github.com/rgthree/rgthree-comfy.git
 git clone https://github.com/WASasquatch/was-node-suite-comfyui.git
 git clone https://github.com/Layer-norm/comfyui-lama-remover.git
 git clone https://github.com/jamesWalker55/comfyui-various.git
+git clone https://github.com/XLabs-AI/x-flux-comfyui.git
+
 wget -P ComfyUI-LaMA-Preprocessor/annotator/lama/models/lama/lama/ https://huggingface.co/lllyasviel/Annotators/resolve/main/ControlNetLama.pth
