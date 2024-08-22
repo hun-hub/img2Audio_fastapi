@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" autoUpload="Always" serverName="gkalstn000@34.69.14.188:22 key" remoteFilesAllowedToDisappearOnAutoupload="false">
+    <serverData>
+      <paths name="gkalstn000@34.134.200.251:22 key (3)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/gkalstn000/cnt_api" local="$PROJECT_DIR$" />
+          </mappings>
+          <excludedPaths>
+            <excludedPath path="/home/gkalstn000/cnt_api/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts" />
+          </excludedPaths>
+        </serverdata>
+      </paths>
+      <paths name="gkalstn000@34.69.14.188:22 key">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/gkalstn000/api" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+    <option name="myAutoUpload" value="ALWAYS" />
+  </component>
+</project>

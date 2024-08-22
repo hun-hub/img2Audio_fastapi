@@ -1,0 +1,47 @@
+# AI and Machine Learning
+torch
+torchsde
+einops
+transformers
+tokenizers
+sentencepiece
+safetensors
+diffusers
+open-clip-torch
+pytorch-lightning
+torchmetrics
+xformers
+peft
+huggingface_hub[cli]
+bitsandbytes
+google-cloud-aiplatform
+
+# Image and Video Processing
+opencv-python
+Pillow
+kornia
+tabulate
+# Audio Processing
+soundfile
+
+# Data Handling and Utilities
+pyyaml
+scipy
+tqdm
+stqdm
+psutil
+pytz
+
+# Web Frameworks
+fastapi
+uvicorn[standard]
+aiohttp
+gradio
+# Testing
+pytest
+omegaconf
+# Non-essential dependencies
+spandrel
+
+
+
