@@ -7,9 +7,9 @@ class IPAdapter_RequestData(BaseModel):
     images: List[str]
     image_negative: Optional[List[str]] = []
     # Params
-    weight: float
+    weight: float = 0.7
     start_at: float = 0
-    end_at: float
+    end_at: float = 0.4
     weight_type: str = 'linear'
     combine_embeds: Literal['concat', 'add', 'substract', 'average', 'norm average'] = 'concat'
     embeds_scaling: Literal['V only', 'K+V', 'K+V w/ C penalty', 'K+mean(V) w/ C penalty'] = 'V only'
@@ -19,9 +19,9 @@ class ControlNet_RequestData(BaseModel):
     type: Literal['canny', 'inpaint']
     image: Optional[str]
     # Params
-    strength: float
+    strength: float = 0.7
     start_percent: float = 0
-    end_percent: float
+    end_percent: float = 0.4
 
 class RequestData(BaseModel):
     basemodel: str = 'SDXL_copaxTimelessxlSDXL1_v12.safetensors'
