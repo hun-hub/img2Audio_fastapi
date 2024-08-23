@@ -19,9 +19,9 @@ python main_api.py
 python main_demo.py
 ```
 
-[Demo 링크](http://34.69.14.188:7860/)
-
-
+[Demo 링크](http://34.69.14.188:7860/).  
+Develop 서버 IP 주소: `34.69.14.188`
+* 상시 켜져 있지는 않음
 ## 2. API 기능
 
 **Request Data Format**
