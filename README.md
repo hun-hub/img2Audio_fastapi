@@ -19,7 +19,7 @@ python main_api.py
 python main_demo.py
 ```
 
-[Demo 링크](http://34.69.14.188:7860/)
+<a href="http://34.69.14.188:7860/" target="_blank">Demo 링크</a>
 
 ## 2. API 기능
 
