@@ -5,7 +5,7 @@ Light Strength는 API 내부에서 적용됨.
 ```python
 cfg = 4
 denoise = 0.85
-if keep_background == False :
+if KEEP_BACKGROUND == False :
     cfg = 1.5
     denoise = 0.9
 
@@ -22,7 +22,7 @@ request_body = {
     'iclight_model': 'SD15_iclight_sd15_fc.safetensors', 
     'light_condition': IMAGE_BASE64, 
     'light_strength': LIGHT_STRENGTH, # 0 ~ 1 사이 float
-    'keep_background': keep_background,
+    'keep_background': KEEP_BACKGROUND,
     'blending_mode_1': 'color',
     'blending_percentage_1': 0.1,
     'blending_mode_2': 'hue',
