@@ -12,6 +12,13 @@
           </excludedPaths>
         </serverdata>
       </paths>
+      <paths name="gkalstn000@34.64.222.23:22 key">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/gkalstn000/api" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="gkalstn000@34.69.14.188:22 key">
         <serverdata>
           <mappings>

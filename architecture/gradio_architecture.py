@@ -1,4 +1,7 @@
 import gradio as gr
+
+from .ui.flux_ui import build_flux_ui
+
 from functions.sd3.utils import sned_sd3_request_to_api
 from .ui.sd3_ui import build_sd3_ui
 from functions.sdxl.utils import sned_sdxl_request_to_api
@@ -43,6 +46,8 @@ class GradioApp:
                     with gr.Row():
                         gemini_refinement = gr.Button("Gemini Refine Prompt")
 
+                    # with gr.Tab("FLUX"):
+                    #     flux_inputs, flux_generate = build_flux_ui(image, mask, gemini_prompt, self.ip_addr)
                     with gr.Tab("Stable Diffusion 3"):
                         sd3_inputs, sd3_generate = build_sd3_ui(image, mask, gemini_prompt, self.ip_addr)
                     with gr.Tab("Stable Diffusion XL"):

@@ -35,14 +35,20 @@ class CntGenAPI:
 
         '''
         Load model 관리
-        sd_checkpoint:
-            'basemodel': ('filename', Module)# base model
-            'refiner': ('filename', Module)# re-finer
-        controlnet:
-            'canny': ('filename', Module)
-            'inpaint': ('filename', Module)
-        ipadapter:
-            'module': ('filename', Module)
+        unet_base
+        vae_base
+        clip_base
+        clip_vision_base
+        unet_refine
+        vae_refine
+        clip_refine
+        clip_vision_refine
+        controlnet
+            'canny':
+            'inpaint': 
+            'depth'
+        ipadapter
+        lora
         '''
         self.model_cache = {'sd_checkpoint': {'basemodel': (None, None),
                                               'refiner': (None, None)},
