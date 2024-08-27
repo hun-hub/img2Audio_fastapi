@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 import torch
 from utils import set_comfyui_packages
-from utils.loader import load_stable_diffusion
+from utils.loader import load_checkpoint
 from utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
 from .utils import model_sampling_sd3, get_init_noise, apply_controlnet
 from utils.comfyui import (encode_prompt,

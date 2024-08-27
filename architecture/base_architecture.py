@@ -6,12 +6,17 @@ import time
 import random
 import logging
 from queue import Queue
-from utils.loader import load_clip_vision, load_stable_diffusion, load_controlnet, load_ipadapter, load_extra_path_config
-from utils import compare_cache_and_request_difference
+from utils.loader import load_clip_vision, load_controlnet, load_ipadapter, load_extra_path_config
+from utils import (update_model_cache_from_blueprint,
+                   cache_checkpoint,
+                   cache_controlnet,
+                   cache_ipadapter,
+                   )
 from utils.image_process import convert_base64_to_image
 from utils.text_process import prompt_refine, image_caption
 import gc
 import psutil
+import json
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
@@ -34,28 +39,64 @@ class CntGenAPI:
         )
 
         '''
-        Load model 관리
-        unet_base
-        vae_base
-        clip_base
-        clip_vision_base
-        unet_refine
-        vae_refine
-        clip_refine
-        clip_vision_refine
+        ===== Load model 관리 =====
+        unet : 
+            sd15: {MODEL_NAME: MODULE}
+            sdxl:
+                base: {MODEL_NAME: MODULE}
+                refiner: {MODEL_NAME: MODULE}
+            sd3: {MODEL_NAME: MODULE}
+            flux: {MODEL_NAME: MODULE}
+        vae :
+            sd15: {MODEL_NAME: MODULE}
+            sdxl:
+                base: {MODEL_NAME: MODULE}
+                refiner: {MODEL_NAME: MODULE}
+            sd3: {MODEL_NAME: MODULE}
+            flux: {MODEL_NAME: MODULE}
+        clip :
+            sd15: {MODEL_NAME: MODULE}
+            sdxl: {MODEL_NAME: MODULE}
+                base: {MODEL_NAME: MODULE}
+                refiner: {MODEL_NAME: MODULE}
+            sd3: {MODEL_NAME: MODULE}
+            flux: {MODEL_NAME: MODULE}
+        clip_vision :
+            sd15: {MODEL_NAME: MODULE}
+            sdxl:
+                base: {MODEL_NAME: MODULE}
+                refiner: {MODEL_NAME: MODULE}
+            sd3: {MODEL_NAME: MODULE}
+            flux {MODEL_NAME: MODULE}
         controlnet
             'canny':
+                sd15: {MODEL_NAME: MODULE}
+                sdxl: {MODEL_NAME: MODULE}
+                sd3: {MODEL_NAME: MODULE}
+                flux: {MODEL_NAME: MODULE}
             'inpaint': 
-            'depth'
-        ipadapter
-        lora
+                sd15: {MODEL_NAME: MODULE}
+                sdxl: {MODEL_NAME: MODULE}
+                sd3: {MODEL_NAME: MODULE}
+                flux: {MODEL_NAME: MODULE}
+            'depth': 
+                sd15: {MODEL_NAME: MODULE}
+                sdxl: {MODEL_NAME: MODULE}
+                sd3: {MODEL_NAME: MODULE}
+                flux {MODEL_NAME: MODULE}
+        ipadapter:
+            sd15: {MODEL_NAME: MODULE}
+            sdxl: {MODEL_NAME: MODULE}
+            sd3: {MODEL_NAME: MODULE}
+            flux: {MODEL_NAME: MODULE}
+        lora:
+            sd15: {MODEL_NAME: MODULE}
+            sdxl: {MODEL_NAME: MODULE}
+            sd3: {MODEL_NAME: MODULE}
+            flux: {MODEL_NAME: MODULE}
         '''
-        self.model_cache = {'sd_checkpoint': {'basemodel': (None, None),
-                                              'refiner': (None, None)},
-                            'controlnet': {'canny': (None, None),
-                                           'inpaint': (None, None)},
-                            'ipadapter': {'module': (None, None)}
-                            } # 최대 3개 adapter 저장.
+        with open('model_cache.json', 'r') as file:
+            self.model_cache = json.load(file)
 
         self.app.on_event("startup")(self.startup_event)
 
@@ -67,47 +108,38 @@ class CntGenAPI:
 
     def startup_event(self):
         logger.info(" \n============ 초기 모델 로드 중 ============")
-        self.model_cache['sd_checkpoint']['basemodel'] = (self.args.default_ckpt, load_stable_diffusion(self.args.default_ckpt))
         load_extra_path_config('ComfyUI/extra_model_paths.yaml')
+        with open('model_cache.json', 'r') as file:
+            model_cache_blueprint = json.load(file)
+        cache_checkpoint(model_cache_blueprint, self.args.default_ckpt)
+        update_model_cache_from_blueprint(self.model_cache, model_cache_blueprint)
         logger.info("\n============ 초기 모델 로드 완료 ============")
+
+        del model_cache_blueprint
+        gc.collect()
 
     def _cached_model_update(self, request_data):
         # log 출력
-        model_request = {'sd_checkpoint': {'basemodel': request_data.basemodel},
-                         'controlnet': {controlnet_request.type : controlnet_request.controlnet for i, controlnet_request in enumerate(request_data.controlnet_requests)},
-                         'ipadapter': {'module': None}
-                         }
-        if 'refiner' in request_data.dict() and request_data.refiner :
-            model_request['sd_checkpoint']['refiner'] = request_data.refiner
-        if 'ipadapter_request' in request_data.dict() and request_data.ipadapter_request :
-            model_request['ipadapter']['module'] = request_data.ipadapter_request.ipadapter
+        with open('model_cache.json', 'r') as file:
+            model_cache_blueprint = json.load(file)
+        request_dict = request_data.dict()
 
-        difference_dict = compare_cache_and_request_difference(self.model_cache, model_request)
-        self._update_cache_module(difference_dict)
+        if request_dict['checkpoint'] :
+            cache_checkpoint(model_cache_blueprint, request_dict['checkpoint'])
+        else : # FLUX의 경우 unet, vae, clip 따로
+            pass
+        if 'refiner' in request_dict and request_dict['refiner'] :
+            cache_checkpoint(model_cache_blueprint, request_dict['refiner'], True)
+        if 'controlnet_requests' in request_dict and request_dict['controlnet_requests'] :
+            cache_controlnet(model_cache_blueprint, request_dict['controlnet_requests'])
+        if 'ipadapter_request' in request_dict and request_dict['ipadapter_request'] :
+            cache_ipadapter(model_cache_blueprint, request_dict['ipadapter_request'])
 
-
-    def _update_cache_module(self, difference_dict):
-        # SD checkpoint
-        sd_difference = difference_dict['sd_checkpoint']
-        for sd_type, info in sd_difference.items() :
-            model_name = info['requested']
-            self.model_cache['sd_checkpoint'][sd_type] = (model_name, load_stable_diffusion(model_name))
-
-        controlnet_difference = difference_dict['controlnet']
-        for control_type, info in controlnet_difference.items() :
-            model_name = info['requested']
-            self.model_cache['controlnet'][control_type] = (model_name, load_controlnet(model_name))
-
-        ipadapter_difference = difference_dict['ipadapter']
-        for ip_type, info in ipadapter_difference.items():
-            model_name = info['requested']
-            self.model_cache['ipadapter'][ip_type] = (model_name, load_ipadapter(model_name))
+        update_model_cache_from_blueprint(self.model_cache, model_cache_blueprint)
+        del model_cache_blueprint
+        gc.collect()
 
     def generate_blueprint(self, gen_function, request_data):
-        # while self.check_memory_usage():
-        #     print("Memory usage is high, waiting...")
-        #     time.sleep(1)  # 대기
-
         try:
             # cache check & load model
             self._cached_model_update(request_data)

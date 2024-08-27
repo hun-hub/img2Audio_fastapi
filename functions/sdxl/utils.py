@@ -19,7 +19,6 @@ from PIL import Image
 import numpy as np
 
 # set_comfyui_packages()
-
 def construct_condition(unet,
                         cached_model_dict,
                         positive,
@@ -32,7 +31,7 @@ def construct_condition(unet,
     if canny_request is not None :
         control_image = convert_base64_to_image_tensor(canny_request.image) / 255
         control_image = make_canny(control_image)
-        controlnet = cached_model_dict['controlnet'][canny_request.type][1]
+        controlnet = cached_model_dict['controlnet'][canny_request.type]['sdxl'][1]
         positive, negative = apply_controlnet(positive,
                                                         negative,
                                                         controlnet,
@@ -44,7 +43,7 @@ def construct_condition(unet,
         control_image = convert_base64_to_image_tensor(inpaint_request.image) / 255
         control_image, control_mask = control_image[:, :, :, :3], control_image[:, :, :, 3]
         control_image = torch.where(control_mask[:, :, :, None] > 0.5, 1, control_image)
-        controlnet = cached_model_dict['controlnet'][inpaint_request.type][1]
+        controlnet = cached_model_dict['controlnet'][inpaint_request.type]['sdxl'][1]
         positive, negative = apply_controlnet(positive,
                                               negative,
                                               controlnet,
@@ -54,7 +53,7 @@ def construct_condition(unet,
                                               inpaint_request.end_percent, )
     if ipadapter_request is not None:
         clip_vision = load_clip_vision(ipadapter_request.clip_vision)
-        ipadapter = cached_model_dict['ipadapter']['module'][1]
+        ipadapter = cached_model_dict['ipadapter']['sdxl'][1]
         ipadapter_images = [convert_base64_to_image_tensor(image) / 255 for image in ipadapter_request.images]
         image_batch = make_image_batch(ipadapter_images)
         unet = apply_ipadapter(model= unet,
@@ -70,7 +69,7 @@ def construct_condition(unet,
     return unet, positive, negative
 
 def sned_sdxl_request_to_api(
-        model_name,
+        checkpoint,
         image,
         mask,
         prompt,
@@ -106,6 +105,17 @@ def sned_sdxl_request_to_api(
         ipadapter_start,
         ipadapter_end,
 
+        lora_enable,
+        lora_model_name_1,
+        strength_model_1,
+        strength_clip_1,
+        lora_model_name_2,
+        strength_model_2,
+        strength_clip_2,
+        lora_model_name_3,
+        strength_model_3,
+        strength_clip_3,
+
         gen_type,
         ip_addr
 ) :
@@ -134,7 +144,7 @@ def sned_sdxl_request_to_api(
         ipadapter_images = [convert_image_to_base64(ipadapter_image) for ipadapter_image in ipadapter_images]
 
     request_body = {
-        'basemodel': model_name,
+        'checkpoint': checkpoint,
         'init_image': image,
         'mask': mask,
         "prompt_positive": prompt,
@@ -147,6 +157,7 @@ def sned_sdxl_request_to_api(
         'seed': seed,
         'gen_type': gen_type,
         'controlnet_requests': [],
+        'lora_requests': [],
     }
 
     refiner_body = {
@@ -181,6 +192,18 @@ def sned_sdxl_request_to_api(
         'end_at': ipadapter_end,
     }
 
+    lora_body_list = [
+        {'lora': lora_model_name_1,
+         'strength_model': strength_model_1,
+         'strength_clip': strength_clip_1,},
+        {'lora': lora_model_name_2,
+         'strength_model': strength_model_2,
+         'strength_clip': strength_clip_2, },
+        {'lora': lora_model_name_3,
+         'strength_model': strength_model_3,
+         'strength_clip': strength_clip_3, },
+    ]
+
     if refiner_enable:
         request_body.update(refiner_body)
     if canny_enable :
@@ -189,6 +212,10 @@ def sned_sdxl_request_to_api(
         request_body['controlnet_requests'].append(inpaint_body)
     if ipadapter_enable :
         request_body['ipadapter_request'] = ipadapter_body
+    if lora_enable :
+        for lora_body in lora_body_list:
+            if lora_body['lora'] != 'None' :
+                request_body['lora_requests'].append(lora_body)
 
     url = f"http://{ip_addr}:7861/sdxl/generate"
     response = requests.post(url, json=request_body)

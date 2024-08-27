@@ -1,15 +1,16 @@
 import gradio as gr
 from utils import resolution_list
 import os
+checkpoint_root = os.getenv('CHECKPOINT_ROOT')
 
-sdxl_model_list = [x for x in os.listdir('/checkpoints/sdxl_light') if 'SDXL' in x]
-inpaint_model_list = [x for x in os.listdir('/checkpoints/inpaint') if not x.endswith('pth') ]
+sdxl_checkpoint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'sdxl_light')) if 'SDXL' in x]
+inpaint_model_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'inpaint')) if not x.endswith('pth') ]
 
-sdxl_model_list.sort()
+sdxl_checkpoint_list.sort()
 inpaint_model_list.sort()
 
 def build_object_remove_ui(prompt, ip_addr) :
-    model_name = gr.Dropdown(sdxl_model_list, label="Select SDXL model", value = sdxl_model_list[0])
+    checkpoint = gr.Dropdown(sdxl_checkpoint_list, label="Select SDXL checkpoint", value = sdxl_checkpoint_list[3])
     inpaint_model_name = gr.Dropdown(inpaint_model_list, label="Select Inpaint patch", value=inpaint_model_list[-1])
     with gr.Row():
         with gr.Column():
@@ -21,7 +22,7 @@ def build_object_remove_ui(prompt, ip_addr) :
         seed = gr.Number(label='Seed', value= -1)
 
     base_inputs = [
-        model_name,
+        checkpoint,
         prompt,
         num_inference_steps,
         guidance_scale,

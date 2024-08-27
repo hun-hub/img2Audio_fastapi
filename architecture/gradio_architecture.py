@@ -1,6 +1,6 @@
 import gradio as gr
 
-from .ui.flux_ui import build_flux_ui
+# from .ui.flux_ui import build_flux_ui
 
 from functions.sd3.utils import sned_sd3_request_to_api
 from .ui.sd3_ui import build_sd3_ui

@@ -2,18 +2,21 @@ import gradio as gr
 from utils import resolution_list
 import os
 
-sdxl_model_list = [x for x in os.listdir('/checkpoints/sdxl_light') if 'SDXL' in x]
-controlnet_canny_list = [x for x in os.listdir('/checkpoints/controlnet') if 'SDXL_Canny' in x]
-controlnet_inpaint_list = [x for x in os.listdir('/checkpoints/controlnet') if 'SDXL_Inpaint' in x]
-ipadapter_list = [x for x in os.listdir('/checkpoints/ipadapter') if 'SDXL' in x]
+checkpoint_root = os.getenv('CHECKPOINT_ROOT')
+sdxl_checkpoint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'sdxl_light')) if 'SDXL' in x]
+controlnet_canny_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'controlnet')) if 'SDXL_Canny' in x]
+controlnet_inpaint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'controlnet')) if 'SDXL_Inpaint' in x]
+ipadapter_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'ipadapter')) if 'SDXL' in x]
+lora_list = ['None'] + [x for x in os.listdir(os.path.join(checkpoint_root, 'loras')) if 'SDXL' in x]
 
-sdxl_model_list.sort()
+sdxl_checkpoint_list.sort()
 controlnet_canny_list.sort()
 controlnet_inpaint_list.sort()
 ipadapter_list.sort()
+lora_list.sort()
 
 def build_sdxl_ui(image, mask, prompt, ip_addr) :
-    model_name = gr.Dropdown(sdxl_model_list, label="Select SDXL model", value = sdxl_model_list[0])
+    checkpoint = gr.Dropdown(sdxl_checkpoint_list, label="Select SDXL checkpoint", value = sdxl_checkpoint_list[3])
 
     with gr.Row() :
         gen_type = gr.Radio(
@@ -36,7 +39,7 @@ def build_sdxl_ui(image, mask, prompt, ip_addr) :
         seed = gr.Number(label='Seed', value= -1)
 
     base_inputs = [
-        model_name,
+        checkpoint,
         image,
         mask,
         prompt,
@@ -49,7 +52,7 @@ def build_sdxl_ui(image, mask, prompt, ip_addr) :
 
     with gr.Accordion("Refiner", open=False):
         refiner_enable = gr.Checkbox(label="Enable Refiner")
-        refiner_name = gr.Dropdown(sdxl_model_list, label="Select Refiner model", value=sdxl_model_list[0])
+        refiner_name = gr.Dropdown(sdxl_checkpoint_list, label="Select Refiner model", value=sdxl_checkpoint_list[0])
         refine_switch = gr.Slider(label="Swich", minimum=0.0, maximum=1.0, value=0.4, step=0.05)
 
     refiner_inputs = [
@@ -120,7 +123,36 @@ def build_sdxl_ui(image, mask, prompt, ip_addr) :
         ipadapter_end,
     ]
 
+    with gr.Accordion("LoRA", open=False):
+        lora_enable = gr.Checkbox(label="Enable LoRA")
+        with gr.Row():
+            with gr.Group():
+                lora_model_name_1 = gr.Dropdown(lora_list, label="Select LoRA model", value=lora_list[0])
+                strength_model_1 = gr.Slider(label="Strength UNet", minimum=-100, maximum=100, value=1, step=0.05)
+                strength_clip_1 = gr.Slider(label="Strength CLIP", minimum=-100, maximum=100, value=1, step=0.05)
+            with gr.Group():
+                lora_model_name_2 = gr.Dropdown(lora_list, label="Select LoRA model", value=lora_list[0])
+                strength_model_2 = gr.Slider(label="Strength UNet", minimum=-100, maximum=100, value=1, step=0.05)
+                strength_clip_2 = gr.Slider(label="Strength CLIP", minimum=-100, maximum=100, value=1, step=0.05)
+            with gr.Group():
+                lora_model_name_3 = gr.Dropdown(lora_list, label="Select LoRA model", value=lora_list[0])
+                strength_model_3 = gr.Slider(label="Strength UNet", minimum=-100, maximum=100, value=1, step=0.05)
+                strength_clip_3 = gr.Slider(label="Strength CLIP", minimum=-100, maximum=100, value=1, step=0.05)
+
+    lora_inputs = [
+        lora_enable,
+        lora_model_name_1,
+        strength_model_1,
+        strength_clip_1,
+        lora_model_name_2,
+        strength_model_2,
+        strength_clip_2,
+        lora_model_name_3,
+        strength_model_3,
+        strength_clip_3,
+    ]
+
     with gr.Row() :
         generate = gr.Button("Generate!")
 
-    return base_inputs + refiner_inputs + canny_inputs + inpaint_inputs + ipadapter_inputs + extra_inputs, generate
+    return base_inputs + refiner_inputs + canny_inputs + inpaint_inputs + ipadapter_inputs + lora_inputs + extra_inputs, generate

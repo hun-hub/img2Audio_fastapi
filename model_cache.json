@@ -1,0 +1,73 @@
+{
+  "unet":
+  {
+    "sd15": null,
+    "sdxl":
+    {
+      "base": null,
+      "refiner": null
+    },
+    "sd3":  null,
+    "flux": null
+  },
+  "vae":
+  {
+    "sd15": null,
+    "sdxl":
+    {
+      "base": null,
+      "refiner": null
+    },
+    "sd3":  null,
+    "flux": null
+  },
+  "clip":
+  {
+    "sd15": null,
+    "sdxl":
+    {
+      "base": null,
+      "refiner": null
+    },
+    "sd3":  null,
+    "flux": null
+  },
+  "clip_vision":
+  {
+    "sd15": null,
+    "sdxl": null,
+    "sd3":  null,
+    "flux": null
+  },
+  "controlnet" :
+  {
+    "canny":
+    {
+      "sd15": null,
+      "sdxl": null,
+      "sd3":  null,
+      "flux": null
+    },
+    "inpaint":
+    {
+      "sd15": null,
+      "sdxl": null,
+      "sd3":  null,
+      "flux": null
+    },
+    "depth":
+    {
+      "sd15": null,
+      "sdxl": null,
+      "sd3":  null,
+      "flux": null
+    }
+  },
+  "ipadapter":
+  {
+    "sd15": null,
+    "sdxl": null,
+    "sd3":  null,
+    "flux": null
+  }
+}

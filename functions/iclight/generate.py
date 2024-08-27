@@ -9,7 +9,7 @@ from .utils import (construct_condition,
                     was_image_blend,
                     remap_image)
 from utils import set_comfyui_packages
-from utils.loader import load_stable_diffusion
+from utils.loader import load_checkpoint
 from utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
 from utils.comfyui import (encode_prompt,
                            sample_image,
@@ -26,7 +26,9 @@ import random
 # prompt_post_fix = ", RAW photo, subject, 8k uhd, dslr, soft lighting, high quality, film grain, Fujifilm XT3"
 @torch.inference_mode()
 def generate_image(cached_model_dict, request_data):
-    unet, vae, clip = cached_model_dict['sd_checkpoint']['basemodel'][1]
+    unet = cached_model_dict['unet']['sd15'][1]
+    vae = cached_model_dict['vae']['sd15'][1]
+    clip = cached_model_dict['clip']['sd15'][1]
     start_base = 0
     end_base = request_data.steps
 

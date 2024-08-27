@@ -37,7 +37,7 @@ def construct_condition(unet,
     return unet
 
 def sned_object_remove_request_to_api(
-        model_name,
+        checkpoint,
         prompt,
         num_inference_steps,
         guidance_scale,
@@ -57,7 +57,7 @@ def sned_object_remove_request_to_api(
     mask = convert_image_to_base64(resize_image_for_sd(Image.fromarray(mask), is_mask=True))
 
     request_body = {
-        'basemodel': model_name,
+        'checkpoint': checkpoint,
         'inpaint_model_name': inpaint_model_name,
         'init_image': image,
         'mask': mask,

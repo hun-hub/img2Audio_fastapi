@@ -1,19 +1,20 @@
 import gradio as gr
 from utils import resolution_list
 import os
+checkpoint_root = os.getenv('CHECKPOINT_ROOT')
 
-sd15_model_list = [x for x in os.listdir('/checkpoints/sdxl_light') if 'SD15' in x]
-controlnet_canny_list = [x for x in os.listdir('/checkpoints/controlnet') if 'SD15_Canny' in x]
-controlnet_inpaint_list = [x for x in os.listdir('/checkpoints/controlnet') if 'SD15_Inpaint' in x]
-ipadapter_list = [x for x in os.listdir('/checkpoints/ipadapter') if 'SD15' in x]
+sd15_checkpoint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'sdxl_light')) if 'SD15' in x]
+controlnet_canny_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'controlnet')) if 'SD15_Canny' in x]
+controlnet_inpaint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'controlnet')) if 'SD15_Inpaint' in x]
+ipadapter_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'ipadapter')) if 'SD15' in x]
 
-sd15_model_list.sort()
+sd15_checkpoint_list.sort()
 controlnet_canny_list.sort()
 controlnet_inpaint_list.sort()
 ipadapter_list.sort()
 
 def build_sd15_ui(image, mask, prompt, ip_addr) :
-    model_name = gr.Dropdown(sd15_model_list, label="Select SD15 model", value = sd15_model_list[0])
+    checkpoint = gr.Dropdown(sd15_checkpoint_list, label="Select SD15 checkpoint", value = sd15_checkpoint_list[0])
 
     with gr.Row() :
         gen_type = gr.Radio(
@@ -36,7 +37,7 @@ def build_sd15_ui(image, mask, prompt, ip_addr) :
         seed = gr.Number(label='Seed', value= -1)
 
     base_inputs = [
-        model_name,
+        checkpoint,
         image,
         mask,
         prompt,

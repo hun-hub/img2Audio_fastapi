@@ -1,10 +1,11 @@
 import gradio as gr
 from utils import resolution_list
 import os
+checkpoint_root = os.getenv('CHECKPOINT_ROOT')
 
-flux_unet_list = [x for x in os.listdir('/checkpoints/unet') if 'FLUX' in x]
-flux_vae_list = [x for x in os.listdir('/checkpoints/vae') if 'FLUX' in x]
-flux_controlnet_canny_list = [x for x in os.listdir('/checkpoints/vae') if 'FLUX' in x]
+flux_unet_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'unet')) if 'FLUX' in x]
+flux_vae_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'vae')) if 'FLUX' in x]
+flux_controlnet_canny_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'controlnet')) if 'FLUX' in x]
 
 flux_unet_list.sort()
 flux_vae_list.sort()

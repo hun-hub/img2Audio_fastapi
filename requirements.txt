@@ -23,7 +23,7 @@ kornia
 tabulate
 # Audio Processing
 soundfile
-
+prettytable
 # Data Handling and Utilities
 pyyaml
 scipy

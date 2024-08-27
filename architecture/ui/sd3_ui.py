@@ -1,12 +1,12 @@
 import gradio as gr
 from utils import resolution_list
 import os
-
-sd3_model_list = [x for x in os.listdir('/checkpoints/sdxl_light') if 'SD3' in x]
-controlnet_canny_list = [x for x in os.listdir('/checkpoints/controlnet') if 'SD3_Canny' in x]
+checkpoint_root = os.getenv('CHECKPOINT_ROOT')
+sd3_checkpoint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'sdxl_light')) if 'SD3' in x]
+controlnet_canny_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'controlnet')) if 'SD3_Canny' in x]
 
 def build_sd3_ui(image, mask, prompt, ip_addr) :
-    model_name = gr.Dropdown(sd3_model_list, label="Select SD3 model", value = sd3_model_list[0])
+    checkpoint = gr.Dropdown(sd3_checkpoint_list, label="Select SD3 checkpoint", value = sd3_checkpoint_list[0])
 
     with gr.Row() :
         gen_type = gr.Radio(
@@ -29,7 +29,7 @@ def build_sd3_ui(image, mask, prompt, ip_addr) :
         seed = gr.Number(label='Seed', value= -1)
 
     base_inputs = [
-        model_name,
+        checkpoint,
         image,
         mask,
         prompt,

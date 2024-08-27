@@ -16,15 +16,25 @@ class IPAdapter_RequestData(BaseModel):
 
 class ControlNet_RequestData(BaseModel):
     controlnet: str
-    type: Literal['canny', 'inpaint']
+    type: Literal['canny', 'inpaint', 'depth']
     image: Optional[str]
     # Params
     strength: float = 0.7
     start_percent: float = 0
     end_percent: float = 0.4
 
+class LoRA_RequestData(BaseModel):
+    lora: str
+    strength_model: float
+    strength_clip: float
+
 class RequestData(BaseModel):
-    basemodel: str = 'SDXL_copaxTimelessxlSDXL1_v12.safetensors'
+    checkpoint: str = None
+    unet: str = None
+    vae: str = None
+    clip: str = None
+    clip_vision: str = None
+
     init_image: Optional[str] = None
     mask: Optional[str] = None
     prompt_positive: str = 'high quality, 4K, expert.'
@@ -40,8 +50,5 @@ class RequestData(BaseModel):
     denoise: float= 1.0
     gen_type: Literal['t2i', 'i2i', 'inpaint', 'iclight'] = 't2i'
 
-    # controlnet_requests: Optional[List[ControlNet_RequestData]] = []
-    # ipadapter_request: Optional[IPAdapter_RequestData] = None
-    # refiner: Optional[str] = None
-    # refine_switch: float= 0.4
+
 

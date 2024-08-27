@@ -1,16 +1,88 @@
 # Connectbrick 자체 API 및 Demo
 
 ## 0. Install
+### 0.1 conda
 ```Bash
-pip install -r requirements.txt
-sh setup_comfy.sh
+wget https://repo.anaconda.com/archive/Anaconda3-2024.06-1-Linux-x86_64.sh
+sh Anaconda3-2024.06-1-Linux-x86_64.sh
 
-# ComfyUI 한번 실행 했다가 끄기
-cd ComfyUI
-python main.py --listen
+# 마지막 초기화 여부 yes
+# You can undo this by running `conda init --reverse $SHELL`? [yes|no]
+# [no] >>> yes 
+
+source ~/.bashrc
+
+conda create -n api python==3.10
+conda activate api
+
+```
+```Bash
+sh setup_comfy.sh
 ```
 
+### 0.2 gcloud-cli
+```Bash
+curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-linux-x86_64.tar.gz
+tar -xf google-cloud-cli-linux-x86_64.tar.gz
+./google-cloud-sdk/install.sh
+gcloud init --no-launch-browser
+
+
+Select an account:
+ [1] 19872303500-compute@developer.gserviceaccount.com
+ [2] Sign in with a new Google Account
+ [3] Skip this step
+Please enter your numeric choice:  2
+
+...
+
+Your credentials may be visible to others with access to this
+virtual machine. Are you sure you want to authenticate with
+your personal account?
+
+Do you want to continue (Y/n)?  Y
+
+...
+
+
+Pick cloud project to use: 
+ [1] gen-lang-client-0741678048
+ [2] my-project-1575434952875
+ [3] mystical-nimbus-408605
+ [4] Enter a project ID
+ [5] Create a new project
+Please enter numeric choice or text value (must exactly match list item):  3
+
+Your current project has been set to: [mystical-nimbus-408605].
+
+Do you want to configure a default Compute Region and Zone? (Y/n)?  Y
+```
+### 0.3 Huggingface login
+```Bash
+pip install -U "huggingface_hub[cli]"
+huggingface-cli login
+
+    _|    _|  _|    _|    _|_|_|    _|_|_|  _|_|_|  _|      _|    _|_|_|      _|_|_|_|    _|_|      _|_|_|  _|_|_|_|
+    _|    _|  _|    _|  _|        _|          _|    _|_|    _|  _|            _|        _|    _|  _|        _|
+    _|_|_|_|  _|    _|  _|  _|_|  _|  _|_|    _|    _|  _|  _|  _|  _|_|      _|_|_|    _|_|_|_|  _|        _|_|_|
+    _|    _|  _|    _|  _|    _|  _|    _|    _|    _|    _|_|  _|    _|      _|        _|    _|  _|        _|
+    _|    _|    _|_|      _|_|_|    _|_|_|  _|_|_|  _|      _|    _|_|_|      _|        _|    _|    _|_|_|  _|_|_|_|
+
+    To login, `huggingface_hub` requires a token generated from https://huggingface.co/settings/tokens .
+Enter your token (input will not be visible): 
+Add token as git credential? (Y/n) n
+Token is valid (permission: fineGrained).
+Your token has been saved to /home/gkalstn000/.cache/huggingface/token
+Login successful
+
+```
 ## 1. 실행
+`.env` 파일 수정
+```Bash
+COMFYUI_PATH =/home/USERNAME/api/ComfyUI
+CHECKPOINT_ROOT = /checkpoints # path to checkpoint
+```
+
 ```Bash
 # API 실행
 python main_api.py

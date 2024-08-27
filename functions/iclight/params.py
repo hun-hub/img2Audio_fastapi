@@ -3,9 +3,6 @@ from typing import Optional, Literal, List
 
 
 class ICLight_RequestData(RequestData):
-    basemodel: str
-    init_image: str
-    mask: str
     steps: int = 30
     cfg: float = 1.5
     sampler_name: str = 'dpmpp_2m_sde'

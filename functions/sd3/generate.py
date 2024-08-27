@@ -1,7 +1,5 @@
 from fastapi import APIRouter, HTTPException
 import torch
-from utils import set_comfyui_packages
-from utils.loader import load_stable_diffusion
 from utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
 from .utils import model_sampling_sd3, get_init_noise, apply_controlnet
 from utils.comfyui import (encode_prompt,
@@ -18,7 +16,10 @@ router = APIRouter()
 
 @torch.inference_mode()
 def generate_image(cached_model_dict, request_data):
-    unet, vae, clip = cached_model_dict['sd_checkpoint']['basemodel'][1]
+    unet = cached_model_dict['unet']['sd3'][1]
+    vae = cached_model_dict['vae']['sd3'][1]
+    clip = cached_model_dict['clip']['sd3'][1]
+
     unet = model_sampling_sd3(unet)
 
     if request_data.gen_type == 't2i' :
@@ -45,7 +46,7 @@ def generate_image(cached_model_dict, request_data):
     for controlnet_request in request_data.controlnet_requests :
         control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
         control_image = make_canny(control_image)
-        controlnet = cached_model_dict['controlnet'][controlnet_request.type][1]
+        controlnet = cached_model_dict['controlnet'][controlnet_request.type]['sd3'][1]
         positive_cond, negative_cond = apply_controlnet(positive_cond,
                                                         negative_cond,
                                                         controlnet,

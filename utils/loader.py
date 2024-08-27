@@ -5,7 +5,7 @@ import yaml, os
 from utils import set_comfyui_packages
 set_comfyui_packages()
 import folder_paths
-CHECKPOINT_ROOT = '/checkpoints'
+CHECKPOINT_ROOT = os.getenv('CHECKPOINT_ROOT')
 
 def load_extra_path_config(yaml_path):
     with open(yaml_path, 'r') as stream:
@@ -16,7 +16,7 @@ def load_extra_path_config(yaml_path):
             continue
         base_path = None
         if "base_path" in conf:
-            base_path = conf.pop("base_path")
+            base_path = CHECKPOINT_ROOT
         for x in conf:
             for y in conf[x].split("\n"):
                 if len(y) == 0:
@@ -57,13 +57,13 @@ def get_function_from_comfyui(module_path, func_name = None) :
 
 # TODO: clip_vision 가지고 다니면 IP-adapter 할 때 굳이 안불러와도됨.
 @torch.inference_mode()
-def load_stable_diffusion(model_name) :
+def load_checkpoint(model_name) :
     from ComfyUI.comfy.sd import load_checkpoint_guess_config
     model_path = os.path.join(CHECKPOINT_ROOT, 'sdxl_light', model_name)
     if not os.path.exists(model_path):
         raise Exception(f"SD model path wrong: {model_path}")
     model_patcher, clip, vae, clipvision = load_checkpoint_guess_config(model_path)
-    return model_patcher, vae, clip
+    return model_patcher, vae, clip, clipvision
 
 @torch.inference_mode()
 def load_controlnet(model_name) :
@@ -108,6 +108,13 @@ def load_ipadapter(model_name) :
         raise Exception(f"IP-Adapter model path wrong: {model_path}")
     ipadapter = ipadapter_model_loader(model_path)
     return ipadapter
+
+@torch.inference_mode()
+def apply_lora_to_unet(unet, clip, lora_path, strength_model, strength_clip=1) :
+    from ComfyUI.nodes import LoraLoader
+    loraloader = LoraLoader()
+    unet, clip = loraloader.load_lora(unet, clip, lora_path, strength_model, strength_clip=strength_clip)
+    return unet, clip
 
 @torch.inference_mode()
 def encode_decode(vae, image, scale = 0.18215) :

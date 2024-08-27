@@ -33,6 +33,24 @@ async def main():
     end = time.time()
     print(f'총합={result1+result2}, 총시간={end-start}')
 
-
+import requests
+from utils.handler import handle_response
 if __name__ == "__main__":
-    asyncio.run(main())
+    ip_addr = '117.52.72.83'
+
+    request_body = {
+        'basemodel': 'SD3_sd3_medium_incl_clips_t5xxlfp16.safetensors',
+        "prompt_positive": 'a dog',
+        "prompt_negative": "",
+        'width': 1344,
+        'height': 768,
+        'steps': 20,
+        'cfg': 4,
+        'denoise': 1,
+        'gen_type': 't2i'
+    }
+
+    url = f"http://{ip_addr}:7863/sd3/generate"
+    response = requests.post(url, json=request_body)
+    data = handle_response(response)
+    image_base64 = data['image_base64']

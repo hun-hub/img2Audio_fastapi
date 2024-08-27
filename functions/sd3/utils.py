@@ -36,7 +36,7 @@ def get_init_noise(width, height, batch_size=1) :
     return init_noise
 
 def sned_sd3_request_to_api(
-        model_name,
+        checkpoint,
         image,
         mask,
         prompt,
@@ -66,7 +66,7 @@ def sned_sd3_request_to_api(
         canny_image = convert_image_to_base64(canny_image)
 
     request_body = {
-        'basemodel': model_name,
+        'checkpoint': checkpoint,
         'init_image': image,
         'mask': mask,
         "prompt_positive": prompt,
@@ -101,3 +101,21 @@ def sned_sd3_request_to_api(
     image_base64 = data['image_base64']
     image = convert_base64_to_image_array(image_base64)
     return image
+
+if __name__ == "__main__":
+    ip_addr = '117.52.72.83'
+
+    request_body = {
+        'checkpoint': 'SD3_sd3_medium_incl_clips_t5xxlfp16.safetensors',
+        "prompt_positive": 'a dog',
+        "prompt_negative": "",
+        'width': 1344,
+        'height': 768,
+        'steps': 20,
+        'cfg': 4,
+        'denoise': 1,
+        'gen_type': 't2i'
+    }
+
+    url = f"http://{ip_addr}:7863/sd3/generate"
+    response = requests.post(url, json=request_body)

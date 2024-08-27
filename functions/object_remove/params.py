@@ -3,7 +3,6 @@ from typing import Optional, Literal, List
 
 
 class Object_Remove_RequestData(RequestData):
-    basemodel: str
     inpaint_model_name: str
     init_image: str
     mask: str

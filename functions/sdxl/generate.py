@@ -1,7 +1,7 @@
 import torch
 from .utils import construct_condition
 from utils import set_comfyui_packages
-from utils.loader import load_stable_diffusion
+from utils.loader import load_checkpoint, apply_lora_to_unet
 from utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
 from utils.comfyui import (encode_prompt,
                            sample_image,
@@ -18,7 +18,9 @@ import random
 
 @torch.inference_mode()
 def generate_image(cached_model_dict, request_data):
-    unet_base, vae_base, clip_base = cached_model_dict['sd_checkpoint']['basemodel'][1]
+    unet_base = cached_model_dict['unet']['sdxl']['base'][1]
+    vae_base = cached_model_dict['vae']['sdxl']['base'][1]
+    clip_base = cached_model_dict['clip']['sdxl']['base'][1]
     vae_refine = vae_base
     start_base = 0
     end_base = request_data.steps
@@ -42,6 +44,7 @@ def generate_image(cached_model_dict, request_data):
         raise ValueError("Invalid generation type and image: {}".format(request_data.gen_type))
 
     ipadapter_request = request_data.ipadapter_request
+    lora_requests = request_data.lora_requests
     canny_request = None
     inpaint_request = None
     for controlnet_request in request_data.controlnet_requests :
@@ -51,19 +54,23 @@ def generate_image(cached_model_dict, request_data):
             inpaint_request = controlnet_request
 
     seed = random.randint(1, int(1e9)) if request_data.seed == -1 else request_data.seed
-
+    if lora_requests :
+        for lora_request in lora_requests :
+            unet_base, clip_base = apply_lora_to_unet(unet_base, clip_base, lora_request.lora, lora_request.strength_model, lora_request.strength_clip)
     # Base Model Flow
     positive_cond, negative_cond = encode_prompt(clip_base,
                                                  request_data.prompt_positive,
                                                  request_data.prompt_negative)
 
-    unet_base, positive_cond_base, negative_cond_base = construct_condition(unet_base,
-                                                                  cached_model_dict,
-                                                                  positive_cond,
-                                                                  negative_cond,
-                                                                  canny_request,
-                                                                  inpaint_request,
-                                                                  ipadapter_request)
+    unet_base, positive_cond_base, negative_cond_base = construct_condition(
+        unet_base,
+        cached_model_dict,
+        positive_cond,
+        negative_cond,
+        canny_request,
+        inpaint_request,
+        ipadapter_request,
+    )
 
     latent_image = sample_image(
         unet= unet_base,
@@ -80,9 +87,21 @@ def generate_image(cached_model_dict, request_data):
         end_at_step= end_base,)
 
     if request_data.refiner is not None :
-        unet_refine, vae_refine, clip_refine = cached_model_dict['sd_checkpoint']['refiner'][1]
+        unet_refine = cached_model_dict['unet']['sdxl']['refiner'][1]
+        vae_refine = cached_model_dict['vae']['sdxl']['refiner'][1]
+        clip_refine = cached_model_dict['clip']['sdxl']['refiner'][1]
+
         start_refine = end_base
         end_refine = request_data.steps
+
+        if lora_requests:
+            for lora_request in lora_requests:
+                unet_refine, clip_refine = apply_lora_to_unet(
+                    unet_refine,
+                    clip_refine,
+                    lora_request.lora,
+                    lora_request.strength_model,
+                    lora_request.strength_clip)
 
         positive_cond, negative_cond = encode_prompt(clip_refine,
                                                      request_data.prompt_positive,

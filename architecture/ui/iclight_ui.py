@@ -7,11 +7,11 @@ import numpy as np
 from PIL import Image
 from utils.image_process import resize_image_for_sd
 
+checkpoint_root = os.getenv('CHECKPOINT_ROOT')
+sd15_checkpoint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'sdxl_light')) if 'SD15' in x]
+iclight_model_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'unet')) if 'SD15_iclight' in x]
 
-sd15_model_list = [x for x in os.listdir('/checkpoints/sdxl_light') if 'SD15' in x]
-iclight_model_list = [x for x in os.listdir('/checkpoints/unet') if 'SD15_iclight' in x]
-
-sd15_model_list.sort()
+sd15_checkpoint_list.sort()
 iclight_model_list.sort()
 
 light_condition_type_list = ['Canvas', 'Pre-Defined', 'Upload']
@@ -34,7 +34,7 @@ image_blendig_mode = [
                 ]
 
 def build_iclight_ui(image, mask, prompt, ip_addr) :
-    model_name = gr.Dropdown(sd15_model_list, label="Select SD15 model", value = sd15_model_list[0])
+    checkpoint = gr.Dropdown(sd15_checkpoint_list, label="Select SD15 checkpoint", value = sd15_checkpoint_list[0])
     iclight_model_name = gr.Dropdown(iclight_model_list, label="Select IC-Light model", value=iclight_model_list[0])
 
     with gr.Row():
@@ -132,7 +132,7 @@ def build_iclight_ui(image, mask, prompt, ip_addr) :
     light_condition_strength.change(fn=apply_light_condition, inputs=[light_condition_strength, light_condition], outputs=[light_condition_strength_applied])
 
     base_inputs = [
-        model_name,
+        checkpoint,
         image,
         mask,
         prompt,

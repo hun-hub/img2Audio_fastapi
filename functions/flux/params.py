@@ -3,7 +3,6 @@ from typing import Optional, Literal, List
 
 
 class SD3_RequestData(RequestData):
-    basemodel: str
     steps: int = 28
     cfg: float = 4.5
     sampler_name: str = 'dpmpp_2m'

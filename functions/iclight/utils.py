@@ -137,7 +137,7 @@ def remap_image(image_tensor, min=-0.15, max=1.14) :
     return image_tensor
 
 def sned_iclight_request_to_api(
-        model_name,
+        checkpoint,
         image,
         mask,
         prompt,
@@ -170,7 +170,7 @@ def sned_iclight_request_to_api(
         light_condition = convert_image_to_base64(light_condition)
 
     request_body = {
-        'basemodel': model_name,
+        'checkpoint': checkpoint,
         'init_image': image,
         'mask': mask,
         "prompt_positive": prompt,

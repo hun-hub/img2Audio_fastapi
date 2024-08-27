@@ -8,7 +8,6 @@ poorly drawn face, mutation, deformed, blurry, dehydrated, bad anatomy, bad prop
 gross proportions, malformed limbs, missing arms, missing legs, extra arms, extra legs, fused fingers, too many fingers, long neck, UnrealisticDream"""
 
 class SD15_RequestData(RequestData):
-    basemodel: str
     steps: int = 20
     cfg: float = 7
     prompt_negative: str = prompt_negative
