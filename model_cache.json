@@ -69,5 +69,29 @@
     "sdxl": null,
     "sd3":  null,
     "flux": null
+  },
+  "lora":
+  {
+    "module_1":
+    {
+      "sd15": null,
+      "sdxl": null,
+      "sd3":  null,
+      "flux": null
+    },
+    "module_2":
+    {
+      "sd15": null,
+      "sdxl": null,
+      "sd3":  null,
+      "flux": null
+    },
+    "module_3":
+    {
+      "sd15": null,
+      "sdxl": null,
+      "sd3":  null,
+      "flux": null
+    }
   }
 }

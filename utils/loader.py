@@ -110,12 +110,13 @@ def load_ipadapter(model_name) :
     return ipadapter
 
 @torch.inference_mode()
-def apply_lora_to_unet(unet, clip, lora_path, strength_model, strength_clip=1) :
-    from ComfyUI.nodes import LoraLoader
-    loraloader = LoraLoader()
-    unet, clip = loraloader.load_lora(unet, clip, lora_path, strength_model, strength_clip=strength_clip)
-    return unet, clip
-
+def load_lora(model_name) :
+    from ComfyUI.comfy.utils import load_torch_file
+    model_path = os.path.join(CHECKPOINT_ROOT, 'loras', model_name)
+    if not os.path.exists(model_path):
+        raise Exception(f"LoRA model path wrong: {model_path}")
+    lora = load_torch_file(model_path, safe_load=True)
+    return lora
 @torch.inference_mode()
 def encode_decode(vae, image, scale = 0.18215) :
     image_scaled = image * scale

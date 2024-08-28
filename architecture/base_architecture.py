@@ -11,6 +11,7 @@ from utils import (update_model_cache_from_blueprint,
                    cache_checkpoint,
                    cache_controlnet,
                    cache_ipadapter,
+                   cache_lora
                    )
 from utils.image_process import convert_base64_to_image
 from utils.text_process import prompt_refine, image_caption
@@ -134,8 +135,11 @@ class CntGenAPI:
             cache_controlnet(model_cache_blueprint, request_dict['controlnet_requests'])
         if 'ipadapter_request' in request_dict and request_dict['ipadapter_request'] :
             cache_ipadapter(model_cache_blueprint, request_dict['ipadapter_request'])
-
+        if 'lora_requests' in request_dict and request_dict['lora_requests'] :
+            cache_lora(model_cache_blueprint, request_dict['lora_requests'])
+        start = time.time()
         update_model_cache_from_blueprint(self.model_cache, model_cache_blueprint)
+        print('Model check time: ', time.time() - start)
         del model_cache_blueprint
         gc.collect()
 

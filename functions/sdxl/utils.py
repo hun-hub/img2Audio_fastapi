@@ -192,17 +192,18 @@ def sned_sdxl_request_to_api(
         'end_at': ipadapter_end,
     }
 
-    lora_body_list = [
-        {'lora': lora_model_name_1,
-         'strength_model': strength_model_1,
-         'strength_clip': strength_clip_1,},
-        {'lora': lora_model_name_2,
-         'strength_model': strength_model_2,
-         'strength_clip': strength_clip_2, },
-        {'lora': lora_model_name_3,
-         'strength_model': strength_model_3,
-         'strength_clip': strength_clip_3, },
-    ]
+    lora_requests_sorted = sorted([[lora_model_name_1, strength_model_1, strength_clip_1],
+                                   [lora_model_name_2, strength_model_2, strength_clip_2],
+                                   [lora_model_name_3, strength_model_3, strength_clip_3]])
+    lora_body_list = []
+
+    for lora_request_sorted in lora_requests_sorted:
+        if lora_request_sorted[0] == 'None' : continue
+        lora_body = {'lora': lora_request_sorted[0],
+                     'strength_model': lora_request_sorted[1],
+                     'strength_clip': lora_request_sorted[2],}
+        lora_body_list.append(lora_body)
+
 
     if refiner_enable:
         request_body.update(refiner_body)

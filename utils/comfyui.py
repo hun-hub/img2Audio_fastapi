@@ -118,6 +118,22 @@ def apply_ipadapter(model,
     )[0]
     return unet
 
+@torch.inference_mode()
+def apply_lora_to_unet(unet, clip, cached_model_dict, lora_request) :
+    from ComfyUI.comfy.sd import load_lora_for_models
+    lora_type = lora_request.lora.split('_')[0].lower()
+    lora = None
+    for i in range(3) :
+        lora_tuple = cached_model_dict['lora'][f'module_{i+1}'][lora_type]
+        lora_name, lora_module = lora_tuple
+        if lora_name == lora_request.lora :
+            lora = lora_module
+            break
+    if lora is None :
+        raise ValueError(f"Lora {lora_request.lora} not found in the cached_model_dict")
+    unet, clip = load_lora_for_models(unet, clip, lora, lora_request.strength_model, strength_clip=lora_request.strength_clip)
+    return unet, clip
+
 def get_init_noise(width, height, batch_size=1) :
     from ComfyUI.nodes import EmptyLatentImage
     latent_sampler = EmptyLatentImage()

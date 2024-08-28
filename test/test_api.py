@@ -36,21 +36,34 @@ async def main():
 import requests
 from utils.handler import handle_response
 if __name__ == "__main__":
-    ip_addr = '117.52.72.83'
+    ip_addr = '117.52.72.82'
 
     request_body = {
-        'basemodel': 'SD3_sd3_medium_incl_clips_t5xxlfp16.safetensors',
-        "prompt_positive": 'a dog',
-        "prompt_negative": "",
+        'checkpoint': 'SDXL_forrealxl_v05.safetensors',
+        "prompt_positive": "cute tiny stribul monster in floating village lake africa , by Jon Klassen, Chris LaBrooy, Guy Denning, Wes Anderson, Surprising, natural light, Orton effect, Nikon Z9, F/8, yellow orange ultramarine blue brown hues, film grain cinematic lighting, 35mm film, atmospheric mo’ai",  # 입력 필요
+        "prompt_negative": 'worst quality, low quality, illustration, 3d, 2d, painting, cartoons, sketch',
         'width': 1344,
         'height': 768,
         'steps': 20,
-        'cfg': 4,
-        'denoise': 1,
-        'gen_type': 't2i'
+        'cfg': 2,
+        'denoise': 1.0,
+        'gen_type': 't2i',
+        'lora_requests': [],
     }
 
-    url = f"http://{ip_addr}:7863/sd3/generate"
+    lora_body_list = [
+        {'lora': 'SDXL_MJ52.safetensors',
+         'strength_model': 0.5,
+         'strength_clip': 1, },
+        {'lora': 'SDXL_add-detail-xl.safetensors',
+         'strength_model': 1,
+         'strength_clip': 1, },
+    ]
+
+    for lora_body in lora_body_list:
+        request_body['lora_requests'].append(lora_body)
+
+    url = f"http://{ip_addr}:7863/sdxl/generate"
     response = requests.post(url, json=request_body)
     data = handle_response(response)
     image_base64 = data['image_base64']

@@ -17,7 +17,7 @@ conda activate api
 
 ```
 ```Bash
-sh setup_comfy.sh
+bash setup_comfy.sh
 ```
 
 ### 0.2 gcloud-cli
@@ -121,7 +121,12 @@ class ControlNet_RequestData(BaseModel):
     end_percent: float
 
 class RequestData(BaseModel):
-    basemodel: str = 'SDXL_copaxTimelessxlSDXL1_v12.safetensors'
+    checkpoint: str = None
+    unet: str = None
+    vae: str = None
+    clip: str = None
+    clip_vision: str = None
+
     init_image: Optional[str] = None
     mask: Optional[str] = None
     prompt_positive: str = 'high quality, 4K, expert.'
@@ -136,7 +141,6 @@ class RequestData(BaseModel):
     scheduler: str = 'karras'
     denoise: float= 1.0
     gen_type: Literal['t2i', 'i2i', 'inpaint', 'iclight'] = 't2i'
-
 ```
 
 
@@ -175,7 +179,7 @@ class SD3_RequestData(RequestData):
 **SD3 Image Generation Example**
 ```python
 request_body = {
-    'basemodel': 'SD3_sd3_medium_incl_clips_t5xxlfp16.safetensors', # 입력 고정
+    'checkpoint': 'SD3_sd3_medium_incl_clips_t5xxlfp16.safetensors', # 입력 고정
     'init_image': IMAGE_BASE64, # RGB Image / i2i, inpaint 일 경우 필요
     'mask': MASK_BASE64, # RGB Image / inpaint 일 경우 필요
     "prompt_positive": POSITIVE_PROMPT, # 입력 필요
@@ -216,7 +220,6 @@ image_base64 = data['image_base64']
 Parameter format
 ```python
 class SDXL_RequestData(RequestData):
-    basemodel: str
     steps: int = 20
     cfg: float = 7
     sampler_name: str = 'dpmpp_2m_sde'
@@ -225,6 +228,7 @@ class SDXL_RequestData(RequestData):
     mask: Optional[str]= None
     controlnet_requests: Optional[List[ControlNet_RequestData]] = []
     ipadapter_request: Optional[IPAdapter_RequestData] = None
+    lora_requests: Optional[List[LoRA_RequestData]] = []
     gen_type: Literal['t2i', 'i2i', 'inpaint'] = 't2i'
     refiner: Optional[str] = None
     refine_switch: float= 0.4

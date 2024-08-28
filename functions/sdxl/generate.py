@@ -1,14 +1,14 @@
 import torch
 from .utils import construct_condition
 from utils import set_comfyui_packages
-from utils.loader import load_checkpoint, apply_lora_to_unet
+from utils.loader import load_checkpoint
 from utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
 from utils.comfyui import (encode_prompt,
                            sample_image,
                            decode_latent,
                            encode_image,
                            encode_image_for_inpaint,
-                           apply_controlnet,
+                           apply_lora_to_unet,
                            make_canny,
                            get_init_noise,
                            mask_blur)
@@ -56,7 +56,11 @@ def generate_image(cached_model_dict, request_data):
     seed = random.randint(1, int(1e9)) if request_data.seed == -1 else request_data.seed
     if lora_requests :
         for lora_request in lora_requests :
-            unet_base, clip_base = apply_lora_to_unet(unet_base, clip_base, lora_request.lora, lora_request.strength_model, lora_request.strength_clip)
+            unet_base, clip_base = apply_lora_to_unet(
+                unet_base,
+                clip_base,
+                cached_model_dict,
+                lora_request)
     # Base Model Flow
     positive_cond, negative_cond = encode_prompt(clip_base,
                                                  request_data.prompt_positive,
@@ -99,9 +103,8 @@ def generate_image(cached_model_dict, request_data):
                 unet_refine, clip_refine = apply_lora_to_unet(
                     unet_refine,
                     clip_refine,
-                    lora_request.lora,
-                    lora_request.strength_model,
-                    lora_request.strength_clip)
+                    cached_model_dict,
+                    lora_request)
 
         positive_cond, negative_cond = encode_prompt(clip_refine,
                                                      request_data.prompt_positive,

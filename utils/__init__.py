@@ -7,6 +7,7 @@ import pandas as pd
 import gc
 from prettytable import PrettyTable
 
+
 blue_print = {'sd_checkpoint':
                   {'basemodel': {},
                    'refiner': {}},
@@ -122,3 +123,11 @@ def cache_ipadapter(model_cache, ipadapter_request) :
     ipadapter_type = ipadapter_model.split('_')[0].lower()
     ipadapter = load_ipadapter(ipadapter_model)
     model_cache['ipadapter'][ipadapter_type] = (ipadapter_model, ipadapter)
+
+def cache_lora(model_cache, lora_requests) :
+    from utils.loader import load_lora
+    lora_type = lora_requests[0]['lora'].split('_')[0].lower()
+    for i, lora_request in enumerate(lora_requests) :
+        lora_model = lora_request['lora']
+        lora = load_lora(lora_model)
+        model_cache['lora'][f'module_{i+1}'][lora_type] = (lora_model, lora)
