@@ -11,6 +11,7 @@ from utils.comfyui import (encode_prompt,
                            apply_controlnet,
                            make_canny,
                            get_init_noise,
+                           apply_lora_to_unet,
                            mask_blur)
 import random
 
@@ -42,6 +43,7 @@ def generate_image(cached_model_dict, request_data):
         raise ValueError("Invalid generation type and image: {}".format(request_data.gen_type))
 
     ipadapter_request = request_data.ipadapter_request
+    lora_requests = request_data.lora_requests
     canny_request = None
     inpaint_request = None
     for controlnet_request in request_data.controlnet_requests :
@@ -51,18 +53,27 @@ def generate_image(cached_model_dict, request_data):
             inpaint_request = controlnet_request
 
     seed = random.randint(1, int(1e9)) if request_data.seed == -1 else request_data.seed
+    if lora_requests :
+        for lora_request in lora_requests :
+            unet, clip = apply_lora_to_unet(
+                unet,
+                clip,
+                cached_model_dict,
+                lora_request)
 
     positive_cond, negative_cond = encode_prompt(clip,
                                                  request_data.prompt_positive ,
                                                  request_data.prompt_negative)
 
-    unet, positive_cond, negative_cond = construct_condition(unet,
-                                                             cached_model_dict,
-                                                             positive_cond,
-                                                             negative_cond,
-                                                             canny_request,
-                                                             inpaint_request,
-                                                             ipadapter_request)
+    unet, positive_cond, negative_cond = construct_condition(
+        unet,
+        cached_model_dict,
+        positive_cond,
+        negative_cond,
+        canny_request,
+        inpaint_request,
+        ipadapter_request)
+
     latent_image = sample_image(
         unet= unet,
         positive_cond= positive_cond,
