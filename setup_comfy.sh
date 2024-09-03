@@ -30,6 +30,9 @@ repositories=(
     "https://github.com/Layer-norm/comfyui-lama-remover.git"
     "https://github.com/jamesWalker55/comfyui-various.git"
     "https://github.com/XLabs-AI/x-flux-comfyui.git"
+
+    "https://github.com/Kosinkadink/ComfyUI-Advanced-ControlNet"
+    "https://github.com/shadowcz007/comfyui-mixlab-nodes"
 )
 
 for repo in "${repositories[@]}"; do

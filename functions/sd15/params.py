@@ -1,4 +1,4 @@
-from params import RequestData, ControlNet_RequestData, IPAdapter_RequestData
+from params import RequestData, ControlNet_RequestData, IPAdapter_RequestData, LoRA_RequestData
 from typing import Optional, Literal, List
 
 prompt_negative = """boring_e621_v4, (((text, watermark, logo, phrases, person, face))), 
@@ -17,4 +17,5 @@ class SD15_RequestData(RequestData):
     mask: Optional[str]= None
     controlnet_requests: Optional[List[ControlNet_RequestData]] = []
     ipadapter_request: Optional[IPAdapter_RequestData] = None
+    lora_requests: Optional[List[LoRA_RequestData]] = []
     gen_type: Literal['t2i', 'i2i', 'inpaint'] = 't2i'

@@ -30,7 +30,7 @@ def remove(cached_model_dict, request_data):
     mask = convert_base64_to_image_tensor(request_data.mask) / 255
     mask = mask_blur(mask)
     lama_preprocessed = webui_lama_proprecessor(init_image, mask).unsqueeze(0) / 255
-
+    # Gemini prompt
     seed = random.randint(1, int(1e9)) if request_data.seed == -1 else request_data.seed
     positive_cond, negative_cond = encode_prompt(clip,
                                                  request_data.prompt_positive,

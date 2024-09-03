@@ -102,6 +102,17 @@ def sned_sd15_request_to_api(
         ipadapter_start,
         ipadapter_end,
 
+        lora_enable,
+        lora_model_name_1,
+        strength_model_1,
+        strength_clip_1,
+        lora_model_name_2,
+        strength_model_2,
+        strength_clip_2,
+        lora_model_name_3,
+        strength_model_3,
+        strength_clip_3,
+
         gen_type,
         ip_addr
 ) :
@@ -143,6 +154,7 @@ def sned_sd15_request_to_api(
         'seed': seed,
         'gen_type': gen_type,
         'controlnet_requests': [],
+        'lora_requests': [],
     }
 
     canny_body = {
@@ -172,12 +184,30 @@ def sned_sd15_request_to_api(
         'end_at': ipadapter_end,
     }
 
+    lora_requests_sorted = sorted([[lora_model_name_1, strength_model_1, strength_clip_1],
+                                   [lora_model_name_2, strength_model_2, strength_clip_2],
+                                   [lora_model_name_3, strength_model_3, strength_clip_3]])
+    lora_body_list = []
+
+    for lora_request_sorted in lora_requests_sorted:
+        if lora_request_sorted[0] == 'None': continue
+        lora_body = {'lora': lora_request_sorted[0],
+                     'strength_model': lora_request_sorted[1],
+                     'strength_clip': lora_request_sorted[2], }
+        lora_body_list.append(lora_body)
+
     if canny_enable :
         request_body['controlnet_requests'].append(canny_body)
     if inpaint_enable :
         request_body['controlnet_requests'].append(inpaint_body)
     if ipadapter_enable :
         request_body['ipadapter_request'] = ipadapter_body
+    # TODO: 그냥 extend 한줄로 해도 될듯. 위에서 None 걸러내서.
+    if lora_enable :
+        for lora_body in lora_body_list:
+            if lora_body['lora'] != 'None' :
+                request_body['lora_requests'].append(lora_body)
+
 
     url = f"http://{ip_addr}:7861/sd15/generate"
     response = requests.post(url, json=request_body)

@@ -7,11 +7,13 @@ sd15_checkpoint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'sdx
 controlnet_canny_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'controlnet')) if 'SD15_Canny' in x]
 controlnet_inpaint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'controlnet')) if 'SD15_Inpaint' in x]
 ipadapter_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'ipadapter')) if 'SD15' in x]
+lora_list = ['None'] + [x for x in os.listdir(os.path.join(checkpoint_root, 'loras')) if 'SD15' in x]
 
 sd15_checkpoint_list.sort()
 controlnet_canny_list.sort()
 controlnet_inpaint_list.sort()
 ipadapter_list.sort()
+lora_list.sort()
 
 def build_sd15_ui(image, mask, prompt, ip_addr) :
     checkpoint = gr.Dropdown(sd15_checkpoint_list, label="Select SD15 checkpoint", value = sd15_checkpoint_list[0])
@@ -110,7 +112,37 @@ def build_sd15_ui(image, mask, prompt, ip_addr) :
         ipadapter_end,
     ]
 
+
+    with gr.Accordion("LoRA", open=False):
+        lora_enable = gr.Checkbox(label="Enable LoRA")
+        with gr.Row():
+            with gr.Group():
+                lora_model_name_1 = gr.Dropdown(lora_list, label="Select LoRA model", value=lora_list[0])
+                strength_model_1 = gr.Slider(label="Strength UNet", minimum=-100, maximum=100, value=1, step=0.05)
+                strength_clip_1 = gr.Slider(label="Strength CLIP", minimum=-100, maximum=100, value=1, step=0.05)
+            with gr.Group():
+                lora_model_name_2 = gr.Dropdown(lora_list, label="Select LoRA model", value=lora_list[0])
+                strength_model_2 = gr.Slider(label="Strength UNet", minimum=-100, maximum=100, value=1, step=0.05)
+                strength_clip_2 = gr.Slider(label="Strength CLIP", minimum=-100, maximum=100, value=1, step=0.05)
+            with gr.Group():
+                lora_model_name_3 = gr.Dropdown(lora_list, label="Select LoRA model", value=lora_list[0])
+                strength_model_3 = gr.Slider(label="Strength UNet", minimum=-100, maximum=100, value=1, step=0.05)
+                strength_clip_3 = gr.Slider(label="Strength CLIP", minimum=-100, maximum=100, value=1, step=0.05)
+
+    lora_inputs = [
+        lora_enable,
+        lora_model_name_1,
+        strength_model_1,
+        strength_clip_1,
+        lora_model_name_2,
+        strength_model_2,
+        strength_clip_2,
+        lora_model_name_3,
+        strength_model_3,
+        strength_clip_3,
+    ]
+
     with gr.Row() :
         generate = gr.Button("Generate!")
 
-    return base_inputs + canny_inputs + inpaint_inputs + ipadapter_inputs + extra_inputs, generate
+    return base_inputs + canny_inputs + inpaint_inputs + ipadapter_inputs + lora_inputs + extra_inputs, generate
