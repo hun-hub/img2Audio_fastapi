@@ -3,14 +3,18 @@ import torch
 from utils import set_comfyui_packages
 from utils.loader import load_checkpoint
 from utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
-from .utils import model_sampling_sd3, get_init_noise, apply_controlnet
+from .utils import (model_sampling_flux,
+                    get_init_noise,
+                    flux_guidance,
+                    construct_condition)
 from utils.comfyui import (encode_prompt,
                            sample_image,
                            decode_latent,
                            encode_image,
                            encode_image_for_inpaint,
                            make_canny,
-                           mask_blur)
+                           mask_blur,
+                           apply_lora_to_unet)
 import random
 
 # set_comfyui_packages()
@@ -18,8 +22,9 @@ router = APIRouter()
 
 @torch.inference_mode()
 def generate_image(cached_model_dict, request_data):
-    unet, vae, clip = cached_model_dict['sd_checkpoint']['basemodel'][1]
-    unet = model_sampling_sd3(unet)
+    unet = cached_model_dict['unet']['flux'][1]
+    vae = cached_model_dict['vae']['flux'][1]
+    clip = cached_model_dict['clip']['flux'][1]
 
     if request_data.gen_type == 't2i' :
         init_noise = get_init_noise(request_data.width,
@@ -36,24 +41,42 @@ def generate_image(cached_model_dict, request_data):
     else :
         raise ValueError("Invalid generation type and image: {}".format(request_data.gen_type))
 
+    b, c, h, w = init_noise['samples'].size()
+
+    lora_requests = request_data.lora_requests
+    canny_request = None
+    depth_request = None
+    for controlnet_request in request_data.controlnet_requests:
+        if controlnet_request.type == 'canny':
+            canny_request = controlnet_request
+        if controlnet_request.type == 'depth':
+            depth_request = controlnet_request
+
     seed = random.randint(1, int(1e9)) if request_data.seed == -1 else request_data.seed
+    if lora_requests :
+        for lora_request in lora_requests :
+            unet, _ = apply_lora_to_unet(
+                unet,
+                None,
+                cached_model_dict,
+                lora_request)
 
     positive_cond, negative_cond = encode_prompt(clip,
                                                  request_data.prompt_positive,
                                                  request_data.prompt_negative)
 
-    for controlnet_request in request_data.controlnet_requests :
-        control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
-        control_image = make_canny(control_image)
-        controlnet = cached_model_dict['controlnet'][controlnet_request.type][1]
-        positive_cond, negative_cond = apply_controlnet(positive_cond,
-                                                        negative_cond,
-                                                        controlnet,
-                                                        vae,
-                                                        control_image,
-                                                        controlnet_request.strength,
-                                                        controlnet_request.start_percent,
-                                                        controlnet_request.end_percent,)
+    positive_cond = flux_guidance(positive_cond, request_data.cfg)
+
+    unet, positive_cond, negative_cond = construct_condition(
+        unet,
+        cached_model_dict,
+        positive_cond,
+        negative_cond,
+        canny_request,
+        depth_request,
+    )
+
+    unet = model_sampling_flux(unet, width = int(w * 8), height = int(h * 8))
 
     latent_image = sample_image(
         unet= unet,
@@ -62,7 +85,7 @@ def generate_image(cached_model_dict, request_data):
         latent_image= init_noise,
         seed= seed,
         steps= request_data.steps,
-        cfg= request_data.cfg,
+        cfg= 1.0,
         sampler_name= request_data.sampler_name,
         scheduler= request_data.scheduler,
         denoise= request_data.denoise,)

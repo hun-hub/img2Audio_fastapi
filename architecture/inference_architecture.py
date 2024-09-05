@@ -1,4 +1,6 @@
 import logging
+from functions.flux.params import FLUX_RequestData
+import functions.flux.generate
 from functions.sd3.params import SD3_RequestData
 import functions.sd3.generate
 from functions.sdxl.params import SDXL_RequestData
@@ -25,6 +27,7 @@ class Inference_API(CntGenAPI):
     def __init__(self, args):
         super().__init__(args)
         # SD3
+        self.app.post('/flux/generate')(self.flux_generate)
         self.app.post('/sd3/generate')(self.sd3_generate)
         self.app.post('/sdxl/generate')(self.sdxl_generate)
         self.app.post('/sd15/generate')(self.sd15_generate)
@@ -33,6 +36,9 @@ class Inference_API(CntGenAPI):
         self.app.post('/iclight/generate')(self.iclight_generate)
         self.app.post('/gemini')(self.gemini_generate)
 
+    def flux_generate(self, request_data: FLUX_RequestData):
+        image_base64 = self.generate_blueprint(functions.flux.generate.generate_image, request_data)
+        return {"image_base64": image_base64}
 
     def sd3_generate(self, request_data: SD3_RequestData):
         image_base64 = self.generate_blueprint(functions.sd3.generate.generate_image, request_data)

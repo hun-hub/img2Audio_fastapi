@@ -86,48 +86,104 @@ def update_model_cache_from_blueprint(model_cache, model_cache_blueprint):
         recursive_update(model_cache[model_type], model_cache_blueprint[model_type], model_type)
     print(changes_table)
 
-def cache_checkpoint(model_cache, checkpoint_name, is_refiner=False) :
+def cache_checkpoint(model_cache, model_cache_blueprint, checkpoint_name, is_refiner=False) :
     from utils.loader import load_checkpoint
     checkpoint_type = checkpoint_name.split('_')[0].lower()
+
+    if checkpoint_type == 'sdxl' :
+        sdxl_type = 'refiner' if is_refiner else 'base'
+        cached_unet = model_cache['unet'][checkpoint_type][sdxl_type]
+    else :
+        cached_unet = model_cache['unet'][checkpoint_type]
+
+    if cached_unet is not None and cached_unet[0] == checkpoint_name :
+        return None
+
     unet, vae, clip, _ = load_checkpoint(checkpoint_name)
 
     if checkpoint_type == 'sdxl' :
         sdxl_type = 'refiner' if is_refiner else 'base'
-        model_cache['unet'][checkpoint_type][sdxl_type] = (checkpoint_name, unet)
-        model_cache['vae'][checkpoint_type][sdxl_type] = (checkpoint_name, vae)
-        model_cache['clip'][checkpoint_type][sdxl_type] = (checkpoint_name, clip)
+        model_cache_blueprint['unet'][checkpoint_type][sdxl_type] = (checkpoint_name, unet)
+        model_cache_blueprint['vae'][checkpoint_type][sdxl_type] = (checkpoint_name, vae)
+        model_cache_blueprint['clip'][checkpoint_type][sdxl_type] = (checkpoint_name, clip)
     else :
-        model_cache['unet'][checkpoint_type] = (checkpoint_name, unet)
-        model_cache['vae'][checkpoint_type] = (checkpoint_name, vae)
-        model_cache['clip'][checkpoint_type] = (checkpoint_name, clip)
+        model_cache_blueprint['unet'][checkpoint_type] = (checkpoint_name, unet)
+        model_cache_blueprint['vae'][checkpoint_type] = (checkpoint_name, vae)
+        model_cache_blueprint['clip'][checkpoint_type] = (checkpoint_name, clip)
 
-def cache_unet(model_cache, unet) :
-    pass
-def cache_vae(model_cache, vae) :
-    pass
-def cache_clip(model_cache, clip) :
-    pass
+def cache_unet(model_cache, model_cache_blueprint, unet_name) :
+    from ComfyUI.nodes import UNETLoader
+    unet_type = unet_name.split('_')[0].lower()
+
+    cached_unet = model_cache['unet'][unet_type]
+    if cached_unet is not None and cached_unet[0] == unet_name :
+        return None
+
+    unet_loader = UNETLoader()
+    unet = unet_loader.load_unet(unet_name, 'fp8_e4m3fn')[0]
+    model_cache_blueprint['unet'][unet_type] = (unet_name, unet)
+
+def cache_vae(model_cache, model_cache_blueprint, vae_name) :
+    from ComfyUI.nodes import VAELoader
+    vae_type = vae_name.split('_')[0].lower()
+
+    cached_vae = model_cache['vae'][vae_type]
+    if cached_vae is not None and cached_vae[0] == vae_name:
+        return None
+
+    vae_loader = VAELoader()
+    vae = vae_loader.load_vae(vae_name)[0]
+    model_cache_blueprint['vae'][vae_type] = (vae_name, vae)
+
+# TODO: 일단 CLIP 따로 load하는 case는 FLUX로 가정.
+def cache_clip(model_cache, model_cache_blueprint, clip_name) :
+    from ComfyUI.nodes import DualCLIPLoader, CLIPLoader
+    if isinstance(clip_name, tuple) :
+        clip_type = 'flux'
+
+        cached_clip = model_cache['clip'][clip_type]
+        if cached_clip is not None and cached_clip[0] == clip_name:
+            return None
+
+        clip_loader = DualCLIPLoader()
+        clip = clip_loader.load_clip(clip_name[0], clip_name[1], clip_type)[0]
+        model_cache_blueprint['clip'][clip_type] = (clip_name, clip)
 def cache_clip_vision(model_cache, clip_vision) :
     pass
-def cache_controlnet(model_cache, controlnet_requests) :
+def cache_controlnet(model_cache, model_cache_blueprint, controlnet_requests) :
     from utils.loader import load_controlnet
     for controlnet_request in controlnet_requests :
         control_model = controlnet_request['controlnet']
         control_type = controlnet_request['type']
         checkpoint_type = control_model.split('_')[0].lower()
+
+        cached_controlnet = model_cache['controlnet'][control_type][checkpoint_type]
+        if cached_controlnet is not None and cached_controlnet[0] == control_model:
+            continue
+
         controlnet = load_controlnet(control_model)
-        model_cache['controlnet'][control_type][checkpoint_type] = (control_model, controlnet)
-def cache_ipadapter(model_cache, ipadapter_request) :
+        model_cache_blueprint['controlnet'][control_type][checkpoint_type] = (control_model, controlnet)
+def cache_ipadapter(model_cache, model_cache_blueprint, ipadapter_request) :
     from utils.loader import load_ipadapter
     ipadapter_model = ipadapter_request['ipadapter']
     ipadapter_type = ipadapter_model.split('_')[0].lower()
-    ipadapter = load_ipadapter(ipadapter_model)
-    model_cache['ipadapter'][ipadapter_type] = (ipadapter_model, ipadapter)
 
-def cache_lora(model_cache, lora_requests) :
+    cached_ipadapter = model_cache['ipadapter'][ipadapter_type]
+    if cached_ipadapter is not None and cached_ipadapter[0] == ipadapter_model:
+        return None
+
+    ipadapter = load_ipadapter(ipadapter_model)
+    model_cache_blueprint['ipadapter'][ipadapter_type] = (ipadapter_model, ipadapter)
+
+def cache_lora(model_cache, model_cache_blueprint, lora_requests) :
     from utils.loader import load_lora
     lora_type = lora_requests[0]['lora'].split('_')[0].lower()
     for i, lora_request in enumerate(lora_requests) :
         lora_model = lora_request['lora']
+
+        cached_lora = model_cache['lora'][f'module_{i+1}'][lora_type]
+        if cached_lora is not None and cached_lora[0] == lora_model:
+            continue
+
         lora = load_lora(lora_model)
-        model_cache['lora'][f'module_{i+1}'][lora_type] = (lora_model, lora)
+        model_cache_blueprint['lora'][f'module_{i+1}'][lora_type] = (lora_model, lora)

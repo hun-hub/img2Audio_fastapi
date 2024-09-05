@@ -9,12 +9,13 @@ from queue import Queue
 from utils.loader import load_clip_vision, load_controlnet, load_ipadapter, load_extra_path_config
 from utils import (update_model_cache_from_blueprint,
                    cache_checkpoint,
+                   cache_unet,
+                   cache_vae,
+                   cache_clip,
                    cache_controlnet,
                    cache_ipadapter,
                    cache_lora
                    )
-from utils.image_process import convert_base64_to_image
-from utils.text_process import prompt_refine, image_caption
 import gc
 import psutil
 import json
@@ -112,7 +113,7 @@ class CntGenAPI:
         load_extra_path_config('ComfyUI/extra_model_paths.yaml')
         with open('model_cache.json', 'r') as file:
             model_cache_blueprint = json.load(file)
-        cache_checkpoint(model_cache_blueprint, self.args.default_ckpt)
+        cache_checkpoint(self.model_cache, model_cache_blueprint, self.args.default_ckpt)
         update_model_cache_from_blueprint(self.model_cache, model_cache_blueprint)
         logger.info("\n============ 초기 모델 로드 완료 ============")
 
@@ -126,17 +127,21 @@ class CntGenAPI:
         request_dict = request_data.dict()
 
         if request_dict['checkpoint'] :
-            cache_checkpoint(model_cache_blueprint, request_dict['checkpoint'])
-        else : # FLUX의 경우 unet, vae, clip 따로
-            pass
+            cache_checkpoint(self.model_cache, model_cache_blueprint, request_dict['checkpoint'])
+        if request_dict['unet'] : # FLUX의 경우 unet, vae, clip 따로
+            cache_unet(self.model_cache, model_cache_blueprint, request_dict['unet'])
+        if request_dict['vae'] : # FLUX의 경우 unet, vae, clip 따로
+            cache_vae(self.model_cache, model_cache_blueprint, request_dict['vae'])
+        if request_dict['clip'] : # FLUX의 경우 unet, vae, clip 따로
+            cache_clip(self.model_cache, model_cache_blueprint, request_dict['clip'])
         if 'refiner' in request_dict and request_dict['refiner'] :
-            cache_checkpoint(model_cache_blueprint, request_dict['refiner'], True)
+            cache_checkpoint(self.model_cache, model_cache_blueprint, request_dict['refiner'], True)
         if 'controlnet_requests' in request_dict and request_dict['controlnet_requests'] :
-            cache_controlnet(model_cache_blueprint, request_dict['controlnet_requests'])
+            cache_controlnet(self.model_cache, model_cache_blueprint, request_dict['controlnet_requests'])
         if 'ipadapter_request' in request_dict and request_dict['ipadapter_request'] :
-            cache_ipadapter(model_cache_blueprint, request_dict['ipadapter_request'])
+            cache_ipadapter(self.model_cache, model_cache_blueprint, request_dict['ipadapter_request'])
         if 'lora_requests' in request_dict and request_dict['lora_requests'] :
-            cache_lora(model_cache_blueprint, request_dict['lora_requests'])
+            cache_lora(self.model_cache, model_cache_blueprint, request_dict['lora_requests'])
         start = time.time()
         update_model_cache_from_blueprint(self.model_cache, model_cache_blueprint)
         print('Model check time: ', time.time() - start)

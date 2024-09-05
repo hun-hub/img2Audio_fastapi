@@ -1,15 +1,14 @@
 import torch
-from utils.text_process import image_caption, prompt_refine
+from utils.text_process import gemini_with_prompt, gemini_with_prompt_and_image
 
 
 @torch.inference_mode()
 def generate_prompt(request_data):
-    if request_data.user_image :
-        prompt = image_caption(request_data.query,
-                               request_data.user_prompt,
-                               request_data.user_image)
+    if request_data.image :
+        prompt = gemini_with_prompt_and_image(
+            request_data.query,
+            request_data.image)
     else :
-        prompt = prompt_refine(request_data.query,
-                               request_data.user_prompt)
+        prompt = gemini_with_prompt(request_data.query)
 
     return prompt

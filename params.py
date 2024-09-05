@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, List, Literal
+from typing import Optional, List, Literal, Union, Tuple
 
 class IPAdapter_RequestData(BaseModel):
     ipadapter: str
@@ -32,7 +32,7 @@ class RequestData(BaseModel):
     checkpoint: str = None
     unet: str = None
     vae: str = None
-    clip: str = None
+    clip: Union[str, Tuple[str, str]] = None
     clip_vision: str = None
 
     init_image: Optional[str] = None

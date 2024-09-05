@@ -1,7 +1,7 @@
 import gradio as gr
 
-# from .ui.flux_ui import build_flux_ui
-
+from functions.flux.utils import sned_flux_request_to_api
+from .ui.flux_ui import build_flux_ui
 from functions.sd3.utils import sned_sd3_request_to_api
 from .ui.sd3_ui import build_sd3_ui
 from functions.sdxl.utils import sned_sdxl_request_to_api
@@ -17,7 +17,6 @@ from .ui.iclight_ui import build_iclight_ui
 
 from .ui.gemini_ui import build_gemini_ui
 from functions.gemini.utils import send_gemini_request_to_api
-from functions.gemini.params import query_dict
 
 
 class GradioApp:
@@ -46,8 +45,8 @@ class GradioApp:
                     with gr.Row():
                         gemini_refinement = gr.Button("Gemini Refine Prompt")
 
-                    # with gr.Tab("FLUX"):
-                    #     flux_inputs, flux_generate = build_flux_ui(image, mask, gemini_prompt, self.ip_addr)
+                    with gr.Tab("FLUX"):
+                        flux_inputs, flux_generate = build_flux_ui(image, mask, gemini_prompt, self.ip_addr)
                     with gr.Tab("Stable Diffusion 3"):
                         sd3_inputs, sd3_generate = build_sd3_ui(image, mask, gemini_prompt, self.ip_addr)
                     with gr.Tab("Stable Diffusion XL"):
@@ -68,15 +67,19 @@ class GradioApp:
                 with gr.Column() :
                     generated_image = gr.Image(sources='upload', type="numpy", label="Generated Image", interactive=False)
 
-            gemini_inputs_for_imagen = [gr.Image(sources='upload', type="numpy", visible=False),
-                                        gr.Text(query_dict['prompt_refine_query'], visible=False),
-                                        prompt,
+            gemini_inputs_for_imagen = [prompt,
+                                        gr.Text('', visible=False),
+                                        gr.Text('', visible=False),
+                                        gr.Text('prompt_refine', visible=False),
+                                        gr.Image(sources='upload', type="numpy", visible=False),
                                         gr.Text(self.ip_addr, visible=False)]
             gemini_refinement.click(fn=send_gemini_request_to_api, inputs=gemini_inputs_for_imagen, outputs=gemini_prompt)
-            prompt.change(fn=send_gemini_request_to_api, inputs=gemini_inputs_for_imagen, outputs=gemini_prompt)
+            # prompt.change(fn=send_gemini_request_to_api, inputs=gemini_inputs_for_imagen, outputs=gemini_prompt)
 
             # Gemini Tab
             gemini_button.click(fn=send_gemini_request_to_api, inputs=gemini_inputs, outputs=gemini_result)
+            # Flux Tab
+            flux_generate.click(fn=sned_flux_request_to_api, inputs = flux_inputs, outputs=generated_image)
             # SD3 Tab
             sd3_generate.click(fn=sned_sd3_request_to_api, inputs=sd3_inputs, outputs=generated_image)
             # SDXL Tab
