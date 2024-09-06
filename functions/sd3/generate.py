@@ -69,8 +69,10 @@ def generate_image(cached_model_dict, request_data):
         denoise= request_data.denoise,)
 
     image_tensor = decode_latent(vae, latent_image)
+
     if request_data.gen_type == 'inpaint':
         image_tensor = image_tensor * mask.unsqueeze(-1) + init_image * (1 - mask.unsqueeze(-1))
+
 
     image_base64 = convert_image_tensor_to_base64(image_tensor * 255)
     return image_base64

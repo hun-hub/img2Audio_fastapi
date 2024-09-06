@@ -92,6 +92,13 @@ def generate_image(cached_model_dict, request_data):
     if request_data.gen_type == 'inpaint' :
         image_tensor = image_tensor * mask.unsqueeze(-1) + init_image * (1 - mask.unsqueeze(-1))
 
+    if inpaint_request is not None:
+        control_image = convert_base64_to_image_tensor(inpaint_request.image) / 255
+        control_image, control_mask = control_image[:, :, :, :3], control_image[:, :, :, 3]
+        if control_image.squeeze().size() == image_tensor.squeeze().size():
+            control_mask = mask_blur(control_mask)
+            image_tensor = image_tensor * control_mask.unsqueeze(-1) + control_image * (1 - control_mask.unsqueeze(-1))
+
     image_base64 = convert_image_tensor_to_base64(image_tensor * 255)
     return image_base64
 
