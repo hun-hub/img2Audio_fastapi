@@ -3,6 +3,7 @@ from typing import Optional, Literal, List
 
 
 class SDXL_RequestData(RequestData):
+    checkpoint: str = 'SDXL_RealVisXL_V40.safetensors'
     steps: int = 20
     cfg: float = 7
     sampler_name: str = 'dpmpp_2m_sde'

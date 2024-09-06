@@ -46,7 +46,7 @@ def generate_image(cached_model_dict, request_data):
     for controlnet_request in request_data.controlnet_requests :
         control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
         control_image = make_canny(control_image)
-        controlnet = cached_model_dict['controlnet'][controlnet_request.type]['sd3'][1]
+        controlnet = cached_model_dict['controlnet']['sd3'][controlnet_request.type][1]
         positive_cond, negative_cond = apply_controlnet(positive_cond,
                                                         negative_cond,
                                                         controlnet,

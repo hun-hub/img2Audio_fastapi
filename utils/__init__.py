@@ -157,12 +157,12 @@ def cache_controlnet(model_cache, model_cache_blueprint, controlnet_requests) :
         control_type = controlnet_request['type']
         checkpoint_type = control_model.split('_')[0].lower()
 
-        cached_controlnet = model_cache['controlnet'][control_type][checkpoint_type]
+        cached_controlnet = model_cache['controlnet'][checkpoint_type][control_type]
         if cached_controlnet is not None and cached_controlnet[0] == control_model:
             continue
 
         controlnet = load_controlnet(control_model)
-        model_cache_blueprint['controlnet'][control_type][checkpoint_type] = (control_model, controlnet)
+        model_cache_blueprint['controlnet'][checkpoint_type][control_type] = (control_model, controlnet)
 def cache_ipadapter(model_cache, model_cache_blueprint, ipadapter_request) :
     from utils.loader import load_ipadapter
     ipadapter_model = ipadapter_request['ipadapter']
@@ -181,9 +181,9 @@ def cache_lora(model_cache, model_cache_blueprint, lora_requests) :
     for i, lora_request in enumerate(lora_requests) :
         lora_model = lora_request['lora']
 
-        cached_lora = model_cache['lora'][f'module_{i+1}'][lora_type]
+        cached_lora = model_cache['lora'][lora_type][f'module_{i+1}']
         if cached_lora is not None and cached_lora[0] == lora_model:
             continue
 
         lora = load_lora(lora_model)
-        model_cache_blueprint['lora'][f'module_{i+1}'][lora_type] = (lora_model, lora)
+        model_cache_blueprint['lora'][lora_type][f'module_{i+1}'] = (lora_model, lora)

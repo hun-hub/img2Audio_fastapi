@@ -124,7 +124,7 @@ def apply_lora_to_unet(unet, clip, cached_model_dict, lora_request) :
     lora_type = lora_request.lora.split('_')[0].lower()
     lora = None
     for i in range(3) :
-        lora_tuple = cached_model_dict['lora'][f'module_{i+1}'][lora_type]
+        lora_tuple = cached_model_dict['lora'][lora_type][f'module_{i+1}']
         lora_name, lora_module = lora_tuple
         if lora_name == lora_request.lora :
             lora = lora_module

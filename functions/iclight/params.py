@@ -3,6 +3,7 @@ from typing import Optional, Literal, List
 
 
 class ICLight_RequestData(RequestData):
+    checkpoint: str = 'SD15_epicrealism_naturalSinRC1VAE.safetensors'
     steps: int = 30
     cfg: float = 1.5
     sampler_name: str = 'dpmpp_2m_sde'

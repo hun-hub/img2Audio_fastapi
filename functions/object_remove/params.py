@@ -3,7 +3,8 @@ from typing import Optional, Literal, List
 
 
 class Object_Remove_RequestData(RequestData):
-    inpaint_model_name: str
+    checkpoint: str = 'SDXL_RealVisXL_V40.safetensors'
+    inpaint_model_name: str = 'SDXL_inpaint_v26.fooocus.patch'
     init_image: str
     mask: str
     steps: int = 10

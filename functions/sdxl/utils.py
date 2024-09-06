@@ -31,7 +31,7 @@ def construct_condition(unet,
     if canny_request is not None :
         control_image = convert_base64_to_image_tensor(canny_request.image) / 255
         control_image = make_canny(control_image)
-        controlnet = cached_model_dict['controlnet'][canny_request.type]['sdxl'][1]
+        controlnet = cached_model_dict['controlnet']['sdxl'][canny_request.type][1]
         positive, negative = apply_controlnet(positive,
                                                         negative,
                                                         controlnet,
@@ -43,7 +43,7 @@ def construct_condition(unet,
         control_image = convert_base64_to_image_tensor(inpaint_request.image) / 255
         control_image, control_mask = control_image[:, :, :, :3], control_image[:, :, :, 3]
         control_image = torch.where(control_mask[:, :, :, None] > 0.5, 1, control_image)
-        controlnet = cached_model_dict['controlnet'][inpaint_request.type]['sdxl'][1]
+        controlnet = cached_model_dict['controlnet']['sdxl'][inpaint_request.type][1]
         positive, negative = apply_controlnet(positive,
                                               negative,
                                               controlnet,

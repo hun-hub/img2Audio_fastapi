@@ -41,26 +41,29 @@
   },
   "controlnet" :
   {
-    "canny":
+    "sd15" :
     {
-      "sd15": null,
-      "sdxl": null,
-      "sd3":  null,
-      "flux": null
+      "canny": null,
+      "inpaint": null,
+      "depth": null
     },
-    "inpaint":
+    "sdxl" :
     {
-      "sd15": null,
-      "sdxl": null,
-      "sd3":  null,
-      "flux": null
+      "canny": null,
+      "inpaint": null,
+      "depth": null
     },
-    "depth":
+    "sd3" :
     {
-      "sd15": null,
-      "sdxl": null,
-      "sd3":  null,
-      "flux": null
+      "canny": null,
+      "inpaint": null,
+      "depth": null
+    },
+    "flux" :
+    {
+      "canny": null,
+      "inpaint": null,
+      "depth": null
     }
   },
   "ipadapter":
@@ -72,26 +75,29 @@
   },
   "lora":
   {
-    "module_1":
+    "sd15" :
     {
-      "sd15": null,
-      "sdxl": null,
-      "sd3":  null,
-      "flux": null
+      "module_1": null,
+      "module_2": null,
+      "module_3": null
     },
-    "module_2":
+    "sdxl" :
     {
-      "sd15": null,
-      "sdxl": null,
-      "sd3":  null,
-      "flux": null
+      "module_1": null,
+      "module_2": null,
+      "module_3": null
     },
-    "module_3":
+    "sd3" :
     {
-      "sd15": null,
-      "sdxl": null,
-      "sd3":  null,
-      "flux": null
+      "module_1": null,
+      "module_2": null,
+      "module_3": null
+    },
+    "flux" :
+    {
+      "module_1": null,
+      "module_2": null,
+      "module_3": null
     }
   }
 }

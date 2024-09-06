@@ -1,12 +1,13 @@
 from params import RequestData, ControlNet_RequestData, LoRA_RequestData
-from typing import Optional, Literal, List
+from typing import Optional, Literal, List,  Union, Tuple
 
 
 class FLUX_RequestData(RequestData):
+    unet: str = 'FLUX_flux1-dev.safetensors'
+    vae: str = 'FLUX_VAE.safetensors'
+    clip: Union[str, Tuple[str, str]] = ('t5xxl_fp16.safetensors', 'clip_l.safetensors')
     steps: int = 20
     cfg: float = 3.5
-    # sampler_name: str = 'dpmpp_2m'
-    # scheduler: str = 'sgm_uniform'
     sampler_name: str = 'euler'
     scheduler: str = 'simple'
     init_image: Optional[str]= None

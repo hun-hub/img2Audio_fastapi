@@ -71,31 +71,44 @@ class CntGenAPI:
             sd3: {MODEL_NAME: MODULE}
             flux {MODEL_NAME: MODULE}
         controlnet
-            'canny':
-                sd15: {MODEL_NAME: MODULE}
-                sdxl: {MODEL_NAME: MODULE}
-                sd3: {MODEL_NAME: MODULE}
-                flux: {MODEL_NAME: MODULE}
-            'inpaint': 
-                sd15: {MODEL_NAME: MODULE}
-                sdxl: {MODEL_NAME: MODULE}
-                sd3: {MODEL_NAME: MODULE}
-                flux: {MODEL_NAME: MODULE}
-            'depth': 
-                sd15: {MODEL_NAME: MODULE}
-                sdxl: {MODEL_NAME: MODULE}
-                sd3: {MODEL_NAME: MODULE}
-                flux {MODEL_NAME: MODULE}
+            'sd15' :
+                'canny' : {MODEL_NAME: MODULE}
+                'inpaint' : {MODEL_NAME: MODULE}
+                'depth' : {MODEL_NAME: MODULE}
+            'sdxl'
+                'canny' : {MODEL_NAME: MODULE}
+                'inpaint' : {MODEL_NAME: MODULE}
+                'depth' : {MODEL_NAME: MODULE}
+            'sd3'
+                'canny' : {MODEL_NAME: MODULE}
+                'inpaint' : {MODEL_NAME: MODULE}
+                'depth' : {MODEL_NAME: MODULE}
+            'flux'
+                'canny' : {MODEL_NAME: MODULE}
+                'inpaint' : {MODEL_NAME: MODULE}
+                'depth' : {MODEL_NAME: MODULE}
         ipadapter:
             sd15: {MODEL_NAME: MODULE}
             sdxl: {MODEL_NAME: MODULE}
             sd3: {MODEL_NAME: MODULE}
             flux: {MODEL_NAME: MODULE}
         lora:
-            sd15: {MODEL_NAME: MODULE}
-            sdxl: {MODEL_NAME: MODULE}
-            sd3: {MODEL_NAME: MODULE}
-            flux: {MODEL_NAME: MODULE}
+            sd15: 
+                'module_1':{MODEL_NAME: MODULE}
+                'module_2':{MODEL_NAME: MODULE}
+                'module_3':{MODEL_NAME: MODULE}
+            sdxl: 
+                'module_1':{MODEL_NAME: MODULE}
+                'module_2':{MODEL_NAME: MODULE}
+                'module_3':{MODEL_NAME: MODULE}
+            sd3:
+                'module_1':{MODEL_NAME: MODULE}
+                'module_2':{MODEL_NAME: MODULE}
+                'module_3':{MODEL_NAME: MODULE}
+            flux:
+                'module_1':{MODEL_NAME: MODULE}
+                'module_2':{MODEL_NAME: MODULE}
+                'module_3':{MODEL_NAME: MODULE}
         '''
         with open('model_cache.json', 'r') as file:
             self.model_cache = json.load(file)
