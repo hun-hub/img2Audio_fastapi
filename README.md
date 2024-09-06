@@ -79,8 +79,8 @@ Login successful
 ## 1. 실행
 `.env` 파일 수정
 ```Bash
-COMFYUI_PATH =/home/USERNAME/api/ComfyUI
-CHECKPOINT_ROOT = /checkpoints # path to checkpoint
+COMFYUI_PATH =/home/gkalstn000/cnt_api/ComfyUI
+CHECKPOINT_ROOT = /home/gkalstn000/cnt_api/ComfyUI/models
 ```
 
 ```Bash
