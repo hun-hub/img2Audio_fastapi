@@ -2,7 +2,7 @@ import gradio as gr
 from utils import resolution_list
 import os
 checkpoint_root = os.getenv('CHECKPOINT_ROOT')
-sd3_checkpoint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'sdxl_light')) if 'SD3' in x]
+sd3_checkpoint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'checkpoints')) if 'SD3' in x]
 controlnet_canny_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'controlnet')) if 'SD3_Canny' in x]
 
 def build_sd3_ui(image, mask, prompt, ip_addr) :

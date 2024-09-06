@@ -3,7 +3,7 @@ from utils import resolution_list
 import os
 checkpoint_root = os.getenv('CHECKPOINT_ROOT')
 
-sd15_checkpoint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'sdxl_light')) if 'SD15' in x]
+sd15_checkpoint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'checkpoints')) if 'SD15' in x]
 controlnet_canny_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'controlnet')) if 'SD15_Canny' in x]
 controlnet_inpaint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'controlnet')) if 'SD15_Inpaint' in x]
 ipadapter_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'ipadapter')) if 'SD15' in x]

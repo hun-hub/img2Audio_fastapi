@@ -3,7 +3,7 @@ from utils import resolution_list
 import os
 checkpoint_root = os.getenv('CHECKPOINT_ROOT')
 
-sdxl_checkpoint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'sdxl_light')) if 'SDXL' in x]
+sdxl_checkpoint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'checkpoints')) if 'SDXL' in x]
 inpaint_model_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'inpaint')) if not x.endswith('pth') ]
 
 sdxl_checkpoint_list.sort()

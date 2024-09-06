@@ -59,7 +59,7 @@ def get_function_from_comfyui(module_path, func_name = None) :
 @torch.inference_mode()
 def load_checkpoint(model_name) :
     from ComfyUI.comfy.sd import load_checkpoint_guess_config
-    model_path = os.path.join(CHECKPOINT_ROOT, 'sdxl_light', model_name)
+    model_path = os.path.join(CHECKPOINT_ROOT, 'checkpoints', model_name)
     if not os.path.exists(model_path):
         raise Exception(f"SD model path wrong: {model_path}")
     model_patcher, clip, vae, clipvision = load_checkpoint_guess_config(model_path)

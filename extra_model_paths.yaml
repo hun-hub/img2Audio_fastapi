@@ -25,7 +25,7 @@
 
 comfyui:
      base_path: /checkpoints/
-     checkpoints: sdxl_light/
+     checkpoints: checkpoints/
      clip: clip/
      clip_vision: clip_vision/
      configs: configs/
