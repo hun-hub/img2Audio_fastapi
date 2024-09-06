@@ -5,7 +5,7 @@ checkpoint_root = os.getenv('CHECKPOINT_ROOT')
 
 flux_unet_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'unet')) if 'FLUX' in x]
 flux_vae_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'vae')) if 'FLUX' in x]
-flux_clip_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'clip')) ]
+flux_clip_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'clip')) if x.endswith('safetensors')]
 
 flux_controlnet_canny_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'controlnet')) if 'FLUX_Canny' in x]
 flux_controlnet_depth_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'controlnet')) if 'FLUX_Depth' in x]
