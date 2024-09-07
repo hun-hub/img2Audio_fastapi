@@ -164,7 +164,7 @@ data = response.json()
 image_base64 = data['image_base64']
 image = convert_base64_to_image_array(image_base64)
 ```
-**Model 종류는 Demo에서 확인 가능.**  
+Model 종류는 Demo에서 확인 가능.  
 
 
 
@@ -185,7 +185,7 @@ image = convert_base64_to_image_array(image_base64)
 * [Gemini](#gemini)
 
 #### FLUX
-**Parameter format**
+Parameter format
 ```python
 class FLUX_RequestData(RequestData):
     unet: str = 'FLUX_flux1-dev.safetensors'
@@ -202,7 +202,7 @@ class FLUX_RequestData(RequestData):
     gen_type: Literal['t2i', 'i2i', 'inpaint'] = 't2i'
 ```
 ---
-**FLUX Image Generation Example**
+FLUX Image Generation Example
 
 ```python
 ```python
@@ -252,7 +252,7 @@ image = convert_base64_to_image_array(image_base64)
 ```
 ---
 #### SD3
-**Parameter format**
+Parameter format
 ```python
 class SD3_RequestData(RequestData):
     checkpoint: str = 'SD3_sd3_medium_incl_clips_t5xxlfp16.safetensors'
@@ -266,7 +266,7 @@ class SD3_RequestData(RequestData):
     gen_type: Literal['t2i', 'i2i', 'inpaint'] = 't2i'
 ```
 
-**SD3 Image Generation Example**
+SD3 Image Generation Example
 ```python
 request_body = {
     'checkpoint': 'SD3_sd3_medium_incl_clips_t5xxlfp16.safetensors',
@@ -305,7 +305,7 @@ image = convert_base64_to_image_array(image_base64)
 ```
 ---
 #### SDXL
-**Parameter format**
+Parameter format
 ```python
 class SDXL_RequestData(RequestData):
     checkpoint: str = 'SDXL_RealVisXL_V40.safetensors'
@@ -323,7 +323,7 @@ class SDXL_RequestData(RequestData):
     refine_switch: float= 0.4
 ```
 
-**SDXL Image Generation Example**
+SDXL Image Generation Example
 ```python
 request_body = {
     'checkpoint': 'SDXL_RealVisXL_V40.safetensors',
@@ -397,7 +397,7 @@ image = convert_base64_to_image_array(image_base64)
 ```
 ---
 #### SD15
-**Parameter format**
+Parameter format
 ```python
 class SD15_RequestData(RequestData):
     checkpoint: str = 'SD15_realisticVisionV51_v51VAE.safetensors'
@@ -414,7 +414,7 @@ class SD15_RequestData(RequestData):
     gen_type: Literal['t2i', 'i2i', 'inpaint'] = 't2i'
 ```
 
-**SD15 Image Generation Example**
+SD15 Image Generation Example
 ```python
 request_body = {
     'checkpoint': 'SD15_epicrealism_naturalSinRC1VAE.safetensors',
@@ -481,7 +481,7 @@ image = convert_base64_to_image_array(image_base64)
 ```
 ---
 #### Object Removal
-**Parameter format**
+Parameter format
 ```python
 class Object_Remove_RequestData(RequestData):
     checkpoint: str = 'SDXL_RealVisXL_V40.safetensors'
@@ -493,7 +493,7 @@ class Object_Remove_RequestData(RequestData):
     sampler_name: str = 'dpmpp_2m_sde'
     scheduler: str = 'karras'
 ```
-**Object Removal Example**
+Object Removal Example
 ```python
 request_body = {
     'checkpoint': 'SDXL_copaxTimelessxlSDXL1_v12.safetensors', # 입력 고정
@@ -513,7 +513,7 @@ image_base64 = data['image_base64']
 ```
 ---
 #### Up-scale
-**Parameter format**
+Parameter format
 ```python
 class Upscale_RequestData(RequestData):
     upscale_model: str = '4x-UltraSharp.pth'
@@ -521,7 +521,7 @@ class Upscale_RequestData(RequestData):
     method: Literal['nearest-exact', 'bilinear', 'area', 'bicubic', 'lanczos'] = 'lanczos'
     scale: float = 2 # 최대 4배
 ```
-**Up-scale Example**
+Up-scale Example
 ```python
 request_body = {
     'upscale_model': '4x-UltraSharp.pth',
@@ -559,7 +559,7 @@ class ICLight_RequestData(RequestData):
     remap_max_value: float = 1.14
 ```
 
-**SD15 Image Generation Example**
+SD15 Image Generation Example
 ```python
 request_body = {
     'checkpoint': 'SD15_epicrealism_naturalSinRC1VAE.safetensors',
@@ -602,7 +602,7 @@ class Gemini_RequestData(BaseModel) :
     image: Optional[str] = None
 ```
 
-**Gemini Example**
+Gemini Example
 
 [Gemini Query Document](https://www.notion.so/connectbrick/240830-Gemini-Query-e3b55161ef934083a6a2a9909a0dfc63)
 
