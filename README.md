@@ -27,9 +27,26 @@ python main_demo.py
 | 테스트 | 130.211.239.93     | 7861     | 7860      |
 
 
-## 2. API 기능
 
-**Request Data Format**
+## 2. SD type 별 기능 요약
+| SD type | T2I | I2I | Inpaint | Controlnet[Canny] | Controlnet[Inpaint] | Controlnet[Depth] | IP-Adapter | LoRA |
+|---------|-----|-----|--------------------------|-------------------|---------------------|-------------------|------------|------|
+| FLUX    | O   | O   | O                        | O                 | X                   | 작업중               | X          | O    |
+| SD3     | O   | O   | O                        | O                 | X                   | X                 | X          | X    |
+| SDXL    | O   | O   | O                        | O                 | O                   | X        | O          | O    |
+| SD15    | O   | O   | O                        | O                 | O                   | X                 | O          | O    |
+
+* SDXL, SD15 Controlnet Depth는 필요시 작업 수행.
+
+
+
+출처: https://young-cow.tistory.com/44 [어린소:티스토리]
+
+### 2.1 Basic Request Format
+
+<details>
+<summary>RequestData Class Details</summary>
+
 ```python
 class IPAdapter_RequestData(BaseModel):
     ipadapter: str
@@ -37,27 +54,32 @@ class IPAdapter_RequestData(BaseModel):
     images: List[str]
     image_negative: Optional[List[str]] = []
     # Params
-    weight: float
+    weight: float = 0.7
     start_at: float = 0
-    end_at: float
+    end_at: float = 0.4
     weight_type: str = 'linear'
     combine_embeds: Literal['concat', 'add', 'substract', 'average', 'norm average'] = 'concat'
     embeds_scaling: Literal['V only', 'K+V', 'K+V w/ C penalty', 'K+mean(V) w/ C penalty'] = 'V only'
 
 class ControlNet_RequestData(BaseModel):
     controlnet: str
-    type: Literal['canny', 'inpaint']
+    type: Literal['canny', 'inpaint', 'depth']
     image: Optional[str]
     # Params
-    strength: float
+    strength: float = 0.7
     start_percent: float = 0
-    end_percent: float
+    end_percent: float = 0.4
+
+class LoRA_RequestData(BaseModel):
+    lora: str
+    strength_model: float
+    strength_clip: float
 
 class RequestData(BaseModel):
     checkpoint: str = None
     unet: str = None
     vae: str = None
-    clip: str = None
+    clip: Union[str, Tuple[str, str]] = None
     clip_vision: str = None
 
     init_image: Optional[str] = None
@@ -76,29 +98,168 @@ class RequestData(BaseModel):
     gen_type: Literal['t2i', 'i2i', 'inpaint', 'iclight'] = 't2i'
 ```
 
+</details>
 
-### 2.1 Service Request Examples
+Request Overview
+```python
+request_body = {
+    'checkpoint': CHECKPOINT_NAME,
+    'init_image': IMAGE_BASE64,
+    'mask': MASK_BASE64,
+    "prompt_positive": POSITIVE_PROMPT,
+    "prompt_negative": NEGATIVE_PROMPT,
+    'width': WIDTH,
+    'height': HEIGHT,
+    'steps': 20,
+    'cfg': 7,
+    'denoise': 1,
+    'gen_type': 't2i', # ['t2i', 'i2i', 'inpain'] 
+    'controlnet_requests': [],
+    'lora_requests': [],
+}
+
+canny_body = {
+    'controlnet': CANNY_MODEL_NAME,
+    'type': 'canny',
+    'image': IMAGE_BASE64,
+    'strength': 1,
+    'start_percent': 0,
+    'end_percent': 1,
+}
+
+inpaint_body = {
+    'controlnet': INPAINT_MODEL_NAME,
+    'type': 'inpaint',
+    'image': IMAGE_BASE64,
+    'strength': 1,
+    'start_percent': 0,
+    'end_percent': 1,
+}
+
+ipadapter_body = {
+    'ipadapter': IPADAPTER_MODEL_NAME,
+    'clip_vision': 'CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors', # SD15: 'CLIP-ViT-bigG-14-laion2B-39B-b160k.safetensors'
+    'images': [IMAGE_BASE64, IMAGE_BASE64],
+    'weight': 1,
+    'start_at': 0,
+    'end_at': 1,
+}
+
+lora_body = {'lora': LoRA_MODEL_NAME,
+             'strength_model': 1,
+             'strength_clip': 1}
+
+if canny_enable :
+    request_body['controlnet_requests'].append(canny_body)
+if inpaint_enable :
+    request_body['controlnet_requests'].append(inpaint_body)
+if ipadapter_enable :
+    request_body['ipadapter_request'] = ipadapter_body
+if lora_enable : # 최대 3개
+    request_body['lora_requests'].append(lora_body)
+
+flux_url = f"http://{IP_Addr}:{Port}/flux/generate"
+sd3_url = f"http://{IP_Addr}:{Port}/sd3/generate"
+sdxl_url = f"http://{IP_Addr}:{Port}/sdxl/generate"
+sd15_url = f"http://{IP_Addr}:{Port}/sd15/generate"
+
+response = requests.post(url, json=request_body)
+data = response.json()
+image_base64 = data['image_base64']
+image = convert_base64_to_image_array(image_base64)
+```
+**Model 종류는 Demo에서 확인 가능.**  
+
+
+
+### 2.2 Service Request Examples
 * [Jector](docs/jector.md)
 * [Proposal](docs/proposal.md)
 * [IC-Light](docs/iclight.md)
 
-### 2.2 Base function Examples
-* [SD3](#221-sd3)
-* [SDXL](#222-sdxl)
-* [SD15](#223-sd15)
-* [Object Removal](#224-object-removal)
-* [Up-scale](#225-up-scale)
-* [IC-Light](#226-ic-light)
-* [Segment Anything (coming soon)](#227-segment-anything)
-* [Gemini](#228-gemini)
-* [Flux (coming soon)](#229-flux)
+### 2.3 Base function Examples
+* [Flux](#flux)
+* [SD3](#sd3)
+* [SDXL](#sdxl)
+* [SD15](#sd15)
+* [Object Removal](#object-removal)
+* [Up-scale](#up-scale)
+* [IC-Light](#ic-light)
+* [Segment Anything (coming soon)](#segment-anything)
+* [Gemini](#gemini)
 
-#### 2.2.1 SD3
+#### FLUX
+**Parameter format**
+```python
+class FLUX_RequestData(RequestData):
+    unet: str = 'FLUX_flux1-dev.safetensors'
+    vae: str = 'FLUX_VAE.safetensors'
+    clip: Union[str, Tuple[str, str]] = ('t5xxl_fp16.safetensors', 'clip_l.safetensors')
+    steps: int = 20
+    cfg: float = 3.5
+    sampler_name: str = 'euler'
+    scheduler: str = 'simple'
+    init_image: Optional[str]= None
+    mask: Optional[str]= None
+    controlnet_requests: Optional[List[ControlNet_RequestData]] = []
+    lora_requests: Optional[List[LoRA_RequestData]] = []
+    gen_type: Literal['t2i', 'i2i', 'inpaint'] = 't2i'
+```
+---
+**FLUX Image Generation Example**
 
-Parameter format
+```python
+```python
+request_body = {
+    'unet': 'FLUX_flux1-dev.safetensors',
+    'vae': 'FLUX_VAE.safetensors',
+    'clip': ('t5xxl_fp16.safetensors', 'clip_l.safetensors'),    
+    
+    'init_image': IMAGE_BASE64,
+    'mask': MASK_BASE64,
+    "prompt_positive": POSITIVE_PROMPT,
+    "prompt_negative": NEGATIVE_PROMPT,
+    'width': WIDTH,
+    'height': HEIGHT,
+    'steps': 20,
+    'cfg': 3.5,
+    'denoise': 1,
+    'gen_type': 't2i', # ['t2i', 'i2i', 'inpain'] 
+    'controlnet_requests': [],
+    'lora_requests': [],
+}
+
+canny_body = {
+    'controlnet': CANNY_MODEL_NAME,
+    'type': 'canny',
+    'image': IMAGE_BASE64,
+    'strength': 1,
+    'start_percent': 0,
+    'end_percent': 1,
+}
+
+lora_body = {'lora': LoRA_MODEL_NAME,
+             'strength_model': 1,
+             'strength_clip': 1}
+
+if canny_enable :
+    request_body['controlnet_requests'].append(canny_body)
+if lora_enable : # 최대 3개
+    request_body['lora_requests'].append(lora_body)
+
+url = f"http://{IP_Addr}:{Port}/flux/generate"
+
+response = requests.post(url, json=request_body)
+data = response.json()
+image_base64 = data['image_base64']
+image = convert_base64_to_image_array(image_base64)
+```
+---
+#### SD3
+**Parameter format**
 ```python
 class SD3_RequestData(RequestData):
-    basemodel: str
+    checkpoint: str = 'SD3_sd3_medium_incl_clips_t5xxlfp16.safetensors'
     steps: int = 28
     cfg: float = 4.5
     sampler_name: str = 'dpmpp_2m'
@@ -112,47 +273,46 @@ class SD3_RequestData(RequestData):
 **SD3 Image Generation Example**
 ```python
 request_body = {
-    'checkpoint': 'SD3_sd3_medium_incl_clips_t5xxlfp16.safetensors', # 입력 고정
-    'init_image': IMAGE_BASE64, # RGB Image / i2i, inpaint 일 경우 필요
-    'mask': MASK_BASE64, # RGB Image / inpaint 일 경우 필요
-    "prompt_positive": POSITIVE_PROMPT, # 입력 필요
-    "prompt_negative": NEGATIVE_PROMPT, # 입력 선택
-    'width': WIDTH, # t2i는 입력 필요
-    'height': HEIGHT, # t2i는 입력 필요
-    'steps': 28, # 입력 선택
-    'cfg': 4, # 입력 선택
-    'denoise': 1.0, 
-    'gen_type': 't2i', # 't2i' or 'i2i' or 'inpaint'
+    'checkpoint': 'SD3_sd3_medium_incl_clips_t5xxlfp16.safetensors',
+    'init_image': IMAGE_BASE64,
+    'mask': MASK_BASE64,
+    "prompt_positive": POSITIVE_PROMPT,
+    "prompt_negative": NEGATIVE_PROMPT,
+    'width': WIDTH,
+    'height': HEIGHT,
+    'steps': 20,
+    'cfg': 4,
+    'denoise': 1,
+    'gen_type': 't2i', # ['t2i', 'i2i', 'inpain'] 
+    'controlnet_requests': [],
+    'lora_requests': [],
 }
 
-canny_request_body = {
-    'controlnet_requests':
-        [
-            {
-                'controlnet': 'SD3_Canny.safetensors', # 입력 고정
-                'type': 'canny', # 입력 고정
-                'image': IMAGE_BASE64, # RGB Image
-                'strength': 0.7, # 입력 선택
-                'start_percent': 0, # 입력 선택
-                'end_percent': 0.4, # 입력 선택
-            }
-        ]
+canny_body = {
+    'controlnet': CANNY_MODEL_NAME,
+    'type': 'canny',
+    'image': IMAGE_BASE64,
+    'strength': 1,
+    'start_percent': 0,
+    'end_percent': 1,
 }
 
 if canny_enable :
-    request_body.update(canny_request_body)
+    request_body['controlnet_requests'].append(canny_body)
 
+url = f"http://{IP_Addr}:{Port}/sd3/generate"
 
-url = f"http://{ip_addr}:7861/sd3/generate"
 response = requests.post(url, json=request_body)
 data = response.json()
-image_base64 = data['image_base64'] 
+image_base64 = data['image_base64']
+image = convert_base64_to_image_array(image_base64)
 ```
-
-#### 2.2.2 SDXL
-Parameter format
+---
+#### SDXL
+**Parameter format**
 ```python
 class SDXL_RequestData(RequestData):
+    checkpoint: str = 'SDXL_RealVisXL_V40.safetensors'
     steps: int = 20
     cfg: float = 7
     sampler_name: str = 'dpmpp_2m_sde'
@@ -170,51 +330,56 @@ class SDXL_RequestData(RequestData):
 **SDXL Image Generation Example**
 ```python
 request_body = {
-    'basemodel': 'SDXL_copaxTimelessxlSDXL1_v12.safetensors', # 입력 고정
-    'init_image': IMAGE_BASE64, # RGB Image / i2i, inpaint 일 경우 필요
-    'mask': MASK_BASE64, # RGB Image / inpaint 일 경우 필요
-    "prompt_positive": POSITIVE_PROMPT, # 입력 필요
-    "prompt_negative": NEGATIVE_PROMPT, # 입력 선택
-    'width': WIDTH, # t2i는 입력 필요
-    'height': HEIGHT, # t2i는 입력 필요
-    'steps': 20, # 입력 선택
-    'cfg': 7, # 입력 선택
-    'denoise': 1.0, 
-    'gen_type': 't2i', # 't2i' or 'i2i' or 'inpaint'
+    'checkpoint': 'SDXL_RealVisXL_V40.safetensors',
+    'init_image': IMAGE_BASE64,
+    'mask': MASK_BASE64,
+    "prompt_positive": POSITIVE_PROMPT,
+    "prompt_negative": NEGATIVE_PROMPT,
+    'width': WIDTH,
+    'height': HEIGHT,
+    'steps': 20,
+    'cfg': 7,
+    'denoise': 1,
+    'gen_type': 't2i', # ['t2i', 'i2i', 'inpain'] 
     'controlnet_requests': [],
+    'lora_requests': [],
 }
 
 refiner_body = {
-    'refiner': 'SDXL_RealVisXL_V40.safetensors', # 입력 고정
-    'refine_switch': 0.4, # 입력 선택
+    'refiner': 'SDXL_copaxPhotoxl_v2.safetensors',
+    'refine_switch': 0.45,
 }
 
 canny_body = {
-    'controlnet': 'SDXL_Canny_jector.safetensors',  # 입력 고정
+    'controlnet': CANNY_MODEL_NAME,
     'type': 'canny',
-    'image': IMAGE_BASE64, # RGB Image
-    'strength': 0.7, # 입력 선택
-    'start_percent': 0, # 입력 선택
-    'end_percent': 0.4, # 입력 선택
+    'image': IMAGE_BASE64,
+    'strength': 1,
+    'start_percent': 0,
+    'end_percent': 1,
 }
 
-inpaint_body = { # Controlnet Inpaint body
-    'controlnet': 'SDXL_Inpaint_dreamerfp16.safetensors',
+inpaint_body = {
+    'controlnet': INPAINT_MODEL_NAME,
     'type': 'inpaint',
-    'image': IMAGE_BASE64 # RGB Image, 채워질 부분 하얀색(255) 값으로
-    'strength': 0.7, # 입력 선택
-    'start_percent': 0, # 입력 선택
-    'end_percent': 0.4, # 입력 선택
+    'image': IMAGE_BASE64,
+    'strength': 1,
+    'start_percent': 0,
+    'end_percent': 1,
 }
 
 ipadapter_body = {
-    'ipadapter': 'SDXL_ip-adapter-plus_sdxl_vit-h.safetensors', # 입력 고정
-    'clip_vision': 'CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors', # 입력 고정
-    'images': [IMAGE_BASE64, IMAGE_BASE64], # RGB Image list
-    'weight': 0.7, # 입력 선택
-    'start_at': 0, # 입력 선택
-    'end_at': 0.4, # 입력 선택
+    'ipadapter': IPADAPTER_MODEL_NAME,
+    'clip_vision': 'CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors', # SD15: 'CLIP-ViT-bigG-14-laion2B-39B-b160k.safetensors'
+    'images': [IMAGE_BASE64, IMAGE_BASE64],
+    'weight': 1,
+    'start_at': 0,
+    'end_at': 1,
 }
+
+lora_body = {'lora': LoRA_MODEL_NAME,
+             'strength_model': 1,
+             'strength_clip': 1}
 
 if refiner_enable:
     request_body.update(refiner_body)
@@ -224,18 +389,22 @@ if inpaint_enable :
     request_body['controlnet_requests'].append(inpaint_body)
 if ipadapter_enable :
     request_body['ipadapter_request'] = ipadapter_body
-        
-url = f"http://{ip_addr}:7861/sdxl/generate"
+if lora_enable : # 최대 3개
+    request_body['lora_requests'].append(lora_body)
+
+url = f"http://{IP_Addr}:{Port}/sdxl/generate"
+
 response = requests.post(url, json=request_body)
 data = response.json()
-image_base64 = data['image_base64'] 
+image_base64 = data['image_base64']
+image = convert_base64_to_image_array(image_base64)
 ```
-
-#### 2.2.3 SD15
-Parameter format
+---
+#### SD15
+**Parameter format**
 ```python
 class SD15_RequestData(RequestData):
-    basemodel: str
+    checkpoint: str = 'SD15_realisticVisionV51_v51VAE.safetensors'
     steps: int = 20
     cfg: float = 7
     prompt_negative: str = prompt_negative
@@ -245,52 +414,58 @@ class SD15_RequestData(RequestData):
     mask: Optional[str]= None
     controlnet_requests: Optional[List[ControlNet_RequestData]] = []
     ipadapter_request: Optional[IPAdapter_RequestData] = None
+    lora_requests: Optional[List[LoRA_RequestData]] = []
     gen_type: Literal['t2i', 'i2i', 'inpaint'] = 't2i'
 ```
 
 **SD15 Image Generation Example**
 ```python
 request_body = {
-    'basemodel': 'SD15_realisticVisionV51_v51VAE.safetensors', # 입력 고정
-    'init_image': IMAGE_BASE64, # RGB Image / i2i, inpaint 일 경우 필요
-    'mask': MASK_BASE64, # RGB Image / inpaint 일 경우 필요
-    "prompt_positive": POSITIVE_PROMPT, # 입력 필요
-    "prompt_negative": NEGATIVE_PROMPT, # 입력 선택
-    'width': WIDTH, # t2i는 입력 필요
-    'height': HEIGHT, # t2i는 입력 필요
-    'steps': 20, # 입력 선택
-    'cfg': 7, # 입력 선택
-    'denoise': 1.0, 
-    'gen_type': 't2i', # 't2i' or 'i2i' or 'inpaint'
+    'checkpoint': 'SD15_epicrealism_naturalSinRC1VAE.safetensors',
+    'init_image': IMAGE_BASE64,
+    'mask': MASK_BASE64,
+    "prompt_positive": POSITIVE_PROMPT,
+    "prompt_negative": NEGATIVE_PROMPT,
+    'width': WIDTH,
+    'height': HEIGHT,
+    'steps': 20,
+    'cfg': 7,
+    'denoise': 1,
+    'gen_type': 't2i', # ['t2i', 'i2i', 'inpain'] 
     'controlnet_requests': [],
+    'lora_requests': [],
 }
 
 canny_body = {
-    'controlnet': 'SD15_Canny_control_v11p_sd15_canny.pth',  # 입력 고정
+    'controlnet': CANNY_MODEL_NAME,
     'type': 'canny',
-    'image': IMAGE_BASE64, # RGB Image
-    'strength': 1., # 입력 필수
-    'start_percent': 0.03, # 입력 필수
-    'end_percent': 1, # 입력 필수
+    'image': IMAGE_BASE64,
+    'strength': 1,
+    'start_percent': 0,
+    'end_percent': 1,
 }
 
-inpaint_body = { # Controlnet Inpaint body
-    'controlnet': 'SD15_Inpaint_control_v11p_sd15_inpaint.pth.safetensors',
+inpaint_body = {
+    'controlnet': INPAINT_MODEL_NAME,
     'type': 'inpaint',
-    'image': IMAGE_BASE64 # RGB Image, 채워질 부분 검은색(0) 값으로
-    'strength': 1.3, # 입력 필수
-    'start_percent': 0.31, # 입력 필수
-    'end_percent': 0.86, # 입력 필수
+    'image': IMAGE_BASE64,
+    'strength': 1,
+    'start_percent': 0,
+    'end_percent': 1,
 }
 
 ipadapter_body = {
-    'ipadapter': 'SD15_ip-adapter-plus_sd15.safetensors', # 입력 고정
-    'clip_vision': 'CLIP-ViT-bigG-14-laion2B-39B-b160k.safetensors', # 입력 고정
-    'images': [IMAGE_BASE64, IMAGE_BASE64], # RGB Image list
-    'weight': 1, # 입력 필수
-    'start_at': 0.27, # 입력 필수
-    'end_at': 1, # 입력 필수
+    'ipadapter': IPADAPTER_MODEL_NAME,
+    'clip_vision': 'CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors', # SD15: 'CLIP-ViT-bigG-14-laion2B-39B-b160k.safetensors'
+    'images': [IMAGE_BASE64, IMAGE_BASE64],
+    'weight': 1,
+    'start_at': 0,
+    'end_at': 1,
 }
+
+lora_body = {'lora': LoRA_MODEL_NAME,
+             'strength_model': 1,
+             'strength_clip': 1}
 
 if canny_enable :
     request_body['controlnet_requests'].append(canny_body)
@@ -298,33 +473,34 @@ if inpaint_enable :
     request_body['controlnet_requests'].append(inpaint_body)
 if ipadapter_enable :
     request_body['ipadapter_request'] = ipadapter_body
-        
-url = f"http://{ip_addr}:7861/sd15/generate"
+if lora_enable : # 최대 3개
+    request_body['lora_requests'].append(lora_body)
+
+url = f"http://{IP_Addr}:{Port}/sd15/generate"
+
 response = requests.post(url, json=request_body)
 data = response.json()
-image_base64 = data['image_base64'] 
+image_base64 = data['image_base64']
+image = convert_base64_to_image_array(image_base64)
 ```
-
-
-
-#### 2.2.4 Object Removal
-Parameter format
+---
+#### Object Removal
+**Parameter format**
 ```python
 class Object_Remove_RequestData(RequestData):
-    basemodel: str
-    inpaint_model_name: str
+    checkpoint: str = 'SDXL_RealVisXL_V40.safetensors'
+    inpaint_model_name: str = 'SDXL_inpaint_v26.fooocus.patch'
     init_image: str
     mask: str
     steps: int = 10
     cfg: float = 4
     sampler_name: str = 'dpmpp_2m_sde'
     scheduler: str = 'karras'
-    controlnet_requests: list = [] # 필요없는데 model cache update 때문에 넣음.
 ```
 **Object Removal Example**
 ```python
 request_body = {
-    'basemodel': 'SDXL_copaxTimelessxlSDXL1_v12.safetensors', # 입력 고정
+    'checkpoint': 'SDXL_copaxTimelessxlSDXL1_v12.safetensors', # 입력 고정
     'inpaint_model_name': 'SDXL_inpaint_v25.fooocus.patch', # 입력 고정
     'init_image': IMAGE_BASE64, # RGB Image 
     'mask': MASK_BASE64, # RGB Image 
@@ -339,20 +515,16 @@ response = requests.post(url, json=request_body)
 data = response.json()
 image_base64 = data['image_base64'] 
 ```
-
-
-
-#### 2.2.5 Up-scale
-Parameter format
+---
+#### Up-scale
+**Parameter format**
 ```python
 class Upscale_RequestData(RequestData):
-    upscale_model: str
+    upscale_model: str = '4x-UltraSharp.pth'
     init_image: str
     method: Literal['nearest-exact', 'bilinear', 'area', 'bicubic', 'lanczos'] = 'lanczos'
-    scale: float = 2
-    controlnet_requests: list = [] # 필요없는데 model cache update 때문에 넣음.
+    scale: float = 2 # 최대 4배
 ```
-
 **Up-scale Example**
 ```python
 request_body = {
@@ -363,18 +535,17 @@ request_body = {
 }
 
 url = f"http://{ip_addr}:7861/upscale"
+
 response = requests.post(url, json=request_body)
 data = response.json()
 image_base64 = data['image_base64'] 
 ```
-
-#### 2.2.6 IC-Light
+---
+#### IC-Light
 Parameter format
 ```python
 class ICLight_RequestData(RequestData):
-    basemodel: str
-    init_image: str
-    mask: str
+    checkpoint: str = 'SD15_epicrealism_naturalSinRC1VAE.safetensors'
     steps: int = 30
     cfg: float = 1.5
     sampler_name: str = 'dpmpp_2m_sde'
@@ -390,14 +561,12 @@ class ICLight_RequestData(RequestData):
     blending_percentage_2: float = 0.2
     remap_min_value: float = -0.15
     remap_max_value: float = 1.14
-
-    controlnet_requests: list = [] # 필요없는데 model cache update 때문에 넣음.
 ```
 
 **SD15 Image Generation Example**
 ```python
 request_body = {
-    'basemodel': 'SD15_epicrealism_naturalSinRC1VAE.safetensors',
+    'checkpoint': 'SD15_epicrealism_naturalSinRC1VAE.safetensors',
     'init_image': IMAGE_BASE64, # RGB Image 
     'mask': MASK_BASE64, # RGB Image
     "prompt_positive": POSITIVE_PROMPT, # 입력 필요
@@ -416,42 +585,67 @@ request_body = {
     'blending_percentage_2': blending_percentage_2,
     'remap_min_value': remap_min_value,
     'remap_max_value': remap_max_value,
-
-    'controlnet_requests': [],
 }
 
 url = f"http://{ip_addr}:7861/iclight/generate"
+
 response = requests.post(url, json=request_body)
 data = response.json()
 image_base64 = data['image_base64'] 
 ```
-
-
-
-#### 2.2.7 Segment Anything
+---
+#### Segment Anything
 작업중...
-#### 2.2.8 Gemini
+
+---
+#### Gemini
 Parameter format
 ```python
 class Gemini_RequestData(BaseModel) :
-    user_prompt: str
-    query: Optional[str] = ''
-    user_image: Optional[str] = None
+    query: str
+    image: Optional[str] = None
 ```
 
 **Gemini Example**
+
+[Gemini Query Document](https://www.notion.so/connectbrick/240830-Gemini-Query-e3b55161ef934083a6a2a9909a0dfc63)
+
 ```python
+'''
+Input
+image: str or None
+user_prompt: str
+object_description: str
+backgroun_description: str
+
+query_type: [
+'product_description', 
+'image_description',
+'prompt_refine',
+'prompt_refine_with_image',
+'synthesized_image_description',
+'decompose_background_and_product',
+'iclight_keep_background',
+'iclight_gen_background'
+]
+'''
+query = query_dict[query_type]
+user_prompt = ', '.join(user_prompt.split(' '))
+query = query.format(user_prompt = user_prompt,
+                     object_description = object_description,
+                     background_description = background_description)
+
 request_body = {
-    'user_prompt': user_prompt, # 입력 필수
-    'query': query, # 입력 필수
-    'user_image': user_image # 입력 선택
+    'query': query,
+    'image': image # str or None
 }
 
 url = f"http://{ip_addr}:7861/gemini"
+
 response = requests.post(url, json=request_body)
 data = response.json()
-image_base64 = data['image_base64'] 
+prompt = data['prompt']
+return prompt
 ```
-#### 2.2.9 Flux
-작업중...
+
 
