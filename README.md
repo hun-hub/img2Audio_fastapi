@@ -183,7 +183,7 @@ Model 종류는 Demo에서 확인 가능.
 * [IC-Light](#ic-light)
 * [Segment Anything (coming soon)](#segment-anything)
 * [Gemini](#gemini)
-
+---
 #### FLUX
 Parameter format
 ```python
@@ -201,7 +201,6 @@ class FLUX_RequestData(RequestData):
     lora_requests: Optional[List[LoRA_RequestData]] = []
     gen_type: Literal['t2i', 'i2i', 'inpaint'] = 't2i'
 ```
----
 FLUX Image Generation Example
 
 ```python
