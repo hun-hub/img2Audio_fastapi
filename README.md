@@ -205,7 +205,6 @@ class FLUX_RequestData(RequestData):
 FLUX Image Generation Example
 
 ```python
-```python
 request_body = {
     'unet': 'FLUX_flux1-dev.safetensors',
     'vae': 'FLUX_VAE.safetensors',
