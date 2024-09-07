@@ -17,7 +17,7 @@
 ## Text to image Generation (키워드로 시작)
 ```python
 request_body = {
-    'basemodel': 'SDXL_copaxTimelessxlSDXL1_v12.safetensors', 
+    'checkpoint': 'SDXL_copaxTimelessxlSDXL1_v12.safetensors', 
     "prompt_positive": POSITIVE_PROMPT,
     "prompt_negative": 'worst quality, low quality, illustration, 3d, 2d, painting, cartoons, sketch', # 입력 선택
     'width': 1024,
@@ -30,6 +30,7 @@ request_body = {
 }
 
 url = f"http://{ip_addr}:7861/sdxl/generate"
+
 response = requests.post(url, json=request_body)
 data = response.json()
 image_base64 = data['image_base64'] 
@@ -38,7 +39,7 @@ image_base64 = data['image_base64']
 ## Text to image Generation + IPAdapter (레퍼런스로 시작)
 ```python
 request_body = {
-    'basemodel': 'SDXL_copaxTimelessxlSDXL1_v12.safetensors', 
+    'checkpoint': 'SDXL_copaxTimelessxlSDXL1_v12.safetensors', 
     "prompt_positive": POSITIVE_PROMPT,
     "prompt_negative": 'worst quality, low quality, illustration, 3d, 2d, painting, cartoons, sketch', # 입력 선택
     'width': 1024, 
@@ -61,6 +62,7 @@ ipadapter_body = {
 request_body['ipadapter_request'] = ipadapter_body
         
 url = f"http://{ip_addr}:7861/sdxl/generate"
+
 response = requests.post(url, json=request_body)
 data = response.json()
 image_base64 = data['image_base64'] 
@@ -69,7 +71,7 @@ image_base64 = data['image_base64']
 ## Inpaint + ControlNet-Canny (Synthesis 1, 2 단계)
 ```python
 request_body = {
-    'basemodel': 'SDXL_copaxTimelessxlSDXL1_v12.safetensors',
+    'checkpoint': 'SDXL_copaxTimelessxlSDXL1_v12.safetensors',
     'init_image': IMAGE_BASE64,
     'mask': MASK_BASE64, 
     "prompt_positive": POSITIVE_PROMPT, 
@@ -92,6 +94,7 @@ canny_body = {
 request_body['controlnet_requests'].append(canny_body)
 
 url = f"http://{ip_addr}:7861/sdxl/generate"
+
 response = requests.post(url, json=request_body)
 data = response.json()
 image_base64 = data['image_base64'] 
@@ -100,7 +103,7 @@ image_base64 = data['image_base64']
 ## Inpaint + ControlNet-Canny + IPAdapter (Synthesis 3, 4 단계)
 ```python
 request_body = {
-    'basemodel': 'SDXL_copaxTimelessxlSDXL1_v12.safetensors', 
+    'checkpoint': 'SDXL_copaxTimelessxlSDXL1_v12.safetensors', 
     'init_image': IMAGE_BASE64, 
     'mask': MASK_BASE64, 
     "prompt_positive": POSITIVE_PROMPT, 
@@ -132,6 +135,7 @@ request_body['controlnet_requests'].append(canny_body)
 request_body['ipadapter_request'] = ipadapter_body
         
 url = f"http://{ip_addr}:7861/sdxl/generate"
+
 response = requests.post(url, json=request_body)
 data = response.json()
 image_base64 = data['image_base64'] 
@@ -144,7 +148,7 @@ f(x) = -5/6 * denoise + 4/3
 '''
 denoise = -5/6 * denoise + 4/3
 request_body = {
-    'basemodel': 'SDXL_copaxTimelessxlSDXL1_v12.safetensors',
+    'checkpoint': 'SDXL_copaxTimelessxlSDXL1_v12.safetensors',
     'init_image': IMAGE_BASE64,
     'mask': MASK_BASE64, 
     "prompt_positive": POSITIVE_PROMPT, 
@@ -167,6 +171,7 @@ canny_body = {
 request_body['controlnet_requests'].append(canny_body)
 
 url = f"http://{ip_addr}:7861/sdxl/generate"
+
 response = requests.post(url, json=request_body)
 data = response.json()
 image_base64 = data['image_base64'] 
@@ -175,7 +180,7 @@ image_base64 = data['image_base64']
 ## Object Removal
 ```python
 request_body = {
-    'basemodel': 'SDXL_copaxTimelessxlSDXL1_v12.safetensors', 
+    'checkpoint': 'SDXL_copaxTimelessxlSDXL1_v12.safetensors', 
     'inpaint_model_name': 'SDXL_inpaint_v26.fooocus.patch', 
     'init_image': IMAGE_BASE64, 
     'mask': MASK_BASE64, 
@@ -200,6 +205,7 @@ request_body = {
 }
 
 url = f"http://{ip_addr}:7861/upscale"
+
 response = requests.post(url, json=request_body)
 data = response.json()
 image_base64 = data['image_base64'] 
@@ -207,7 +213,7 @@ image_base64 = data['image_base64']
 ## theme
 ```python
 request_body = {
-    'basemodel': 'SD15_realisticVisionV51_v51VAE.safetensors', # 입력 고정
+    'checkpoint': 'SD15_realisticVisionV51_v51VAE.safetensors', # 입력 고정
     'init_image': IMAGE_BASE64, 
     'mask': MASK_BASE64, 
     "prompt_positive": POSITIVE_PROMPT, 
@@ -242,6 +248,7 @@ request_body['controlnet_requests'].append(inpaint_body)
 
         
 url = f"http://{ip_addr}:7861/sd15/generate"
+
 response = requests.post(url, json=request_body)
 data = response.json()
 image_base64 = data['image_base64'] 
@@ -249,7 +256,7 @@ image_base64 = data['image_base64']
 ## theme + reference
 ```python
 request_body = {
-    'basemodel': 'SD15_realisticVisionV51_v51VAE.safetensors', # 입력 고정
+    'checkpoint': 'SD15_realisticVisionV51_v51VAE.safetensors', # 입력 고정
     'init_image': IMAGE_BASE64, 
     'mask': MASK_BASE64, 
     "prompt_positive": POSITIVE_PROMPT, 
@@ -293,6 +300,7 @@ request_body['ipadapter_request'] = ipadapter_body
 
         
 url = f"http://{ip_addr}:7861/sd15/generate"
+
 response = requests.post(url, json=request_body)
 data = response.json()
 image_base64 = data['image_base64'] 

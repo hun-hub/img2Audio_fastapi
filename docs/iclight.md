@@ -10,7 +10,7 @@ if KEEP_BACKGROUND == False :
     denoise = 0.9
 
 request_body = {
-    'basemodel': 'SD15_epicrealism_naturalSinRC1VAE.safetensors',
+    'checkpoint': 'SD15_epicrealism_naturalSinRC1VAE.safetensors',
     'init_image': IMAGE_BASE64, 
     'mask': MASK_BASE64, 
     "prompt_positive": POSITIVE_PROMPT, 
@@ -29,11 +29,10 @@ request_body = {
     'blending_percentage_2': 0.2,
     'remap_min_value': -0.15,
     'remap_max_value': 1.14,
-
-    'controlnet_requests': [],
 }
 
 url = f"http://{ip_addr}:7861/iclight/generate"
+
 response = requests.post(url, json=request_body)
 data = response.json()
 image_base64 = data['image_base64'] 
