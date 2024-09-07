@@ -38,10 +38,6 @@ python main_demo.py
 
 * SDXL, SD15 Controlnet Depth는 필요시 작업 수행.
 
-
-
-출처: https://young-cow.tistory.com/44 [어린소:티스토리]
-
 ### 2.1 Basic Request Format
 
 <details>
