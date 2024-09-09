@@ -504,7 +504,7 @@ request_body = {
     'denoise': 1,
 }
         
-url = f"http://{ip_addr}:7861/object_remove"
+url = f"http://{IP_Addr}:{Port}/object_remove"
 response = requests.post(url, json=request_body)
 data = response.json()
 image_base64 = data['image_base64'] 
@@ -528,7 +528,7 @@ request_body = {
     "scale": 2, # 최대 4배 
 }
 
-url = f"http://{ip_addr}:7861/upscale"
+url = f"http://{IP_Addr}:{Port}/upscale"
 
 response = requests.post(url, json=request_body)
 data = response.json()
@@ -581,7 +581,7 @@ request_body = {
     'remap_max_value': remap_max_value,
 }
 
-url = f"http://{ip_addr}:7861/iclight/generate"
+url = f"http://{IP_Addr}:{Port}/iclight/generate"
 
 response = requests.post(url, json=request_body)
 data = response.json()
@@ -596,7 +596,10 @@ image_base64 = data['image_base64']
 Parameter format
 ```python
 class Gemini_RequestData(BaseModel) :
-    query: str
+    user_prompt: Optional[str] = ''
+    object_description: Optional[str] = ''
+    background_description: Optional[str] = ''
+    query_type: str
     image: Optional[str] = None
 ```
 
@@ -612,29 +615,25 @@ user_prompt: str
 object_description: str
 backgroun_description: str
 
-query_type: [
-'product_description', 
-'image_description',
-'prompt_refine',
-'prompt_refine_with_image',
-'synthesized_image_description',
-'decompose_background_and_product',
-'iclight_keep_background',
-'iclight_gen_background'
-]
+query_type: 
+    'product_description' : BLIP 대체 (object category 추출)
+    'image_description'
+    'prompt_refine': Keyword 기반 유저 입력 refine
+    'prompt_refine_with_image': referenct 이미지 + 키워드 유저 입력 prompt refine
+    'synthesized_image_description': 합성(concat) 이미지 + 유저 입력 prompt refine 추출
+    'decompose_background_and_product': backgorund와 object category 각각 추출 (iclight용)
+    'iclight_keep_background'
+    'iclight_gen_background'
 '''
-query = query_dict[query_type]
-user_prompt = ', '.join(user_prompt.split(' '))
-query = query.format(user_prompt = user_prompt,
-                     object_description = object_description,
-                     background_description = background_description)
-
 request_body = {
-    'query': query,
-    'image': image # str or None
+    'user_prompt': user_prompt,
+    'object_description': object_description,
+    'background_description': background_description,
+    'query_type': query_type,
+    'image': image # base64
 }
 
-url = f"http://{ip_addr}:7861/gemini"
+url = f"http://{IP_Addr}:{Port}/gemini"
 
 response = requests.post(url, json=request_body)
 data = response.json()
