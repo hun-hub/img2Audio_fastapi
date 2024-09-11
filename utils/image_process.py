@@ -4,7 +4,7 @@ import torch
 from PIL import Image
 from io import BytesIO
 import cv2
-from utils.loader import get_function_from_comfyui
+from utils.loader import load_controlnet_preprocessor
 
 
 def convert_image_to_base64(image):
@@ -81,3 +81,8 @@ def resize_image_for_sd(image: Image, is_mask=False, resolution = 1024) :
     image_resized_cropped = _crop_image(image_resized)
     return image_resized_cropped
 
+
+def controlnet_image_preprocess(images, preprocessor_type, resolution=1024) :
+    preprocessor = load_controlnet_preprocessor()
+    image_preprocessed, _ = preprocessor.detect_controlnet(images, preprocessor_type, sd_version='sdxl', resolution=resolution)
+    return image_preprocessed

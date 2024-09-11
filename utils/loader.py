@@ -142,6 +142,12 @@ def load_lamaInpainting() :
 
     return LamaInpainting()
 
+def load_controlnet_preprocessor() :
+    module_path = 'ComfyUI/custom_nodes/comfyui-art-venture'
+    func_name = 'modules.controlnet.AV_ControlNetPreprocessor'
+    controlnet_preprocessor = get_function_from_comfyui(module_path, func_name)
+    return controlnet_preprocessor()
+
 if __name__ == '__main__':
     # module_path = 'ComfyUI/custom_nodes/ComfyUI-LaMA-Preprocessor'
     # func_name = 'annotator.lama.LamaInpainting'

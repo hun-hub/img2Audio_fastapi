@@ -33,6 +33,7 @@ repositories=(
 
     "https://github.com/Kosinkadink/ComfyUI-Advanced-ControlNet"
     "https://github.com/shadowcz007/comfyui-mixlab-nodes"
+    "https://github.com/kijai/ComfyUI-Marigold"
 )
 
 for repo in "${repositories[@]}"; do
