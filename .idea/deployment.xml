@@ -2,6 +2,13 @@
 <project version="4">
   <component name="PublishConfigData" autoUpload="Always" serverName="gkalstn000@34.69.14.188:22 key" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
+      <paths name="gkalstn000@130.211.239.93:22 key">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/gkalstn000/cnt_api" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="gkalstn000@34.69.14.188:22 key">
         <serverdata>
           <mappings>

@@ -23,7 +23,7 @@ from functions.gemini.utils import send_gemini_request_to_api
 class GradioApp:
     def __init__(self, args):
         self.args = args
-        self.ip_addr = f'{args.ip_addr}:{args.port}'
+        self.inference_addr = f'{args.inference_addr}'
         self.block = gr.Blocks()
         self.build_ui()  # build_ui 메서드를 호출하여 UI를 빌드합니다.
 
@@ -46,23 +46,23 @@ class GradioApp:
                         gemini_refinement = gr.Button("Gemini Refine Prompt")
 
                     with gr.Tab("FLUX"):
-                        flux_inputs, flux_generate = build_flux_ui(image, mask, gemini_prompt, self.ip_addr)
+                        flux_inputs, flux_generate = build_flux_ui(image, mask, gemini_prompt, self.inference_addr)
                     with gr.Tab("Stable Diffusion 3"):
-                        sd3_inputs, sd3_generate = build_sd3_ui(image, mask, gemini_prompt, self.ip_addr)
+                        sd3_inputs, sd3_generate = build_sd3_ui(image, mask, gemini_prompt, self.inference_addr)
                     with gr.Tab("Stable Diffusion XL"):
-                        sdxl_inputs, sdxl_generate = build_sdxl_ui(image, mask, gemini_prompt, self.ip_addr)
+                        sdxl_inputs, sdxl_generate = build_sdxl_ui(image, mask, gemini_prompt, self.inference_addr)
                     with gr.Tab("Stable Diffusion 1.5"):
-                        sd15_inputs, sd15_generate = build_sd15_ui(image, mask, gemini_prompt, self.ip_addr)
+                        sd15_inputs, sd15_generate = build_sd15_ui(image, mask, gemini_prompt, self.inference_addr)
                     with gr.Tab("Object Removal"):
-                        obj_remove_inputs, obj_remove_generate = build_object_remove_ui(gemini_prompt, self.ip_addr)
+                        obj_remove_inputs, obj_remove_generate = build_object_remove_ui(gemini_prompt, self.inference_addr)
                     with gr.Tab("UP-scale"):
-                        upscale_inputs, upscale_generate = build_upscale_ui(self.ip_addr)
+                        upscale_inputs, upscale_generate = build_upscale_ui(self.inference_addr)
                     with gr.Tab("IC-Light"):
-                        iclight_inputs, iclight_generate = build_iclight_ui(image, mask, gemini_prompt, self.ip_addr)
+                        iclight_inputs, iclight_generate = build_iclight_ui(image, mask, gemini_prompt, self.inference_addr)
                     with gr.Tab("Segment Anything"):
                         gr.Markdown("SAM Functions")
                     with gr.Tab("Gemini"):
-                        gemini_inputs, (gemini_result, gemini_button) = build_gemini_ui(self.ip_addr)
+                        gemini_inputs, (gemini_result, gemini_button) = build_gemini_ui(self.inference_addr)
 
                 with gr.Column() :
                     generated_image = gr.Image(sources='upload', type="numpy", label="Generated Image", interactive=False)
@@ -72,7 +72,7 @@ class GradioApp:
                                         gr.Text('', visible=False),
                                         gr.Text('prompt_refine', visible=False),
                                         gr.Image(sources='upload', type="numpy", visible=False),
-                                        gr.Text(self.ip_addr, visible=False)]
+                                        gr.Text(self.inference_addr, visible=False)]
             gemini_refinement.click(fn=send_gemini_request_to_api, inputs=gemini_inputs_for_imagen, outputs=gemini_prompt)
             # prompt.change(fn=send_gemini_request_to_api, inputs=gemini_inputs_for_imagen, outputs=gemini_prompt)
 
@@ -96,8 +96,8 @@ class GradioApp:
             # API Restart Button
             # api_restart_button.click(fn=self.restart)
     def launch(self):
-        self.block.launch(server_name='0.0.0.0', server_port=7860)
+        self.block.launch(server_name='0.0.0.0', server_port=self.args.port)
 
     def restart(self):
-        url = f"http://{self.ip_addr}/restart"
+        url = f"http://{self.inference_addr}/restart"
         requests.post(url)

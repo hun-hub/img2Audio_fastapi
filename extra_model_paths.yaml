@@ -37,6 +37,7 @@ comfyui:
      unet: unet/
      inpaint: inpaint/
      ipadapter: ipadapter/
+     instantid: instantid/
 
 #other_ui:
 #    base_path: path/to/ui
