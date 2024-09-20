@@ -194,7 +194,7 @@ def sned_iclight_request_to_api(
         'controlnet_requests': [],
     }
 
-    url = f"http://{ip_addr}:7861/iclight/generate"
+    url = f"http://{ip_addr}/iclight/generate"
     response = requests.post(url, json=request_body)
     data = handle_response(response)
     image_base64 = data['image_base64']

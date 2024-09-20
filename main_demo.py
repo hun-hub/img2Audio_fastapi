@@ -5,9 +5,8 @@ import argparse
 
 
 parser = argparse.ArgumentParser(description="Run Gradio")
-parser.add_argument("--ip_addr", type=str, default='localhost')
-parser.add_argument("--port", type=int, default='7860')
-parser.add_argument("--checkpoint_root", type=str, default='/checkpoint')
+parser.add_argument("--ip_addr", type=str, default='localhost', help="Inference API ip addr (default: localhost)")
+parser.add_argument("--port", type=int, default=7861, help="Inference API port num (default: 7860)")
 
 args = parser.parse_args()
 

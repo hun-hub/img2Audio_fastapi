@@ -48,8 +48,9 @@ resolution_list = [
 def set_comfyui_packages() :
     load_dotenv()
     COMFYUI_PATH = os.getenv('COMFYUI_PATH')
-    sys.path.insert(0, os.path.abspath(COMFYUI_PATH))
-    print(f'Setting ComfyUI Packages PATH to {COMFYUI_PATH}')
+    if COMFYUI_PATH not in sys.path:
+        sys.path.insert(0, os.path.abspath(COMFYUI_PATH))
+        print(f'Setting ComfyUI Packages PATH to {COMFYUI_PATH}')
 
 def update_model_cache_from_blueprint(model_cache, model_cache_blueprint):
     # 테이블을 생성하여 변경된 내용을 기록

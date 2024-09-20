@@ -95,7 +95,7 @@ def sned_sd3_request_to_api(
     if canny_enable :
         request_body.update(canny_request_body)
 
-    url = f"http://{ip_addr}:7861/sd3/generate"
+    url = f"http://{ip_addr}/sd3/generate"
     response = requests.post(url, json=request_body)
     data = handle_response(response)
     image_base64 = data['image_base64']

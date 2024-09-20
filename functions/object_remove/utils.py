@@ -69,7 +69,7 @@ def sned_object_remove_request_to_api(
         'seed': seed,
     }
 
-    url = f"http://{ip_addr}:7861/object_remove"
+    url = f"http://{ip_addr}/object_remove"
     response = requests.post(url, json=request_body)
     data = handle_response(response)
     image_base64 = data['image_base64']

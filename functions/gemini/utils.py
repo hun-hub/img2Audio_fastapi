@@ -30,7 +30,7 @@ def send_gemini_request_to_api(
         'image': image
     }
 
-    url = f"http://{ip_addr}:7861/gemini"
+    url = f"http://{ip_addr}/gemini"
     response = requests.post(url, json=request_body)
     data = handle_response(response)
     prompt = data['prompt']

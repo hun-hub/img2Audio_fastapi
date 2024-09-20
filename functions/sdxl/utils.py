@@ -218,7 +218,7 @@ def sned_sdxl_request_to_api(
             if lora_body['lora'] != 'None' :
                 request_body['lora_requests'].append(lora_body)
 
-    url = f"http://{ip_addr}:7861/sdxl/generate"
+    url = f"http://{ip_addr}/sdxl/generate"
     response = requests.post(url, json=request_body)
     data = handle_response(response)
     image_base64 = data['image_base64']

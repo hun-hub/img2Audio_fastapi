@@ -209,7 +209,7 @@ def sned_sd15_request_to_api(
                 request_body['lora_requests'].append(lora_body)
 
 
-    url = f"http://{ip_addr}:7861/sd15/generate"
+    url = f"http://{ip_addr}/sd15/generate"
     response = requests.post(url, json=request_body)
     data = handle_response(response)
     image_base64 = data['image_base64']

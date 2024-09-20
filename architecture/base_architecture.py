@@ -6,7 +6,7 @@ import time
 import random
 import logging
 from queue import Queue
-from utils.loader import load_clip_vision, load_controlnet, load_ipadapter, load_extra_path_config
+from utils.loader import load_extra_path_config
 from utils import (update_model_cache_from_blueprint,
                    cache_checkpoint,
                    cache_unet,
@@ -19,6 +19,7 @@ from utils import (update_model_cache_from_blueprint,
 import gc
 import psutil
 import json
+import os, sys, signal
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
@@ -114,11 +115,11 @@ class CntGenAPI:
             self.model_cache = json.load(file)
 
         self.app.on_event("startup")(self.startup_event)
+        self.app.post('/restart')(self.restart)
 
     def check_memory_usage(self, threshold=50):
         # 시스템의 메모리 사용량을 퍼센트로 반환
         memory = psutil.virtual_memory()
-        psutil
         return memory.percent > threshold
 
     def startup_event(self):
@@ -132,6 +133,22 @@ class CntGenAPI:
 
         del model_cache_blueprint
         gc.collect()
+
+    def restart(self):
+        try:
+            sys.stdout.close_log()
+        except Exception as e:
+            pass
+        print(f"\nRestarting... [Legacy Mode]\n\n")
+        os.kill(os.getpid(), signal.SIGTERM)
+        os.execv(sys.executable, [sys.executable] + sys.argv)
+        # dummy_file = 'logs/reboot.txt'
+        # if os.path.exists(dummy_file):
+        #     os.remove(dummy_file)
+        # else:
+        #     with open(dummy_file, 'w') as file:
+        #         file.write('Dummy file')
+
 
     def _cached_model_update(self, request_data):
         # log 출력

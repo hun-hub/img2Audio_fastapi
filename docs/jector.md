@@ -29,7 +29,7 @@ request_body = {
     'controlnet_requests': [],
 }
 
-url = f"http://{ip_addr}:7861/sdxl/generate"
+url = f"http://{ip_addr}:{port}/sdxl/generate"
 
 response = requests.post(url, json=request_body)
 data = response.json()
@@ -61,7 +61,7 @@ ipadapter_body = {
 }
 request_body['ipadapter_request'] = ipadapter_body
         
-url = f"http://{ip_addr}:7861/sdxl/generate"
+url = f"http://{ip_addr}:{port}/sdxl/generate"
 
 response = requests.post(url, json=request_body)
 data = response.json()
@@ -93,7 +93,7 @@ canny_body = {
 }
 request_body['controlnet_requests'].append(canny_body)
 
-url = f"http://{ip_addr}:7861/sdxl/generate"
+url = f"http://{ip_addr}:{port}/sdxl/generate"
 
 response = requests.post(url, json=request_body)
 data = response.json()
@@ -134,7 +134,7 @@ ipadapter_body = {
 request_body['controlnet_requests'].append(canny_body)
 request_body['ipadapter_request'] = ipadapter_body
         
-url = f"http://{ip_addr}:7861/sdxl/generate"
+url = f"http://{ip_addr}:{port}/sdxl/generate"
 
 response = requests.post(url, json=request_body)
 data = response.json()
@@ -170,7 +170,7 @@ canny_body = {
 }
 request_body['controlnet_requests'].append(canny_body)
 
-url = f"http://{ip_addr}:7861/sdxl/generate"
+url = f"http://{ip_addr}:{port}/sdxl/generate"
 
 response = requests.post(url, json=request_body)
 data = response.json()
@@ -190,7 +190,7 @@ request_body = {
     'denoise': 1,
 }
         
-url = f"http://{ip_addr}:7861/object_remove"
+url = f"http://{ip_addr}:{port}/object_remove"
 response = requests.post(url, json=request_body)
 data = response.json()
 image_base64 = data['image_base64'] 
@@ -204,7 +204,7 @@ request_body = {
     "scale": 2, # range: [2, 4]
 }
 
-url = f"http://{ip_addr}:7861/upscale"
+url = f"http://{ip_addr}:{port}/upscale"
 
 response = requests.post(url, json=request_body)
 data = response.json()
@@ -247,7 +247,7 @@ request_body['controlnet_requests'].append(canny_body)
 request_body['controlnet_requests'].append(inpaint_body)
 
         
-url = f"http://{ip_addr}:7861/sd15/generate"
+url = f"http://{ip_addr}:{port}/sd15/generate"
 
 response = requests.post(url, json=request_body)
 data = response.json()
@@ -299,7 +299,7 @@ request_body['controlnet_requests'].append(inpaint_body)
 request_body['ipadapter_request'] = ipadapter_body
 
         
-url = f"http://{ip_addr}:7861/sd15/generate"
+url = f"http://{ip_addr}:{port}/sd15/generate"
 
 response = requests.post(url, json=request_body)
 data = response.json()

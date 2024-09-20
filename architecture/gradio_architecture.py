@@ -1,4 +1,5 @@
 import gradio as gr
+import requests
 
 from functions.flux.utils import sned_flux_request_to_api
 from .ui.flux_ui import build_flux_ui
@@ -22,8 +23,7 @@ from functions.gemini.utils import send_gemini_request_to_api
 class GradioApp:
     def __init__(self, args):
         self.args = args
-        self.ip_addr = args.ip_addr
-        self.port = args.port
+        self.ip_addr = f'{args.ip_addr}:{args.port}'
         self.block = gr.Blocks()
         self.build_ui()  # build_ui 메서드를 호출하여 UI를 빌드합니다.
 
@@ -66,7 +66,7 @@ class GradioApp:
 
                 with gr.Column() :
                     generated_image = gr.Image(sources='upload', type="numpy", label="Generated Image", interactive=False)
-
+                    # api_restart_button = gr.Button("API Restart")
             gemini_inputs_for_imagen = [prompt,
                                         gr.Text('', visible=False),
                                         gr.Text('', visible=False),
@@ -93,7 +93,11 @@ class GradioApp:
             # IC-Light
             iclight_generate.click(fn=sned_iclight_request_to_api, inputs=iclight_inputs, outputs=generated_image)
 
+            # API Restart Button
+            # api_restart_button.click(fn=self.restart)
     def launch(self):
-        self.block.launch(server_name='0.0.0.0', server_port=self.port)
+        self.block.launch(server_name='0.0.0.0', server_port=7860)
 
-
+    def restart(self):
+        url = f"http://{self.ip_addr}/restart"
+        requests.post(url)

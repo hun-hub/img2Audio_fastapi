@@ -31,7 +31,7 @@ request_body = {
     'remap_max_value': 1.14,
 }
 
-url = f"http://{ip_addr}:7861/iclight/generate"
+url = f"http://{ip_addr}:{port}/iclight/generate"
 
 response = requests.post(url, json=request_body)
 data = response.json()
