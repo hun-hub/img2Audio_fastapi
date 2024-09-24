@@ -17,11 +17,11 @@ def generate_gen_type_ui(ip_addr) :
     ]
     return inputs
 
-def generate_base_checkpoint_ui() :
+def generate_base_checkpoint_ui(steps=20, cfg = 7, denoise = 1.0) :
     with gr.Accordion("Options", open=False):
-        num_inference_steps = gr.Slider(label="Inference Steps", minimum=10, maximum=100, value=20, step=1)
-        guidance_scale = gr.Slider(label="CFG Scale", minimum=1.0, maximum=10.0, value=7, step=0.1)
-        denoising_strength = gr.Slider(label="Denoising strength", minimum=0.1, maximum=1.0, value=1.0, step=0.01)
+        num_inference_steps = gr.Slider(label="Inference Steps", minimum=10, maximum=100, value=steps, step=1)
+        guidance_scale = gr.Slider(label="CFG Scale", minimum=1.0, maximum=10.0, value=cfg, step=0.1)
+        denoising_strength = gr.Slider(label="Denoising strength", minimum=0.1, maximum=1.0, value=denoise, step=0.01)
         resolution = gr.Dropdown(resolution_list, label='Select Resolution (H, W)', value=resolution_list[11])
         seed = gr.Number(label='Seed', value= -1)
 

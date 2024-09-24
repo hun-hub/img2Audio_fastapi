@@ -1,5 +1,3 @@
-import gradio as gr
-from utils import resolution_list
 from .utils import *
 import os
 

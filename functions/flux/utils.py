@@ -41,34 +41,24 @@ def construct_condition(unet,
                         cached_model_dict,
                         positive,
                         negative,
-                        canny_request,
-                        depth_request,
+                        controlnet_requests,
                         ):
-
-    if canny_request is not None :
-        control_image = convert_base64_to_image_tensor(canny_request.image) / 255
-        control_image = controlnet_image_preprocess(control_image, 'canny', 'sdxl', )
-        controlnet = cached_model_dict['controlnet']['flux'][canny_request.type][1]
-        positive, negative = apply_controlnet(
-            positive,
-            negative,
-            controlnet,
-            control_image,
-            canny_request.strength,
-            canny_request.start_percent,
-            canny_request.end_percent,)
-    # if depth_request is not None :
-    #     control_image = convert_base64_to_image_tensor(depth_request.image) / 255
-    #     control_image, control_mask = control_image[:, :, :, :3], control_image[:, :, :, 3]
-    #     control_image = torch.where(control_mask[:, :, :, None] > 0.5, 1, control_image)
-    #     controlnet = cached_model_dict['controlnet']['flux'][depth_request.type][1]
-    #     positive, negative = apply_controlnet(positive,
-    #                                           negative,
-    #                                           controlnet,
-    #                                           control_image,
-    #                                           depth_request.strength,
-    #                                           depth_request.start_percent,
-    #                                           depth_request.end_percent, )
+    for controlnet_request in controlnet_requests:
+        if controlnet_request.type == 'inpaint':
+            control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
+            control_image, control_mask = control_image[:, :, :, :3], control_image[:, :, :, 3]
+            control_image = torch.where(control_mask[:, :, :, None] > 0.5, 1, control_image)
+        else:
+            control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
+            control_image = controlnet_image_preprocess(control_image, controlnet_request.preprocessor_type, 'sdxl')
+        controlnet = cached_model_dict['controlnet']['flux'][controlnet_request.type][1]
+        positive, negative = apply_controlnet(positive,
+                                              negative,
+                                              controlnet,
+                                              control_image,
+                                              controlnet_request.strength,
+                                              controlnet_request.start_percent,
+                                              controlnet_request.end_percent, )
 
     return unet, positive, negative
 
@@ -89,9 +79,18 @@ def sned_flux_request_to_api(
         canny_enable,
         canny_model_name,
         canny_image,
+        canny_preprocessor_type,
         canny_control_weight,
         canny_start,
         canny_end,
+
+        depth_enable,
+        depth_model_name,
+        depth_image,
+        depth_preprocessor_type,
+        depth_control_weight,
+        depth_start,
+        depth_end,
 
         lora_enable,
         lora_model_name_1,
@@ -117,6 +116,9 @@ def sned_flux_request_to_api(
     if not isinstance(canny_image, NoneType):
         canny_image = resize_image_for_sd(Image.fromarray(canny_image))
         canny_image = convert_image_to_base64(canny_image)
+    if not isinstance(depth_image, NoneType):
+        depth_image = resize_image_for_sd(Image.fromarray(depth_image))
+        depth_image = convert_image_to_base64(depth_image)
 
     request_body = {
         'unet': unet_name,
@@ -142,9 +144,20 @@ def sned_flux_request_to_api(
         'controlnet': canny_model_name,
         'type': 'canny',
         'image': canny_image,
+        'preprocessor_type': canny_preprocessor_type,
         'strength': canny_control_weight,
         'start_percent': canny_start,
         'end_percent': canny_end,
+    }
+
+    depth_body = {
+        'controlnet': depth_model_name,
+        'type': 'depth',
+        'image': depth_image,
+        'preprocessor_type': depth_preprocessor_type,
+        'strength': depth_control_weight,
+        'start_percent': depth_start,
+        'end_percent': depth_end,
     }
 
     lora_requests_sorted = sorted([[lora_model_name_1, strength_model_1, strength_clip_1],
@@ -161,6 +174,9 @@ def sned_flux_request_to_api(
 
     if canny_enable :
         request_body['controlnet_requests'].append(canny_body)
+    if depth_enable :
+        request_body['controlnet_requests'].append(depth_body)
+
     if lora_enable :
         for lora_body in lora_body_list:
             if lora_body['lora'] != 'None' :

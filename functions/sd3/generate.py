@@ -3,7 +3,7 @@ import torch
 from utils.image_process import (convert_image_tensor_to_base64,
                                  convert_base64_to_image_tensor,
                                  controlnet_image_preprocess)
-from .utils import model_sampling_sd3, get_init_noise, apply_controlnet
+from .utils import model_sampling_sd3, get_init_noise, construct_condition
 from utils.comfyui import (encode_prompt,
                            sample_image,
                            decode_latent,
@@ -17,14 +17,14 @@ router = APIRouter()
 
 @torch.inference_mode()
 def generate_image(cached_model_dict, request_data):
-    unet = cached_model_dict['unet']['sd3'][1]
-    vae = cached_model_dict['vae']['sd3'][1]
-    clip = cached_model_dict['clip']['sd3'][1]
+    unet = cached_model_dict['unet']['sd3']['base'][1]
+    vae = cached_model_dict['vae']['sd3']['base'][1]
+    clip = cached_model_dict['clip']['sd3']['base'][1]
 
     unet = model_sampling_sd3(unet)
 
-    start = int(request_data.steps - request_data.steps * request_data.denoise)
-    end = request_data.steps
+    start_base = int(request_data.steps - request_data.steps * request_data.denoise)
+    end_base = request_data.steps
 
     if request_data.gen_type == 't2i' :
         init_noise = get_init_noise(request_data.width,
@@ -41,24 +41,21 @@ def generate_image(cached_model_dict, request_data):
     else :
         raise ValueError("Invalid generation type and image: {}".format(request_data.gen_type))
 
+    controlnet_requests = request_data.controlnet_requests
+
     seed = random.randint(1, int(1e9)) if request_data.seed == -1 else request_data.seed
 
     positive_cond, negative_cond = encode_prompt(clip,
                                                  request_data.prompt_positive,
                                                  request_data.prompt_negative)
 
-    for controlnet_request in request_data.controlnet_requests :
-        control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
-        control_image = controlnet_image_preprocess(control_image, 'canny', 'sdxl')
-        controlnet = cached_model_dict['controlnet']['sd3'][controlnet_request.type][1]
-        positive_cond, negative_cond = apply_controlnet(positive_cond,
-                                                        negative_cond,
-                                                        controlnet,
-                                                        vae,
-                                                        control_image,
-                                                        controlnet_request.strength,
-                                                        controlnet_request.start_percent,
-                                                        controlnet_request.end_percent,)
+    unet, positive_cond, negative_cond = construct_condition(
+        unet,
+        cached_model_dict,
+        positive_cond,
+        negative_cond,
+        controlnet_requests,
+    )
 
     latent_image = sample_image(
         unet= unet,
@@ -70,12 +67,11 @@ def generate_image(cached_model_dict, request_data):
         cfg= request_data.cfg,
         sampler_name= request_data.sampler_name,
         scheduler= request_data.scheduler,
-        start_at_step = start,
-        end_at_step = end
+        start_at_step = start_base,
+        end_at_step = end_base
     )
 
     image_tensor = decode_latent(vae, latent_image)
-
     if request_data.gen_type == 'inpaint':
         image_tensor = image_tensor * mask.unsqueeze(-1) + init_image * (1 - mask.unsqueeze(-1))
 

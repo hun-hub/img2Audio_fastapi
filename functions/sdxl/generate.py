@@ -47,12 +47,6 @@ def generate_image(cached_model_dict, request_data):
     lora_requests = request_data.lora_requests
     controlnet_requests = request_data.controlnet_requests
 
-    # for controlnet_request in request_data.controlnet_requests :
-    #     if controlnet_request.type == 'canny' :
-    #         canny_request = controlnet_request
-    #     if controlnet_request.type == 'inpaint' :
-    #         inpaint_request = controlnet_request
-
     seed = random.randint(1, int(1e9)) if request_data.seed == -1 else request_data.seed
     if lora_requests :
         for lora_request in lora_requests :

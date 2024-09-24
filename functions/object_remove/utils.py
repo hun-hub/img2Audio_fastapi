@@ -6,7 +6,8 @@ from utils.image_process import (convert_base64_to_image_array,
                                  convert_image_array_to_base64,
                                  resize_image_for_sd,
                                  convert_image_to_base64,
-                                 convert_base64_to_image_tensor
+                                 convert_base64_to_image_tensor,
+                                 convert_image_tensor_to_base64
                                  )
 from utils.comfyui import (apply_controlnet,
                            apply_ipadapter,
@@ -14,14 +15,26 @@ from utils.comfyui import (apply_controlnet,
                            encode_image_for_inpaint)
 
 from utils.loader import load_clip_vision, resize_image_with_pad, load_lamaInpainting, load_fooocus, get_function_from_comfyui
+from functions.gemini.generate import query_dict
+from utils.text_process import gemini_with_prompt_and_image
+
 from types import NoneType
 from PIL import Image
 import numpy as np
-from urllib.parse import urlparse
 import os
 import cv2
 
-# set_comfyui_packages()
+def object_removal_prompt_generation(query_type, image_tensor) :
+    query = query_dict[query_type]
+
+    image_tensor = image_tensor * 255
+    image_base64 = convert_image_tensor_to_base64(image_tensor)
+
+    prompt = gemini_with_prompt_and_image(
+        query,
+        image_base64)
+
+    return prompt
 
 def construct_condition(unet,
                         vae,

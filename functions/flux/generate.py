@@ -21,9 +21,9 @@ router = APIRouter()
 
 @torch.inference_mode()
 def generate_image(cached_model_dict, request_data):
-    unet = cached_model_dict['unet']['flux'][1]
-    vae = cached_model_dict['vae']['flux'][1]
-    clip = cached_model_dict['clip']['flux'][1]
+    unet = cached_model_dict['unet']['flux']['base'][1]
+    vae = cached_model_dict['vae']['flux']['base'][1]
+    clip = cached_model_dict['clip']['flux']['base'][1]
 
     start_base = int(request_data.steps - request_data.steps * request_data.denoise)
     end_base = request_data.steps
@@ -46,13 +46,7 @@ def generate_image(cached_model_dict, request_data):
     b, c, h, w = init_noise['samples'].size()
 
     lora_requests = request_data.lora_requests
-    canny_request = None
-    depth_request = None
-    for controlnet_request in request_data.controlnet_requests:
-        if controlnet_request.type == 'canny':
-            canny_request = controlnet_request
-        if controlnet_request.type == 'depth':
-            depth_request = controlnet_request
+    controlnet_requests = request_data.controlnet_requests
 
     seed = random.randint(1, int(1e9)) if request_data.seed == -1 else request_data.seed
     if lora_requests :
@@ -74,8 +68,7 @@ def generate_image(cached_model_dict, request_data):
         cached_model_dict,
         positive_cond,
         negative_cond,
-        canny_request,
-        depth_request,
+        controlnet_requests,
     )
 
     unet = model_sampling_flux(unet, width = int(w * 8), height = int(h * 8))

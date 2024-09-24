@@ -25,9 +25,9 @@ import random
 # prompt_post_fix = ", RAW photo, subject, 8k uhd, dslr, soft lighting, high quality, film grain, Fujifilm XT3"
 @torch.inference_mode()
 def generate_image(cached_model_dict, request_data):
-    unet = cached_model_dict['unet']['sd15'][1]
-    vae = cached_model_dict['vae']['sd15'][1]
-    clip = cached_model_dict['clip']['sd15'][1]
+    unet = cached_model_dict['unet']['sd15']['base'][1]
+    vae = cached_model_dict['vae']['sd15']['base'][1]
+    clip = cached_model_dict['clip']['sd15']['base'][1]
 
     start_base = int(request_data.steps - request_data.steps * request_data.denoise)
     end_base = request_data.steps

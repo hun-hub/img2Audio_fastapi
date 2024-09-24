@@ -14,15 +14,14 @@ from utils.comfyui import (encode_prompt,
                            mask_blur)
 import random
 
-# set_comfyui_packages()
-
 # prompt_post_fix = ", RAW photo, subject, 8k uhd, dslr, soft lighting, high quality, film grain, Fujifilm XT3"
 scale_factor = 0.18215
 @torch.inference_mode()
 def generate_image(cached_model_dict, request_data):
-    unet = cached_model_dict['unet']['sd15'][1]
-    vae = cached_model_dict['vae']['sd15'][1]
-    clip = cached_model_dict['clip']['sd15'][1]
+    unet = cached_model_dict['unet']['sd15']['base'][1]
+    vae = cached_model_dict['vae']['sd15']['base'][1]
+    clip = cached_model_dict['clip']['sd15']['base'][1]
+
     start_base = int(request_data.steps - request_data.steps * request_data.denoise)
     end_base = request_data.steps
 
@@ -43,13 +42,7 @@ def generate_image(cached_model_dict, request_data):
 
     ipadapter_request = request_data.ipadapter_request
     lora_requests = request_data.lora_requests
-    canny_request = None
-    inpaint_request = None
-    for controlnet_request in request_data.controlnet_requests :
-        if controlnet_request.type == 'canny' :
-            canny_request = controlnet_request
-        if controlnet_request.type == 'inpaint' :
-            inpaint_request = controlnet_request
+    controlnet_requests = request_data.controlnet_requests
 
     seed = random.randint(1, int(1e9)) if request_data.seed == -1 else request_data.seed
     if lora_requests :
@@ -61,7 +54,7 @@ def generate_image(cached_model_dict, request_data):
                 lora_request)
 
     positive_cond, negative_cond = encode_prompt(clip,
-                                                 request_data.prompt_positive ,
+                                                 request_data.prompt_positive,
                                                  request_data.prompt_negative)
 
     unet, positive_cond, negative_cond = construct_condition(
@@ -69,8 +62,7 @@ def generate_image(cached_model_dict, request_data):
         cached_model_dict,
         positive_cond,
         negative_cond,
-        canny_request,
-        inpaint_request,
+        controlnet_requests,
         ipadapter_request)
 
     latent_image = sample_image(
@@ -89,13 +81,6 @@ def generate_image(cached_model_dict, request_data):
     image_tensor = decode_latent(vae, latent_image)
     if request_data.gen_type == 'inpaint' :
         image_tensor = image_tensor * mask.unsqueeze(-1) + init_image * (1 - mask.unsqueeze(-1))
-
-    if inpaint_request is not None:
-        control_image = convert_base64_to_image_tensor(inpaint_request.image) / 255
-        control_image, control_mask = control_image[:, :, :, :3], control_image[:, :, :, 3]
-        if control_image.squeeze().size() == image_tensor.squeeze().size():
-            control_mask = mask_blur(control_mask)
-            image_tensor = image_tensor * control_mask.unsqueeze(-1) + control_image * (1 - control_mask.unsqueeze(-1))
 
     image_base64 = convert_image_tensor_to_base64(image_tensor * 255)
     return image_base64

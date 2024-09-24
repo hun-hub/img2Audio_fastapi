@@ -5,6 +5,8 @@ import requests
 from utils.handler import handle_response
 from utils.image_process import (convert_base64_to_image_array,
                                  convert_image_array_to_base64,
+                                 convert_base64_to_image_tensor,
+                                 controlnet_image_preprocess,
                                  resize_image_for_sd,
                                  convert_image_to_base64,
                                  )
@@ -35,6 +37,30 @@ def get_init_noise(width, height, batch_size=1) :
 
     return init_noise
 
+def construct_condition(unet,
+                        cached_model_dict,
+                        positive,
+                        negative,
+                        controlnet_requests,
+                        ):
+    for controlnet_request in controlnet_requests:
+        if controlnet_request.type == 'inpaint':
+            control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
+            control_image, control_mask = control_image[:, :, :, :3], control_image[:, :, :, 3]
+            control_image = torch.where(control_mask[:, :, :, None] > 0.5, 1, control_image)
+        else:
+            control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
+            control_image = controlnet_image_preprocess(control_image, controlnet_request.preprocessor_type, 'sdxl')
+        controlnet = cached_model_dict['controlnet']['sd3'][controlnet_request.type][1]
+        positive, negative = apply_controlnet(positive,
+                                              negative,
+                                              controlnet,
+                                              control_image,
+                                              controlnet_request.strength,
+                                              controlnet_request.start_percent,
+                                              controlnet_request.end_percent, )
+    return unet, positive, negative
+
 def sned_sd3_request_to_api(
         checkpoint,
         image,
@@ -45,12 +71,15 @@ def sned_sd3_request_to_api(
         guidance_scale,
         denoising_strength,
         seed,
+
         canny_enable,
         canny_model_name,
         canny_image,
+        canny_preprocessor_type,
         canny_control_weight,
         canny_start,
         canny_end,
+
         gen_type,
         ip_addr
 ) :
@@ -77,23 +106,22 @@ def sned_sd3_request_to_api(
         'cfg': guidance_scale,
         'denoise': denoising_strength,
         'seed': seed,
-        'gen_type': gen_type
+        'gen_type': gen_type,
+        'controlnet_requests': [],
     }
-    canny_request_body = {
-        'controlnet_requests':
-            [
-                {
-                    'controlnet': canny_model_name,
-                    'type': 'canny',
-                    'image': canny_image,
-                    'strength': canny_control_weight,
-                    'start_percent': canny_start,
-                    'end_percent': canny_end,
-                }
-            ]
+
+    canny_body = {
+        'controlnet': canny_model_name,
+        'type': 'canny',
+        'image': canny_image,
+        'preprocessor_type': canny_preprocessor_type,
+        'strength': canny_control_weight,
+        'start_percent': canny_start,
+        'end_percent': canny_end,
     }
+
     if canny_enable :
-        request_body.update(canny_request_body)
+        request_body['controlnet_requests'].append(canny_body)
 
     url = f"http://{ip_addr}/sd3/generate"
     response = requests.post(url, json=request_body)

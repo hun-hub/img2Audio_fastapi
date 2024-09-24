@@ -1,5 +1,5 @@
 import torch
-from .utils import webui_lama_proprecessor, construct_condition
+from .utils import webui_lama_proprecessor, construct_condition, object_removal_prompt_generation
 from utils import set_comfyui_packages
 from utils.loader import load_checkpoint
 from utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor, convert_image_array_to_base64
@@ -28,11 +28,19 @@ def remove(cached_model_dict, request_data):
     mask = mask_blur(mask)
     lama_preprocessed = webui_lama_proprecessor(init_image, mask).unsqueeze(0) / 255
     # Gemini prompt
+    prompt = object_removal_prompt_generation('image_description', lama_preprocessed)
+    print('Object Removal Prompt:', prompt)
     seed = random.randint(1, int(1e9)) if request_data.seed == -1 else request_data.seed
     positive_cond, negative_cond = encode_prompt(clip,
-                                                 request_data.prompt_positive,
+                                                 prompt,
                                                  request_data.prompt_negative)
-    unet = construct_condition(unet, vae, lama_preprocessed, mask, request_data.inpaint_model_name)
+    unet = construct_condition(
+        unet,
+        vae,
+        lama_preprocessed,
+        mask,
+        request_data.inpaint_model_name
+    )
 
     init_noise = encode_image_for_inpaint(vae, init_image, mask, grow_mask_by=6)
 
