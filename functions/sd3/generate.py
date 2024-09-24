@@ -7,7 +7,7 @@ from utils.comfyui import (encode_prompt,
                            decode_latent,
                            encode_image,
                            encode_image_for_inpaint,
-                           make_canny,
+                           controlnet_preprocessor,
                            mask_blur)
 import random
 
@@ -21,6 +21,9 @@ def generate_image(cached_model_dict, request_data):
     clip = cached_model_dict['clip']['sd3'][1]
 
     unet = model_sampling_sd3(unet)
+
+    start = int(request_data.steps - request_data.steps * request_data.denoise)
+    end = request_data.steps
 
     if request_data.gen_type == 't2i' :
         init_noise = get_init_noise(request_data.width,
@@ -45,7 +48,7 @@ def generate_image(cached_model_dict, request_data):
 
     for controlnet_request in request_data.controlnet_requests :
         control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
-        control_image = make_canny(control_image)
+        control_image = controlnet_preprocessor(control_image)
         controlnet = cached_model_dict['controlnet']['sd3'][controlnet_request.type][1]
         positive_cond, negative_cond = apply_controlnet(positive_cond,
                                                         negative_cond,
@@ -66,7 +69,9 @@ def generate_image(cached_model_dict, request_data):
         cfg= request_data.cfg,
         sampler_name= request_data.sampler_name,
         scheduler= request_data.scheduler,
-        denoise= request_data.denoise,)
+        start_at_step = start,
+        end_at_step = end
+    )
 
     image_tensor = decode_latent(vae, latent_image)
 

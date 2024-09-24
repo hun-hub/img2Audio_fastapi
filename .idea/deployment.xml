@@ -14,6 +14,12 @@
           <mappings>
             <mapping deploy="/home/gkalstn000/api" local="$PROJECT_DIR$" />
           </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/ComfyUI" />
+            <excludedPath path="/home/gkalstn000/api/ComfyUI" />
+            <excludedPath local="true" path="$PROJECT_DIR$/.env" />
+            <excludedPath path="/home/gkalstn000/api/.env" />
+          </excludedPaths>
         </serverdata>
       </paths>
     </serverData>

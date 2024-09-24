@@ -9,7 +9,7 @@ from utils.comfyui import (encode_prompt,
                            encode_image,
                            encode_image_for_inpaint,
                            apply_lora_to_unet,
-                           make_canny,
+                           controlnet_preprocessor,
                            get_init_noise,
                            mask_blur)
 import random
@@ -22,7 +22,7 @@ def generate_image(cached_model_dict, request_data):
     vae_base = cached_model_dict['vae']['sdxl']['base'][1]
     clip_base = cached_model_dict['clip']['sdxl']['base'][1]
     vae_refine = vae_base
-    start_base = 0
+    start_base = int(request_data.steps - request_data.steps * request_data.denoise)
     end_base = request_data.steps
 
     if request_data.refiner is not None :
@@ -86,9 +86,11 @@ def generate_image(cached_model_dict, request_data):
         cfg= request_data.cfg,
         sampler_name= request_data.sampler_name,
         scheduler= request_data.scheduler,
-        denoise= request_data.denoise,
         start_at_step= start_base,
-        end_at_step= end_base,)
+        end_at_step= end_base,
+        add_noise = 'enable',
+        return_with_leftover_noise='enable' if request_data.refiner is not None else 'disable'
+    )
 
     if request_data.refiner is not None :
         unet_refine = cached_model_dict['unet']['sdxl']['refiner'][1]
@@ -126,9 +128,11 @@ def generate_image(cached_model_dict, request_data):
             cfg=request_data.cfg,
             sampler_name=request_data.sampler_name,
             scheduler=request_data.scheduler,
-            denoise=request_data.denoise,
             start_at_step=start_refine,
-            end_at_step=end_refine, )
+            end_at_step=end_refine,
+            add_noise='disable',
+            return_with_leftover_noise='disable'
+        )
 
 
 

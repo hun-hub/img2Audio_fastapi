@@ -9,7 +9,7 @@ from utils.comfyui import (encode_prompt,
                            encode_image,
                            encode_image_for_inpaint,
                            apply_controlnet,
-                           make_canny,
+                           controlnet_preprocessor,
                            get_init_noise,
                            apply_lora_to_unet,
                            mask_blur)
@@ -24,7 +24,7 @@ def generate_image(cached_model_dict, request_data):
     unet = cached_model_dict['unet']['sd15'][1]
     vae = cached_model_dict['vae']['sd15'][1]
     clip = cached_model_dict['clip']['sd15'][1]
-    start_base = 0
+    start_base = int(request_data.steps - request_data.steps * request_data.denoise)
     end_base = request_data.steps
 
     if request_data.gen_type == 't2i' :
@@ -84,7 +84,6 @@ def generate_image(cached_model_dict, request_data):
         cfg= request_data.cfg,
         sampler_name= request_data.sampler_name,
         scheduler= request_data.scheduler,
-        denoise= request_data.denoise,
         start_at_step= start_base,
         end_at_step= end_base,)
 

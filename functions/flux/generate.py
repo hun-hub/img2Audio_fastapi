@@ -12,7 +12,7 @@ from utils.comfyui import (encode_prompt,
                            decode_latent,
                            encode_image,
                            encode_image_for_inpaint,
-                           make_canny,
+                           controlnet_preprocessor,
                            mask_blur,
                            apply_lora_to_unet)
 import random
@@ -25,6 +25,9 @@ def generate_image(cached_model_dict, request_data):
     unet = cached_model_dict['unet']['flux'][1]
     vae = cached_model_dict['vae']['flux'][1]
     clip = cached_model_dict['clip']['flux'][1]
+
+    start_base = int(request_data.steps - request_data.steps * request_data.denoise)
+    end_base = request_data.steps
 
     if request_data.gen_type == 't2i' :
         init_noise = get_init_noise(request_data.width,
@@ -88,7 +91,9 @@ def generate_image(cached_model_dict, request_data):
         cfg= 1.0,
         sampler_name= request_data.sampler_name,
         scheduler= request_data.scheduler,
-        denoise= request_data.denoise,)
+        start_at_step = start_base,
+        end_at_step = end_base,
+    )
 
     image_tensor = decode_latent(vae, latent_image)
     if request_data.gen_type == 'inpaint':

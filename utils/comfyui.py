@@ -13,14 +13,13 @@ def sample_image(unet,
                  cfg,
                  sampler_name,
                  scheduler,
-                 denoise,
-                 start_at_step=None,
-                 end_at_step=None) :
+                 start_at_step,
+                 end_at_step,
+                 add_noise='enable',
+                 return_with_leftover_noise='disable'
+                 ) :
     from ComfyUI.nodes import KSamplerAdvanced
 
-    if start_at_step == None :
-        start_at_step = 0
-        end_at_step = steps
     ksampler = KSamplerAdvanced()
     image_latent = ksampler.sample(
         model= unet,
@@ -34,10 +33,9 @@ def sample_image(unet,
         cfg= cfg,
         sampler_name= sampler_name,
         scheduler= scheduler,
-        denoise= denoise,
 
-        add_noise='enable',
-        return_with_leftover_noise='disable'
+        add_noise=add_noise,
+        return_with_leftover_noise=return_with_leftover_noise
     )[0]
 
     return image_latent
@@ -83,7 +81,7 @@ def apply_controlnet(positive, negative, controlnet, image, strength, start_perc
     return positive, negative
 
 @torch.inference_mode()
-def make_canny(image, low_threshold=0.4, high_threshold=0.8) :
+def controlnet_preprocessor(image, low_threshold=0.4, high_threshold=0.8) :
     from ComfyUI.comfy_extras.nodes_canny import Canny
     canny_detector = Canny()
     canny_image = canny_detector.detect_edge(image, low_threshold, high_threshold)[0]

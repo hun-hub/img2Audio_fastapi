@@ -9,7 +9,7 @@ from utils.comfyui import (encode_prompt,
                            encode_image,
                            encode_image_for_inpaint,
                            apply_controlnet,
-                           make_canny,
+                           controlnet_preprocessor,
                            get_init_noise,
                            mask_blur)
 import random
@@ -23,7 +23,7 @@ def remove(cached_model_dict, request_data):
     vae = cached_model_dict['vae']['sdxl']['base'][1]
     clip = cached_model_dict['clip']['sdxl']['base'][1]
 
-    start_base = 0
+    start_base = int(request_data.steps - request_data.steps * request_data.denoise)
     end_base = request_data.steps
 
     init_image = convert_base64_to_image_tensor(request_data.init_image) / 255
@@ -49,7 +49,6 @@ def remove(cached_model_dict, request_data):
         cfg=request_data.cfg,
         sampler_name=request_data.sampler_name,
         scheduler=request_data.scheduler,
-        denoise=request_data.denoise,
         start_at_step=start_base,
         end_at_step=end_base, )
 
