@@ -21,6 +21,7 @@ def generate_image(cached_model_dict, request_data):
     vae_base = cached_model_dict['vae']['sdxl']['base'][1]
     clip_base = cached_model_dict['clip']['sdxl']['base'][1]
     vae_refine = vae_base
+
     start_base = int(request_data.steps - request_data.steps * request_data.denoise)
     end_base = request_data.steps
 
@@ -44,13 +45,13 @@ def generate_image(cached_model_dict, request_data):
 
     ipadapter_request = request_data.ipadapter_request
     lora_requests = request_data.lora_requests
-    canny_request = None
-    inpaint_request = None
-    for controlnet_request in request_data.controlnet_requests :
-        if controlnet_request.type == 'canny' :
-            canny_request = controlnet_request
-        if controlnet_request.type == 'inpaint' :
-            inpaint_request = controlnet_request
+    controlnet_requests = request_data.controlnet_requests
+
+    # for controlnet_request in request_data.controlnet_requests :
+    #     if controlnet_request.type == 'canny' :
+    #         canny_request = controlnet_request
+    #     if controlnet_request.type == 'inpaint' :
+    #         inpaint_request = controlnet_request
 
     seed = random.randint(1, int(1e9)) if request_data.seed == -1 else request_data.seed
     if lora_requests :
@@ -70,8 +71,7 @@ def generate_image(cached_model_dict, request_data):
         cached_model_dict,
         positive_cond,
         negative_cond,
-        canny_request,
-        inpaint_request,
+        controlnet_requests,
         ipadapter_request,
     )
 
@@ -114,8 +114,7 @@ def generate_image(cached_model_dict, request_data):
                                                                                       cached_model_dict,
                                                                                       positive_cond,
                                                                                       negative_cond,
-                                                                                      canny_request,
-                                                                                      inpaint_request,
+                                                                                      controlnet_requests,
                                                                                       ipadapter_request)
         latent_image = sample_image(
             unet=unet_refine,
@@ -138,13 +137,6 @@ def generate_image(cached_model_dict, request_data):
     image_tensor = decode_latent(vae_refine, latent_image)
     if request_data.gen_type == 'inpaint' :
         image_tensor = image_tensor * mask.unsqueeze(-1) + init_image * (1 - mask.unsqueeze(-1))
-
-    if inpaint_request is not None:
-        control_image = convert_base64_to_image_tensor(inpaint_request.image) / 255
-        control_image, control_mask = control_image[:, :, :, :3], control_image[:, :, :, 3]
-        if control_image.squeeze().size() == image_tensor.squeeze().size():
-            control_mask = mask_blur(control_mask)
-            image_tensor = image_tensor * control_mask.unsqueeze(-1) + control_image * (1 - control_mask.unsqueeze(-1))
 
     image_base64 = convert_image_tensor_to_base64(image_tensor * 255)
     return image_base64

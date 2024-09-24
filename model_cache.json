@@ -1,36 +1,72 @@
 {
   "unet":
   {
-    "sd15": null,
+    "sd15":
+    {
+      "base": null,
+      "refiner": null
+    },
     "sdxl":
     {
       "base": null,
       "refiner": null
     },
-    "sd3":  null,
-    "flux": null
+    "sd3":
+    {
+      "base": null,
+      "refiner": null
+    },
+    "flux":
+    {
+      "base": null,
+      "refiner": null
+    }
   },
   "vae":
   {
-    "sd15": null,
+    "sd15":
+    {
+      "base": null,
+      "refiner": null
+    },
     "sdxl":
     {
       "base": null,
       "refiner": null
     },
-    "sd3":  null,
-    "flux": null
+    "sd3":
+    {
+      "base": null,
+      "refiner": null
+    },
+    "flux":
+    {
+      "base": null,
+      "refiner": null
+    }
   },
   "clip":
   {
-    "sd15": null,
+    "sd15":
+    {
+      "base": null,
+      "refiner": null
+    },
     "sdxl":
     {
       "base": null,
       "refiner": null
     },
-    "sd3":  null,
-    "flux": null
+    "sd3":
+    {
+      "base": null,
+      "refiner": null
+    },
+    "flux":
+    {
+      "base": null,
+      "refiner": null
+    }
   },
   "clip_vision":
   {

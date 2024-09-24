@@ -166,6 +166,7 @@ class CntGenAPI:
             cache_clip(self.model_cache, model_cache_blueprint, request_dict['clip'])
         if 'refiner' in request_dict and request_dict['refiner'] :
             cache_checkpoint(self.model_cache, model_cache_blueprint, request_dict['refiner'], True)
+
         if 'controlnet_requests' in request_dict and request_dict['controlnet_requests'] :
             cache_controlnet(self.model_cache, model_cache_blueprint, request_dict['controlnet_requests'])
         if 'ipadapter_request' in request_dict and request_dict['ipadapter_request'] :

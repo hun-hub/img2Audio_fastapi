@@ -14,5 +14,3 @@ class SDXL_RequestData(RequestData):
     ipadapter_request: Optional[IPAdapter_RequestData] = None
     lora_requests: Optional[List[LoRA_RequestData]] = []
     gen_type: Literal['t2i', 'i2i', 'inpaint'] = 't2i'
-    refiner: Optional[str] = None
-    refine_switch: float= 0.4

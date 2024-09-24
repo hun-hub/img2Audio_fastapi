@@ -18,6 +18,7 @@ class ControlNet_RequestData(BaseModel):
     controlnet: str
     type: Literal['canny', 'inpaint', 'depth', 'normal', 'pose']
     image: Optional[str]
+    preprocessor_type: Literal['canny', 'lineart', 'openpose', 'normalmap_bae', 'normalmap_midas', 'depth_midas', 'depth', 'depth_zoe']
     # Params
     strength: float = 0.7
     start_percent: float = 0
@@ -34,6 +35,9 @@ class RequestData(BaseModel):
     vae: str = None
     clip: Union[str, Tuple[str, str]] = None
     clip_vision: str = None
+
+    refiner: Optional[str] = None
+    refine_switch: float= 0.4
 
     init_image: Optional[str] = None
     mask: Optional[str] = None
