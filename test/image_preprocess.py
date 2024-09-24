@@ -1,5 +1,5 @@
 from utils.loader import get_function_from_comfyui
-from utils.image_process import controlnet_image_preprocess, resize_image_for_sd
+from utils.image_process import resize_image_for_sd
 from torch.utils.data import Dataset, DataLoader
 import torch
 import os

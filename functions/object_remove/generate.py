@@ -8,9 +8,6 @@ from utils.comfyui import (encode_prompt,
                            decode_latent,
                            encode_image,
                            encode_image_for_inpaint,
-                           apply_controlnet,
-                           controlnet_preprocessor,
-                           get_init_noise,
                            mask_blur)
 import random
 import numpy as np

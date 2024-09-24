@@ -45,25 +45,33 @@
     {
       "canny": null,
       "inpaint": null,
-      "depth": null
+      "depth": null,
+      "normal": null,
+      "pose": null
     },
     "sdxl" :
     {
       "canny": null,
       "inpaint": null,
-      "depth": null
+      "depth": null,
+      "normal": null,
+      "pose": null
     },
     "sd3" :
     {
       "canny": null,
       "inpaint": null,
-      "depth": null
+      "depth": null,
+      "normal": null,
+      "pose": null
     },
     "flux" :
     {
       "canny": null,
       "inpaint": null,
-      "depth": null
+      "depth": null,
+      "normal": null,
+      "pose": null
     }
   },
   "ipadapter":

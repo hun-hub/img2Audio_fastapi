@@ -7,12 +7,13 @@ from utils.image_process import (convert_base64_to_image_array,
                                  convert_image_array_to_base64,
                                  resize_image_for_sd,
                                  convert_image_to_base64,
-                                 convert_base64_to_image_tensor
+                                 convert_base64_to_image_tensor,
+                                 controlnet_image_preprocess
                                  )
-from utils.comfyui import (make_canny,
-                           apply_controlnet,
+from utils.comfyui import (apply_controlnet,
                            apply_ipadapter,
                            make_image_batch)
+
 from utils.loader import load_clip_vision
 from types import NoneType
 from PIL import Image
@@ -31,7 +32,7 @@ def construct_condition(unet,
 
     if canny_request is not None :
         control_image = convert_base64_to_image_tensor(canny_request.image) / 255
-        control_image = make_canny(control_image)
+        control_image = controlnet_image_preprocess(control_image, 'canny', 'sd15', resolution=512)
         controlnet = cached_model_dict['controlnet']['sd15'][canny_request.type][1]
         positive, negative = apply_controlnet(positive,
                                                         negative,

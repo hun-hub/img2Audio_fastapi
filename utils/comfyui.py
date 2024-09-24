@@ -81,13 +81,6 @@ def apply_controlnet(positive, negative, controlnet, image, strength, start_perc
     return positive, negative
 
 @torch.inference_mode()
-def controlnet_preprocessor(image, low_threshold=0.4, high_threshold=0.8) :
-    from ComfyUI.comfy_extras.nodes_canny import Canny
-    canny_detector = Canny()
-    canny_image = canny_detector.detect_edge(image, low_threshold, high_threshold)[0]
-    return canny_image
-
-@torch.inference_mode()
 def apply_ipadapter(model,
                     ipadapter,
                     clip_vision,

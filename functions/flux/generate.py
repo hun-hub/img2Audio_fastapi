@@ -12,7 +12,6 @@ from utils.comfyui import (encode_prompt,
                            decode_latent,
                            encode_image,
                            encode_image_for_inpaint,
-                           controlnet_preprocessor,
                            mask_blur,
                            apply_lora_to_unet)
 import random

@@ -16,7 +16,7 @@ class IPAdapter_RequestData(BaseModel):
 
 class ControlNet_RequestData(BaseModel):
     controlnet: str
-    type: Literal['canny', 'inpaint', 'depth']
+    type: Literal['canny', 'inpaint', 'depth', 'normal', 'pose']
     image: Optional[str]
     # Params
     strength: float = 0.7

@@ -82,7 +82,7 @@ def resize_image_for_sd(image: Image, is_mask=False, resolution = 1024) :
     return image_resized_cropped
 
 
-def controlnet_image_preprocess(images, preprocessor_type, resolution=1024) :
+def controlnet_image_preprocess(images, preprocessor_type, sd_version, resolution=512) :
     preprocessor = load_controlnet_preprocessor()
-    image_preprocessed, _ = preprocessor.detect_controlnet(images, preprocessor_type, sd_version='sdxl', resolution=resolution)
+    image_preprocessed, _ = preprocessor.detect_controlnet(images, preprocessor_type, sd_version=sd_version, resolution=resolution)
     return image_preprocessed

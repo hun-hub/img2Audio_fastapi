@@ -8,11 +8,11 @@ from utils.image_process import (convert_base64_to_image_array,
                                  convert_image_to_base64,
                                  convert_base64_to_image_tensor
                                  )
-from utils.comfyui import (make_canny,
-                           apply_controlnet,
+from utils.comfyui import (apply_controlnet,
                            apply_ipadapter,
                            make_image_batch,
                            encode_image_for_inpaint)
+
 from utils.loader import load_clip_vision, resize_image_with_pad, load_lamaInpainting, load_fooocus, get_function_from_comfyui
 from types import NoneType
 from PIL import Image

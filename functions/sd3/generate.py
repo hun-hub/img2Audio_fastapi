@@ -1,13 +1,14 @@
 from fastapi import APIRouter, HTTPException
 import torch
-from utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
+from utils.image_process import (convert_image_tensor_to_base64,
+                                 convert_base64_to_image_tensor,
+                                 controlnet_image_preprocess)
 from .utils import model_sampling_sd3, get_init_noise, apply_controlnet
 from utils.comfyui import (encode_prompt,
                            sample_image,
                            decode_latent,
                            encode_image,
                            encode_image_for_inpaint,
-                           controlnet_preprocessor,
                            mask_blur)
 import random
 
@@ -48,7 +49,7 @@ def generate_image(cached_model_dict, request_data):
 
     for controlnet_request in request_data.controlnet_requests :
         control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
-        control_image = controlnet_preprocessor(control_image)
+        control_image = controlnet_image_preprocess(control_image, 'canny', 'sdxl')
         controlnet = cached_model_dict['controlnet']['sd3'][controlnet_request.type][1]
         positive_cond, negative_cond = apply_controlnet(positive_cond,
                                                         negative_cond,
