@@ -29,14 +29,18 @@ python main_demo.py
 
 
 ## 2. SD type 별 기능 요약
-| SD type | T2I | I2I | Inpaint | Controlnet[Canny] | Controlnet[Inpaint] | Controlnet[Depth] | IP-Adapter | LoRA |
-|---------|-----|-----|--------------------------|-------------------|---------------------|-------------------|------------|------|
-| FLUX    | O   | O   | O                        | O                 | X                   | 작업중               | X          | O    |
-| SD3     | O   | O   | O                        | O                 | X                   | X                 | X          | X    |
-| SDXL    | O   | O   | O                        | O                 | O                   | X        | O          | O    |
-| SD15    | O   | O   | O                        | O                 | O                   | X                 | O          | O    |
+| SD type | T2I | I2I | Inpaint  | Controlnet[Canny] | Controlnet[Inpaint] | Controlnet[Depth] | Controlnet[Normal] | Controlnet[Pose] | IP-Adapter | LoRA |
+|---------|-----|-----|----------|-------------------|---------------------|-------------------|--------------------|------------------|------------|------|
+| FLUX    | O   | O   | O        | O                 | X                   | O                 | X                  | X                | X          | O    |
+| SD3     | O   | O   | O        | O                 | X                   | X                 | X                  | X                | X          | X    |
+| SDXL    | O   | O   | O        | O                 | O                   | O                 | O                  | O                | O          | O    |
+| SD15    | O   | O   | O        | O                 | O                   | O                 | O                  | O                | O          | O    |
 
 * SDXL, SD15 Controlnet Depth는 필요시 작업 수행.
+
+### Patch Node
+* (240925) Image to Pixar 추가
+* (240924) Controlnet Depth, Normal, Pose Update
 
 ### 2.1 Basic Request Format
 
@@ -78,6 +82,9 @@ class RequestData(BaseModel):
     clip: Union[str, Tuple[str, str]] = None
     clip_vision: str = None
 
+    refiner: Optional[str] = None
+    refine_switch: float= 0.4
+
     init_image: Optional[str] = None
     mask: Optional[str] = None
     prompt_positive: str = 'high quality, 4K, expert.'
@@ -118,6 +125,7 @@ canny_body = {
     'controlnet': CANNY_MODEL_NAME,
     'type': 'canny',
     'image': IMAGE_BASE64,
+    'preprocessor_type': Literal['canny', 'lineart', 'dwpose', 'normalmap_bae', 'normalmap_midas', 'depth_midas', 'depth', 'depth_zoe'],
     'strength': 1,
     'start_percent': 0,
     'end_percent': 1,
@@ -183,6 +191,7 @@ Model 종류는 Demo에서 확인 가능.
 * [IC-Light](#ic-light)
 * [Segment Anything (coming soon)](#segment-anything)
 * [Gemini](#gemini)
+* [Image-to-Cartoon](#image-to-cartoon-)
 ---
 #### FLUX
 Parameter format
@@ -640,5 +649,151 @@ data = response.json()
 prompt = data['prompt']
 return prompt
 ```
+--- 
+#### Image-to-Cartoon 
+Parameter format (SD15와 동일)
+```python
+class SD15_RequestData(RequestData):
+    checkpoint: str = 'SD15_realisticVisionV51_v51VAE.safetensors'
+    steps: int = 20
+    cfg: float = 7
+    prompt_negative: str = prompt_negative
+    sampler_name: str = 'dpmpp_sde'
+    scheduler: str = 'karras'
+    init_image: Optional[str]= None
+    mask: Optional[str]= None
+    controlnet_requests: Optional[List[ControlNet_RequestData]] = []
+    ipadapter_request: Optional[IPAdapter_RequestData] = None
+    lora_requests: Optional[List[LoRA_RequestData]] = []
+    gen_type: Literal['t2i', 'i2i', 'inpaint'] = 't2i'
+```
 
+Image-to-Cartoon Generation Example
+```python
+'''
+Input 인자
+image: str, base64 형식 이미지
+style_type: str, ['type_1', 'type_2'] 둘 중 하나
+'''
+import io, base64, os
+from PIL import Image
+import requests
 
+def _crop_image(image: Image):
+    w, h = image.size
+
+    h_ = h - h % 64
+    w_ = w - w % 64
+
+    # 중앙을 기준으로 크롭할 영역 계산
+    left = (w - w_) // 2
+    top = (h - h_) // 2
+    right = left + w_
+    bottom = top + h_
+    image = image.crop((left, top, right, bottom))
+    return image
+
+def resize_image_for_sd(image: Image, is_mask=False, resolution = 1024) :
+    w, h = image.size
+    scale = (resolution ** 2 / (w * h)) ** 0.5
+
+    scale = 1 if scale > 1 else scale
+    w_scaled = w * scale
+    h_scaled = h * scale
+    interpolation = Image.NEAREST if is_mask else Image.BICUBIC
+    image_resized = image.resize((int(w_scaled), int(h_scaled)), interpolation)
+    image_resized_cropped = _crop_image(image_resized)
+    return image_resized_cropped
+
+def convert_image_to_base64(image):
+    buffered = io.BytesIO()
+    image.save(buffered, format="PNG")
+    image_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+
+    return image_base64
+
+def convert_base64_to_image(image_base64):
+    image_data = base64.b64decode(image_base64)
+    image_rgb = Image.open(io.BytesIO(image_data))
+    return image_rgb
+
+image = Image.open(IMAGE_PATH)
+image = resize_image_for_sd(image)
+image = convert_image_to_base64(image)
+
+style_type = 'type_X'
+
+sampler_name = 'euler_ancestral' if style_type == 'type_1' else 'dpmpp_2m_sde_gpu'
+scheduler = 'simple' if style_type == 'type_1' else 'karras'
+
+request_body = {
+    'checkpoint': 'SD15_disneyPixarCartoon_v10.safetensors',
+    'vae': 'SD15_vae-ft-mse-840000-ema-pruned.safetensors',
+    'prompt_negative': 'worst quality, low quality, normal quality, bad hands,text,bad anatomy',
+    'init_image': image,
+    'steps': 30,
+    'sampler_name': sampler_name,
+    'scheduler': scheduler,
+    'gen_type': 'inpaint',
+    'controlnet_requests': [],
+    'lora_requests': [],
+}
+
+refiner_body = {
+    'refiner': 'SD15_realcartoonPixar_v12.safetensors',
+}
+
+canny_body = {
+    'controlnet': 'SD15_Canny_control_v11p_sd15_lineart.pth',
+    'type': 'canny',
+    'image': image,
+    'preprocessor_type': 'lineart',
+    'strength': 0.8 if style_type == 'type_1' else 0.65,
+    'start_percent': 0,
+    'end_percent': 1,
+}
+
+depth_body = {
+    'controlnet': 'SD15_Depth_control_sd15_depth.pth',
+    'type': 'depth',
+    'image': image,
+    'preprocessor_type': 'depth_zoe',
+    'strength': 0.6,
+    'start_percent': 0,
+    'end_percent': 1,
+}
+
+pose_body = {
+    'controlnet': 'SD15_Pose_control_v11p_sd15_openpose.pth',
+    'type': 'pose',
+    'image': image,
+    'preprocessor_type': 'dwpose',
+    'strength': 0.6,
+    'start_percent': 0,
+    'end_percent': 1,
+}
+
+ipadapter_body = {
+    'ipadapter': 'SD15_ip-adapter-plus_sd15.safetensors',
+    'clip_vision': 'CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors',
+    'images': [image],
+    'weight': 0.7 if style_type == 'type_1' else 0.6,
+    'start_at': 0,
+    'end_at': 1,
+}
+
+request_body.update(refiner_body)
+request_body['controlnet_requests'].append(canny_body)
+request_body['controlnet_requests'].append(depth_body)
+if style_type == 'type_2':
+    request_body['controlnet_requests'].append(pose_body)
+request_body['ipadapter_request'] = ipadapter_body
+
+ip_addr = '130.211.239.93:7861'
+url = f"http://{ip_addr}/i2c/generate"
+response = requests.post(url, json=request_body)
+data = response.json()
+image_base64 = data['image_base64']
+image_face_detail_base64 = data['image_face_detail_base64']
+```
+---
