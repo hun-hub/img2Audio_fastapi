@@ -2,8 +2,6 @@ import numpy as np
 import io, base64
 import torch
 from PIL import Image
-from io import BytesIO
-import cv2
 from utils.loader import load_controlnet_preprocessor
 
 

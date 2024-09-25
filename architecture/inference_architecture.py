@@ -17,14 +17,13 @@ import functions.i2c.generate
 from functions.gemini.params import Gemini_RequestData
 import functions.gemini.generate
 
-
-from .base_architecture import CntGenAPI
+from .basic_function_architecture import BaseFunction_API
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class Inference_API(CntGenAPI):
+class Inference_API(BaseFunction_API):
     def __init__(self, args):
         super().__init__(args)
         # SD3

@@ -41,76 +41,6 @@ class CntGenAPI:
             allow_headers=["*"],
         )
 
-        '''
-        ===== Load model 관리 =====
-        unet : 
-            sd15: {MODEL_NAME: MODULE}
-            sdxl:
-                base: {MODEL_NAME: MODULE}
-                refiner: {MODEL_NAME: MODULE}
-            sd3: {MODEL_NAME: MODULE}
-            flux: {MODEL_NAME: MODULE}
-        vae :
-            sd15: {MODEL_NAME: MODULE}
-            sdxl:
-                base: {MODEL_NAME: MODULE}
-                refiner: {MODEL_NAME: MODULE}
-            sd3: {MODEL_NAME: MODULE}
-            flux: {MODEL_NAME: MODULE}
-        clip :
-            sd15: {MODEL_NAME: MODULE}
-            sdxl: {MODEL_NAME: MODULE}
-                base: {MODEL_NAME: MODULE}
-                refiner: {MODEL_NAME: MODULE}
-            sd3: {MODEL_NAME: MODULE}
-            flux: {MODEL_NAME: MODULE}
-        clip_vision :
-            sd15: {MODEL_NAME: MODULE}
-            sdxl:
-                base: {MODEL_NAME: MODULE}
-                refiner: {MODEL_NAME: MODULE}
-            sd3: {MODEL_NAME: MODULE}
-            flux {MODEL_NAME: MODULE}
-        controlnet
-            'sd15' :
-                'canny' : {MODEL_NAME: MODULE}
-                'inpaint' : {MODEL_NAME: MODULE}
-                'depth' : {MODEL_NAME: MODULE}
-            'sdxl'
-                'canny' : {MODEL_NAME: MODULE}
-                'inpaint' : {MODEL_NAME: MODULE}
-                'depth' : {MODEL_NAME: MODULE}
-            'sd3'
-                'canny' : {MODEL_NAME: MODULE}
-                'inpaint' : {MODEL_NAME: MODULE}
-                'depth' : {MODEL_NAME: MODULE}
-            'flux'
-                'canny' : {MODEL_NAME: MODULE}
-                'inpaint' : {MODEL_NAME: MODULE}
-                'depth' : {MODEL_NAME: MODULE}
-        ipadapter:
-            sd15: {MODEL_NAME: MODULE}
-            sdxl: {MODEL_NAME: MODULE}
-            sd3: {MODEL_NAME: MODULE}
-            flux: {MODEL_NAME: MODULE}
-        lora:
-            sd15: 
-                'module_1':{MODEL_NAME: MODULE}
-                'module_2':{MODEL_NAME: MODULE}
-                'module_3':{MODEL_NAME: MODULE}
-            sdxl: 
-                'module_1':{MODEL_NAME: MODULE}
-                'module_2':{MODEL_NAME: MODULE}
-                'module_3':{MODEL_NAME: MODULE}
-            sd3:
-                'module_1':{MODEL_NAME: MODULE}
-                'module_2':{MODEL_NAME: MODULE}
-                'module_3':{MODEL_NAME: MODULE}
-            flux:
-                'module_1':{MODEL_NAME: MODULE}
-                'module_2':{MODEL_NAME: MODULE}
-                'module_3':{MODEL_NAME: MODULE}
-        '''
         with open('model_cache.json', 'r') as file:
             self.model_cache = json.load(file)
 
@@ -183,12 +113,12 @@ class CntGenAPI:
         try:
             # cache check & load model
             self._cached_model_update(request_data)
-            response_dict = gen_function(self.model_cache, request_data)
+            generate_output = gen_function(self.model_cache, request_data)
 
             # self.queue.get()
             torch.cuda.empty_cache()
             gc.collect()
-            return response_dict
+            return generate_output
 
         except Exception as e:
             # self.queue.get()
@@ -203,12 +133,12 @@ class CntGenAPI:
         #     time.sleep(0.1)
 
         try:
-            response_dict = gen_function(request_data)
+            gemini_output = gen_function(request_data)
 
             # self.queue.get()
             torch.cuda.empty_cache()
             gc.collect()
-            return response_dict
+            return gemini_output
 
         except Exception as e:
             # self.queue.get()
