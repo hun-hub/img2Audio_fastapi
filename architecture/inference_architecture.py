@@ -13,6 +13,7 @@ from functions.upscale.params import Upscale_RequestData
 import functions.upscale.generate
 from functions.iclight.params import ICLight_RequestData
 import functions.iclight.generate
+import functions.i2c.generate
 from functions.gemini.params import Gemini_RequestData
 import functions.gemini.generate
 
@@ -34,6 +35,7 @@ class Inference_API(CntGenAPI):
         self.app.post('/object_remove')(self.object_remove)
         self.app.post('/upscale')(self.upscale)
         self.app.post('/iclight/generate')(self.iclight_generate)
+        self.app.post('/i2c/generate')(self.i2c_generate)
         self.app.post('/gemini')(self.gemini_generate)
 
     def flux_generate(self, request_data: FLUX_RequestData):
@@ -63,6 +65,10 @@ class Inference_API(CntGenAPI):
     def iclight_generate(self, request_data: ICLight_RequestData):
         image_base64 = self.generate_blueprint(functions.iclight.generate.generate_image, request_data)
         return {"image_base64": image_base64}
+
+    def i2c_generate(self, request_data: SD15_RequestData):
+        image_base64, image_face_detail_base64 = self.generate_blueprint(functions.i2c.generate.generate_image, request_data)
+        return {"image_base64": image_base64, "image_face_detail_base64": image_face_detail_base64}
 
     def gemini_generate(self, request_data: Gemini_RequestData):
         prompt = self.gemini(functions.gemini.generate.generate_prompt, request_data)

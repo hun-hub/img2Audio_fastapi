@@ -58,6 +58,10 @@ for repo in "${repositories[@]}"; do
     if [ -f requirements.txt ]; then
         pip install -r requirements.txt
     fi
+    # Run install.py if it exists
+    if [ -f install.py ]; then
+        python install.py
+    fi
     # Go back to the custom_nodes directory
     cd ..
 done

@@ -148,6 +148,25 @@ def load_controlnet_preprocessor() :
     controlnet_preprocessor = get_function_from_comfyui(module_path, func_name)
     return controlnet_preprocessor()
 
+def load_face_detailer() :
+    module_path = 'ComfyUI/custom_nodes/ComfyUI-Impact-Pack'
+    func_name = 'impact.impact_pack.FaceDetailer'
+    face_detailer = get_function_from_comfyui(module_path, func_name)
+    return face_detailer()
+
+def load_sam(model_name='sam_vit_b_01ec64.pth') :
+    module_path = 'ComfyUI/custom_nodes/ComfyUI-Impact-Pack'
+    func_name = 'impact.impact_pack.SAMLoader'
+    sam_loader = get_function_from_comfyui(module_path, func_name)
+    return sam_loader().load_model(model_name)[0]
+
+def load_detect_provider(model_name='bbox/face_yolov8m.pt') :
+    module_path = 'ComfyUI/custom_nodes/ComfyUI-Impact-Pack'
+    func_name = 'impact.subpack_nodes.UltralyticsDetectorProvider'
+    detect_provider = get_function_from_comfyui(module_path, func_name)
+    provider, _ = detect_provider().doit(model_name)
+    return provider
+
 if __name__ == '__main__':
     # module_path = 'ComfyUI/custom_nodes/ComfyUI-LaMA-Preprocessor'
     # func_name = 'annotator.lama.LamaInpainting'

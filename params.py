@@ -18,7 +18,7 @@ class ControlNet_RequestData(BaseModel):
     controlnet: str
     type: Literal['canny', 'inpaint', 'depth', 'normal', 'pose']
     image: Optional[str]
-    preprocessor_type: Literal['canny', 'lineart', 'openpose', 'normalmap_bae', 'normalmap_midas', 'depth_midas', 'depth', 'depth_zoe']
+    preprocessor_type: Literal['canny', 'lineart', 'dwpose', 'normalmap_bae', 'normalmap_midas', 'depth_midas', 'depth', 'depth_zoe']
     # Params
     strength: float = 0.7
     start_percent: float = 0

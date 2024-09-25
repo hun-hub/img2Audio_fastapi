@@ -15,6 +15,9 @@ from functions.upscale.utils import sned_upscale_request_to_api
 from .ui.upscale_ui import build_upscale_ui
 from functions.iclight.utils import sned_iclight_request_to_api
 from .ui.iclight_ui import build_iclight_ui
+from functions.i2c.utils import sned_i2c_request_to_api
+from .ui.i2c_ui import build_i2c_ui
+
 
 from .ui.gemini_ui import build_gemini_ui
 from functions.gemini.utils import send_gemini_request_to_api
@@ -59,6 +62,8 @@ class GradioApp:
                         upscale_inputs, upscale_generate = build_upscale_ui(self.inference_addr)
                     with gr.Tab("IC-Light"):
                         iclight_inputs, iclight_generate = build_iclight_ui(image, mask, gemini_prompt, self.inference_addr)
+                    with gr.Tab("Image-to-Cartoon"):
+                        i2c_inputs, i2c_generate = build_i2c_ui(self.inference_addr)
                     with gr.Tab("Segment Anything"):
                         gr.Markdown("SAM Functions")
                     with gr.Tab("Gemini"):
@@ -92,7 +97,8 @@ class GradioApp:
             upscale_generate.click(fn= sned_upscale_request_to_api, inputs=upscale_inputs, outputs=generated_image)
             # IC-Light
             iclight_generate.click(fn=sned_iclight_request_to_api, inputs=iclight_inputs, outputs=generated_image)
-
+            # I2C
+            i2c_generate.click(fn=sned_i2c_request_to_api, inputs=i2c_inputs, outputs=generated_image)
             # API Restart Button
             # api_restart_button.click(fn=self.restart)
     def launch(self):

@@ -183,12 +183,12 @@ class CntGenAPI:
         try:
             # cache check & load model
             self._cached_model_update(request_data)
-            image_base64 = gen_function(self.model_cache, request_data)
+            response_dict = gen_function(self.model_cache, request_data)
 
             # self.queue.get()
             torch.cuda.empty_cache()
             gc.collect()
-            return image_base64
+            return response_dict
 
         except Exception as e:
             # self.queue.get()
@@ -203,12 +203,12 @@ class CntGenAPI:
         #     time.sleep(0.1)
 
         try:
-            prompt = gen_function(request_data)
+            response_dict = gen_function(request_data)
 
             # self.queue.get()
             torch.cuda.empty_cache()
             gc.collect()
-            return prompt
+            return response_dict
 
         except Exception as e:
             # self.queue.get()
