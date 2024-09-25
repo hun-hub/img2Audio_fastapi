@@ -1,5 +1,4 @@
 import torch
-from utils import set_comfyui_packages
 from utils.loader import load_face_detailer, load_sam, load_detect_provider
 import requests
 from utils.handler import handle_response
@@ -88,14 +87,15 @@ def construct_condition(unet,
                                embeds_scaling= ipadapter_request.embeds_scaling,)
     return unet, positive, negative
 
-try :
-    face_detail_module = load_face_detailer()
-except :
-    face_detail_module = load_face_detailer()
-sam_model_opt = load_sam()
-bbox_detector = load_detect_provider()
 
 def face_detailer(image, unet, clip, vae, positive_cond, negative_cond, seed) :
+    try:
+        face_detail_module = load_face_detailer()
+    except:
+        face_detail_module = load_face_detailer()
+    sam_model_opt = load_sam()
+    bbox_detector = load_detect_provider()
+
     image_face_detailed, _, _, _, _ = face_detail_module.enhance_face(
         image,
         unet,

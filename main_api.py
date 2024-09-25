@@ -1,7 +1,6 @@
 import argparse
 from architecture.inference_architecture import Inference_API
 
-
 parser = argparse.ArgumentParser(description="Run FastAPI server with specified model")
 parser.add_argument("--port", type=int, default=7861, help="Port to serve the server on")
 parser.add_argument("--default_ckpt", type=str, default='SDXL_copaxTimelessxlSDXL1_v12.safetensors', help="Default checkpoint name")

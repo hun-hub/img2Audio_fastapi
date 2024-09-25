@@ -1,7 +1,5 @@
 from fastapi import APIRouter, HTTPException
 import torch
-from utils import set_comfyui_packages
-from utils.loader import load_checkpoint
 from utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
 from .utils import (model_sampling_flux,
                     get_init_noise,
@@ -16,7 +14,6 @@ from utils.comfyui import (encode_prompt,
                            apply_lora_to_unet)
 import random
 
-# set_comfyui_packages()
 router = APIRouter()
 
 @torch.inference_mode()

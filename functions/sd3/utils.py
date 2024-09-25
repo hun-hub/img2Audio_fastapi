@@ -1,6 +1,4 @@
 import torch
-from utils import set_comfyui_packages
-from utils.loader import get_function_from_comfyui
 import requests
 from utils.handler import handle_response
 from utils.image_process import (convert_base64_to_image_array,
@@ -13,7 +11,6 @@ from utils.image_process import (convert_base64_to_image_array,
 from types import NoneType
 from PIL import Image
 
-# set_comfyui_packages()
 
 
 @torch.inference_mode()

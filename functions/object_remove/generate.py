@@ -1,7 +1,5 @@
 import torch
 from .utils import webui_lama_proprecessor, construct_condition, object_removal_prompt_generation
-from utils import set_comfyui_packages
-from utils.loader import load_checkpoint
 from utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor, convert_image_array_to_base64
 from utils.comfyui import (encode_prompt,
                            sample_image,
@@ -10,9 +8,7 @@ from utils.comfyui import (encode_prompt,
                            encode_image_for_inpaint,
                            mask_blur)
 import random
-import numpy as np
 
-# set_comfyui_packages()
 
 @torch.inference_mode()
 def remove(cached_model_dict, request_data):

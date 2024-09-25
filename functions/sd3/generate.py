@@ -12,7 +12,6 @@ from utils.comfyui import (encode_prompt,
                            mask_blur)
 import random
 
-# set_comfyui_packages()
 router = APIRouter()
 
 @torch.inference_mode()

@@ -17,7 +17,6 @@ from types import NoneType
 from PIL import Image
 import numpy as np
 
-# set_comfyui_packages()
 
 def construct_condition(unet,
                         cached_model_dict,

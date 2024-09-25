@@ -1,5 +1,4 @@
 import torch
-from utils import set_comfyui_packages
 import requests
 from utils.handler import handle_response
 from utils.image_process import (convert_base64_to_image_array,

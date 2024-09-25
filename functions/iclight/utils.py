@@ -1,5 +1,4 @@
 import torch
-from utils import set_comfyui_packages
 from utils.loader import get_function_from_comfyui
 import requests
 from utils.handler import handle_response
@@ -9,15 +8,11 @@ from utils.image_process import (convert_base64_to_image_array,
                                  convert_image_to_base64,
                                  convert_base64_to_image_tensor
                                  )
-
-
-from utils.loader import load_clip_vision
 from types import NoneType
 from PIL import Image
 import numpy as np
 import scipy
 import os
-# set_comfyui_packages()
 
 def generate_gradation(light_condition, image_array):
     if isinstance(image_array, np.ndarray):

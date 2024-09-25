@@ -1,16 +1,11 @@
 import torch
 from .utils import model_patch, i2c_prompt_generation, construct_condition, face_detailer
-from utils import set_comfyui_packages
-from utils.loader import load_checkpoint
 from utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
 from utils.comfyui import (encode_prompt,
                            sample_image,
                            decode_latent,
                            encode_image,
-                           encode_image_for_inpaint,
-                           apply_lora_to_unet,
-                           get_init_noise,
-                           mask_blur)
+                           )
 import random
 
 @torch.inference_mode()
