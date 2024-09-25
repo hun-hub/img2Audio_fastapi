@@ -29,18 +29,12 @@ repositories=(
     "https://github.com/WASasquatch/was-node-suite-comfyui.git"
     "https://github.com/Layer-norm/comfyui-lama-remover.git"
     "https://github.com/jamesWalker55/comfyui-various.git"
-    "https://github.com/XLabs-AI/x-flux-comfyui.git"
     # Pixar
     "https://github.com/BlenderNeko/ComfyUI_Noise"
     "https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes"
-    "https://github.com/pythongosssss/ComfyUI-Custom-Scripts"
     "https://github.com/pythongosssss/ComfyUI-WD14-Tagger"
-    "https://github.com/cubiq/ComfyUI_InstantID"
     "https://github.com/Extraltodeus/ComfyUI-AutomaticCFG"
-    "https://github.com/ZHO-ZHO-ZHO/ComfyUI-Gemini"
     "https://github.com/ZHO-ZHO-ZHO/ComfyUI-YoloWorld-EfficientSAM"
-
-
 
     "https://github.com/Kosinkadink/ComfyUI-Advanced-ControlNet"
     "https://github.com/shadowcz007/comfyui-mixlab-nodes"
