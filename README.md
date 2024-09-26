@@ -15,6 +15,12 @@ CHECKPOINT_ROOT = /home/gkalstn000/cnt_api/ComfyUI/models
 ```
 
 ```Bash
+conda create -n cnt_api python==3.10
+conda activate cnt_api
+sh setup_comfy.sh
+```
+
+```Bash
 # API 실행
 python main_api.py
 # Demo 실행
