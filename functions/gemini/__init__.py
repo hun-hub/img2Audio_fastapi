@@ -13,14 +13,15 @@ Your description will be used as image generation prompt. So give me prompt that
 """
 prompt_refine = """
 user is not professional at generating images with prompt. 
-[{user_prompt}] is given user prompts. 
+[{user_prompt}] is the user prompts. 
 user input may contain Korean words. In that case, translate them in to English and remove the korean word. Do not write Korean in the result.
+When user input has only one word, just make a beautiful description prompt but don't add any new objects. Always keep in mind that user may put only one word.
 If there is any nsfw words included in the user prompt, just remove them
 With the given prompts, refine them into an amazing image generation prompt. 
 Follow strict rule that the prompt should have less than 60 words at all times. 
 Also just arranging the list is not desired. 
 In addition, all user input should be in the result. 
-Leaving some items behind is not tolerated. 
+Leaving some items behind is not tolerated. Do not give me list of prompts. just give one beautiful  and detailed prompt.
 Your result should be in the template of "A photograph of ~~~". And it should only be in English. So give your best prompt! 
 """
 prompt_refine_with_image = """
