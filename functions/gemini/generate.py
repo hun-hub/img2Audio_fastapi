@@ -19,7 +19,9 @@ def generate_prompt(request_data):
     else :
         query = query_dict[request_data.query_type]
 
-    user_prompt = ', '.join(request_data.user_prompt.split(' '))
+    # user_prompt = ', '.join(request_data.user_prompt.split(' '))
+    user_prompt = request_data.user_prompt
+
     object_description = request_data.object_description
     background_description = request_data.background_description
     query = query.format(user_prompt=user_prompt,
