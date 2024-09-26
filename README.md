@@ -17,14 +17,14 @@ CHECKPOINT_ROOT = /home/gkalstn000/cnt_api/ComfyUI/models
 ```Bash
 conda create -n cnt_api python==3.10
 conda activate cnt_api
-sh setup_comfy.sh
+bash setup_comfy.sh
 ```
 
 ```Bash
 # API 실행
-python main_api.py
+python main_api.py --port PORT_NUM
 # Demo 실행
-python main_demo.py
+python main_demo.py --inference_addr "localhost:PORT_NUM"
 ```
 
 | 서버  | IP addr | API Port | Demo Port |
