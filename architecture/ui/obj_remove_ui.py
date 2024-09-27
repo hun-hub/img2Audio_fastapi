@@ -10,7 +10,7 @@ sdxl_checkpoint_list.sort()
 inpaint_model_list.sort()
 
 def build_object_remove_ui(prompt, ip_addr) :
-    checkpoint = gr.Dropdown(sdxl_checkpoint_list, label="Select SDXL checkpoint", value = sdxl_checkpoint_list[3])
+    checkpoint = gr.Dropdown(sdxl_checkpoint_list, label="Select SDXL checkpoint", value = sdxl_checkpoint_list[0])
     inpaint_model_name = gr.Dropdown(inpaint_model_list, label="Select Inpaint patch", value=inpaint_model_list[-1])
 
     with gr.Row():
