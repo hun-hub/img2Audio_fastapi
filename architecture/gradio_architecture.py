@@ -77,7 +77,7 @@ class GradioApp:
                                         gr.Text('', visible=False),
                                         gr.Text('prompt_refine', visible=False),
                                         gr.Image(sources='upload', type="numpy", visible=False),
-                                        gr.Text(self.inference_addr, visible=False)]
+                                        gr.Textbox(self.inference_addr, visible=False)]
             gemini_refinement.click(fn=send_gemini_request_to_api, inputs=gemini_inputs_for_imagen, outputs=gemini_prompt)
             # prompt.change(fn=send_gemini_request_to_api, inputs=gemini_inputs_for_imagen, outputs=gemini_prompt)
 

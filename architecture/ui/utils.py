@@ -13,7 +13,7 @@ def generate_gen_type_ui(ip_addr) :
 
     inputs = [
         gen_type,
-        gr.Text(ip_addr, visible=False)
+        gr.Textbox(ip_addr, visible=False)
     ]
     return inputs
 
