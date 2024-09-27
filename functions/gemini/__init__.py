@@ -92,3 +92,14 @@ Final prompt should be natural sentences with natural expressions. The descripti
 
 Ensure the format "A photo of a [object_discription], [background_description]. [keywords]" is preserved. 
 """
+
+i2c_description = """give a detailed description of a given image.
+description will be used as a text-to-image generation prompt.
+So it's really important for detailed and quality prompt from the image.
+Include human race information (black, white, Asian, Korean, etc.)
+Your description should be less than 40 words.
+Do not leave any items in the image or details behind.
+Do not just list the items in the image.
+Describe them like a prompt for image generation.
+Your description will be used as image generation prompt.
+So give me prompt that would work great when generating image."""

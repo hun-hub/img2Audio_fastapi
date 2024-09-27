@@ -10,8 +10,9 @@
 ## 1. 실행
 `.env` 파일 수정
 ```Bash
-COMFYUI_PATH =/home/gkalstn000/cnt_api/ComfyUI
-CHECKPOINT_ROOT = /home/gkalstn000/cnt_api/ComfyUI/models
+COMFYUI_PATH =PATH_TO_API/ComfyUI
+CHECKPOINT_ROOT = CHECKPOINT_ROOT
+GEMINI_ADDR = 130.211.239.93:7860
 ```
 
 ```Bash

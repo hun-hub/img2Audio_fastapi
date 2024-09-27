@@ -1,5 +1,6 @@
 import torch
-from .utils import webui_lama_proprecessor, construct_condition, object_removal_prompt_generation
+from .utils import webui_lama_proprecessor, construct_condition
+from functions.gemini.utils import send_gemini_request_to_api
 from utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor, convert_image_array_to_base64
 from utils.comfyui import (encode_prompt,
                            sample_image,
@@ -24,7 +25,7 @@ def remove(cached_model_dict, request_data):
     mask = mask_blur(mask)
     lama_preprocessed = webui_lama_proprecessor(init_image, mask).unsqueeze(0) / 255
     # Gemini prompt
-    prompt = object_removal_prompt_generation('image_description', lama_preprocessed)
+    prompt = send_gemini_request_to_api(query_type='image_description', image=lama_preprocessed * 255)
     print('Object Removal Prompt:', prompt)
     seed = random.randint(1, int(1e9)) if request_data.seed == -1 else request_data.seed
     positive_cond, negative_cond = encode_prompt(clip,

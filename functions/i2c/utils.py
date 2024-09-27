@@ -37,19 +37,6 @@ def model_patch(unet) :
     unet = model_patcher.patch(unet, b1=1.9, b2=1.4, s1=0.9, s2=0.2)[0]
     return unet
 
-def i2c_prompt_generation(image_tensor) :
-    prefix = 'Modisn disney, pixar 3d animation style image.\n'
-
-    image_tensor = image_tensor * 255
-    image_base64 = convert_image_tensor_to_base64(image_tensor)
-
-    prompt = gemini_with_prompt_and_image(
-        query,
-        image_base64)
-
-    return prefix + prompt
-
-
 def construct_condition(unet,
                         cached_model_dict,
                         positive,

@@ -1,11 +1,12 @@
 import torch
-from .utils import model_patch, i2c_prompt_generation, construct_condition, face_detailer
+from .utils import model_patch, construct_condition, face_detailer
 from utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
 from utils.comfyui import (encode_prompt,
                            sample_image,
                            decode_latent,
                            encode_image,
                            )
+from functions.gemini.utils import send_gemini_request_to_api
 import random
 
 @torch.inference_mode()
@@ -39,7 +40,9 @@ def generate_image(cached_model_dict, request_data):
 
     seed = random.randint(1, int(1e9)) if request_data.seed == -1 else request_data.seed
 
-    prompt_positive_base = i2c_prompt_generation(init_image)
+    prompt_positive_prefix = 'Modisn disney, pixar 3d animation style image.\n'
+    prompt_positive_base = prompt_positive_prefix + send_gemini_request_to_api(query_type='i2c_description', image=init_image * 255)
+
     prompt_positive_refine = prompt_positive_base if is_animation_style else 'best quality,masterpiece,'
     prompt_negative = request_data.prompt_negative
 

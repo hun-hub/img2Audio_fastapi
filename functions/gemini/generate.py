@@ -9,7 +9,8 @@ query_dict = {'product_description': product_description,
               'synthesized_image_description': synthesized_image_description,
               'decompose_background_and_product': decompose_background_and_product,
               'iclight_keep_background': iclight_keep_background,
-              'iclight_gen_background': iclight_gen_background}
+              'iclight_gen_background': iclight_gen_background,
+              'i2c_description': i2c_description}
 
 @torch.inference_mode()
 def generate_prompt(request_data):

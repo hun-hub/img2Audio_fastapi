@@ -23,17 +23,7 @@ import numpy as np
 import os
 import cv2
 
-def object_removal_prompt_generation(query_type, image_tensor) :
-    query = query_dict[query_type]
 
-    image_tensor = image_tensor * 255
-    image_base64 = convert_image_tensor_to_base64(image_tensor)
-
-    prompt = gemini_with_prompt_and_image(
-        query,
-        image_base64)
-
-    return prompt
 
 def construct_condition(unet,
                         vae,

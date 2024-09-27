@@ -67,17 +67,17 @@ class GradioApp:
                     with gr.Tab("Segment Anything"):
                         gr.Markdown("SAM Functions")
                     with gr.Tab("Gemini"):
-                        gemini_inputs, (gemini_result, gemini_button) = build_gemini_ui(self.inference_addr)
+                        gemini_inputs, (gemini_result, gemini_button) = build_gemini_ui()
 
                 with gr.Column() :
                     generated_image = gr.Image(sources='upload', type="numpy", label="Generated Image", interactive=False)
                     # api_restart_button = gr.Button("API Restart")
-            gemini_inputs_for_imagen = [prompt,
-                                        gr.Text('', visible=False),
-                                        gr.Text('', visible=False),
-                                        gr.Text('prompt_refine', visible=False),
+            gemini_inputs_for_imagen = [gr.Text('prompt_refine', visible=False),
                                         gr.Image(sources='upload', type="numpy", visible=False),
-                                        gr.Textbox(self.inference_addr, visible=False)]
+                                        prompt,
+                                        gr.Text('', visible=False),
+                                        gr.Text('', visible=False),
+                                        ]
             gemini_refinement.click(fn=send_gemini_request_to_api, inputs=gemini_inputs_for_imagen, outputs=gemini_prompt)
             # prompt.change(fn=send_gemini_request_to_api, inputs=gemini_inputs_for_imagen, outputs=gemini_prompt)
 
