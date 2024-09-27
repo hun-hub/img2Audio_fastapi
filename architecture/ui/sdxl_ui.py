@@ -6,7 +6,7 @@ sdxl_checkpoint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'che
 sdxl_checkpoint_list.sort()
 
 def build_sdxl_ui(image, mask, prompt, ip_addr) :
-    checkpoint = gr.Dropdown(sdxl_checkpoint_list, label="Select SDXL checkpoint", value = sdxl_checkpoint_list[3])
+    checkpoint = gr.Dropdown(sdxl_checkpoint_list, label="Select SDXL checkpoint", value = sdxl_checkpoint_list[0])
 
     extra_inputs = generate_gen_type_ui(ip_addr)
 
