@@ -6,20 +6,21 @@ import time
 import random
 import logging
 from queue import Queue
-from utils.loader import load_extra_path_config
-from utils import (update_model_cache_from_blueprint,
-                   cache_checkpoint,
-                   cache_unet,
-                   cache_vae,
-                   cache_clip,
-                   cache_controlnet,
-                   cache_ipadapter,
-                   cache_lora
-                   )
+from cgen_utils.loader import load_extra_path_config
+from cgen_utils import (update_model_cache_from_blueprint,
+                        cache_checkpoint,
+                        cache_unet,
+                        cache_vae,
+                        cache_clip,
+                        cache_controlnet,
+                        cache_ipadapter,
+                        cache_lora
+                        )
 import gc
 import psutil
 import json
 import os, sys, signal
+import comfy.model_management
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
@@ -115,15 +116,19 @@ class CntGenAPI:
             self._cached_model_update(request_data)
             generate_output = gen_function(self.model_cache, request_data)
 
+            comfy.model_management.unload_all_models()
+            comfy.model_management.cleanup_models()
             # self.queue.get()
-            torch.cuda.empty_cache()
             gc.collect()
+            comfy.model_management.soft_empty_cache()
+            torch.cuda.empty_cache()
             return generate_output
 
         except Exception as e:
             # self.queue.get()
-            torch.cuda.empty_cache()
             gc.collect()
+            torch.cuda.empty_cache()
+
             raise HTTPException(status_code=500, detail=str(e))
 
     def gemini(self, gen_function, request_data):

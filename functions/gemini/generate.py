@@ -1,5 +1,5 @@
 import torch
-from utils.text_process import gemini_with_prompt, gemini_with_prompt_and_image
+from cgen_utils.text_process import gemini_with_prompt, gemini_with_prompt_and_image
 from . import *
 
 query_dict = {'product_description': product_description,

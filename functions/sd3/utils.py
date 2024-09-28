@@ -1,13 +1,13 @@
 import torch
 import requests
-from utils.handler import handle_response
-from utils.image_process import (convert_base64_to_image_array,
-                                 convert_image_array_to_base64,
-                                 convert_base64_to_image_tensor,
-                                 controlnet_image_preprocess,
-                                 resize_image_for_sd,
-                                 convert_image_to_base64,
-                                 )
+from cgen_utils.handler import handle_response
+from cgen_utils.image_process import (convert_base64_to_image_array,
+                                      convert_image_array_to_base64,
+                                      convert_base64_to_image_tensor,
+                                      controlnet_image_preprocess,
+                                      resize_image_for_sd,
+                                      convert_image_to_base64,
+                                      )
 from types import NoneType
 from PIL import Image
 
@@ -19,14 +19,14 @@ def apply_controlnet(positive, negative, controlnet, vae, image, strength, start
     controlnet_applier = ControlNetApplySD3()
     positive, negative = controlnet_applier.apply_controlnet(positive, negative, controlnet, image, strength, start_percent, end_percent, vae)
     return positive, negative
-
+@torch.inference_mode()
 def model_sampling_sd3(unet, shift:float = 3) :
     from ComfyUI.comfy_extras.nodes_model_advanced import ModelSamplingSD3
     model_sampler = ModelSamplingSD3()
     unet = model_sampler.patch(unet, shift)[0]
 
     return unet
-
+@torch.inference_mode()
 def get_init_noise(width, height, batch_size=1) :
     from ComfyUI.comfy_extras.nodes_sd3 import EmptySD3LatentImage
     latent_sampler = EmptySD3LatentImage()
@@ -34,18 +34,21 @@ def get_init_noise(width, height, batch_size=1) :
 
     return init_noise
 
-def construct_condition(unet,
-                        cached_model_dict,
-                        positive,
-                        negative,
-                        controlnet_requests,
-                        ):
+
+@torch.inference_mode()
+def construct_controlnet_condition(
+        cached_model_dict,
+        positive,
+        negative,
+        controlnet_requests,
+):
+
     for controlnet_request in controlnet_requests:
         if controlnet_request.type == 'inpaint':
             control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
             control_image, control_mask = control_image[:, :, :, :3], control_image[:, :, :, 3]
             control_image = torch.where(control_mask[:, :, :, None] > 0.5, 1, control_image)
-        else:
+        else :
             control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
             control_image = controlnet_image_preprocess(control_image, controlnet_request.preprocessor_type, 'sdxl')
         controlnet = cached_model_dict['controlnet']['sd3'][controlnet_request.type][1]
@@ -56,7 +59,13 @@ def construct_condition(unet,
                                               controlnet_request.strength,
                                               controlnet_request.start_percent,
                                               controlnet_request.end_percent, )
-    return unet, positive, negative
+
+
+    return positive, negative
+
+
+
+
 
 def sned_sd3_request_to_api(
         checkpoint,

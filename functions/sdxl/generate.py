@@ -1,22 +1,24 @@
 import torch
-from .utils import construct_condition
-from utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
-from utils.comfyui import (encode_prompt,
-                           sample_image,
-                           decode_latent,
-                           encode_image,
-                           encode_image_for_inpaint,
-                           apply_lora_to_unet,
-                           get_init_noise,
-                           mask_blur)
+from .utils import construct_controlnet_condition, construct_ipadapter_condition
+from cgen_utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
+from cgen_utils.comfyui import (encode_prompt,
+                                sample_image,
+                                decode_latent,
+                                encode_image,
+                                encode_image_for_inpaint,
+                                apply_lora_to_unet,
+                                get_init_noise,
+                                mask_blur)
 import random
+import copy
 
 
 @torch.inference_mode()
 def generate_image(cached_model_dict, request_data):
-    unet_base = cached_model_dict['unet']['sdxl']['base'][1]
+    unet_base = cached_model_dict['unet']['sdxl']['base'][1].clone()
     vae_base = cached_model_dict['vae']['sdxl']['base'][1]
     clip_base = cached_model_dict['clip']['sdxl']['base'][1]
+
     vae_refine = vae_base
 
     start_base = int(request_data.steps - request_data.steps * request_data.denoise)
@@ -52,18 +54,23 @@ def generate_image(cached_model_dict, request_data):
                 clip_base,
                 cached_model_dict,
                 lora_request)
+
+    unet_base = construct_ipadapter_condition(
+        unet_base,
+        cached_model_dict,
+        ipadapter_request
+    )
+
     # Base Model Flow
     positive_cond, negative_cond = encode_prompt(clip_base,
                                                  request_data.prompt_positive,
                                                  request_data.prompt_negative)
 
-    unet_base, positive_cond_base, negative_cond_base = construct_condition(
-        unet_base,
+    positive_cond_base, negative_cond_base = construct_controlnet_condition(
         cached_model_dict,
         positive_cond,
         negative_cond,
         controlnet_requests,
-        ipadapter_request,
     )
 
     latent_image = sample_image(
@@ -98,19 +105,27 @@ def generate_image(cached_model_dict, request_data):
                     cached_model_dict,
                     lora_request)
 
+        unet_refine = construct_ipadapter_condition(
+            unet_refine,
+            cached_model_dict,
+            ipadapter_request
+        )
+
         positive_cond, negative_cond = encode_prompt(clip_refine,
                                                      request_data.prompt_positive,
                                                      request_data.prompt_negative)
-        unet_refine, positive_cond_refine, negative_cond_refine = construct_condition(unet_refine,
-                                                                                      cached_model_dict,
-                                                                                      positive_cond,
-                                                                                      negative_cond,
-                                                                                      controlnet_requests,
-                                                                                      ipadapter_request)
+
+        positive_cond_refine, negative_cond_refine = construct_controlnet_condition(
+            cached_model_dict,
+            positive_cond,
+            negative_cond,
+            controlnet_requests,
+        )
+
         latent_image = sample_image(
             unet=unet_refine,
-            positive_cond=positive_cond,
-            negative_cond=negative_cond,
+            positive_cond=positive_cond_refine,
+            negative_cond=negative_cond_refine,
             latent_image=latent_image,
             seed=seed,
             steps=request_data.steps,
@@ -122,12 +137,10 @@ def generate_image(cached_model_dict, request_data):
             add_noise='disable',
             return_with_leftover_noise='disable'
         )
-
-
-
     image_tensor = decode_latent(vae_refine, latent_image)
+
     if request_data.gen_type == 'inpaint' :
         image_tensor = image_tensor * mask.unsqueeze(-1) + init_image * (1 - mask.unsqueeze(-1))
-
+    #         unload_model_clones(loaded_model.model, unload_weights_only=True, force_unload=False) #unload clones where the weights are different
     image_base64 = convert_image_tensor_to_base64(image_tensor * 255)
     return image_base64

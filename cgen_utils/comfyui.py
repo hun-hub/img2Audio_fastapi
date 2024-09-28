@@ -1,6 +1,6 @@
 import torch
-from utils.loader import get_function_from_comfyui
-from utils import set_comfyui_packages
+from cgen_utils.loader import get_function_from_comfyui
+from cgen_utils import set_comfyui_packages
 # set_comfyui_packages()
 
 @torch.inference_mode()
@@ -37,7 +37,6 @@ def sample_image(unet,
         add_noise=add_noise,
         return_with_leftover_noise=return_with_leftover_noise
     )[0]
-
     return image_latent
 
 @torch.inference_mode()
@@ -81,32 +80,19 @@ def apply_controlnet(positive, negative, controlnet, image, strength, start_perc
     return positive, negative
 
 @torch.inference_mode()
-def apply_ipadapter(model,
-                    ipadapter,
-                    clip_vision,
-                    image,
-                    weight,
-                    start_at,
-                    end_at,
-                    image_negative=None,
-                    weight_type='linear',
-                    combine_embeds='concat',
-                    embeds_scaling = 'V only') :
+def apply_ipadapter(
+        unet,
+        ipadapter,
+        **kwargs
+) :
     from ComfyUI.custom_nodes.ComfyUI_IPAdapter_plus.IPAdapterPlus import IPAdapterAdvanced
     ipadapter_applier = IPAdapterAdvanced()
-    unet = ipadapter_applier.apply_ipadapter(
-        model=model,
+
+    unet, _ = ipadapter_applier.apply_ipadapter(
+        model=unet,
         ipadapter=ipadapter,
-        image=image,
-        clip_vision=clip_vision,
-        weight=weight,
-        start_at=start_at,
-        end_at=end_at,
-        image_negative=image_negative,
-        weight_type=weight_type,
-        combine_embeds=combine_embeds,
-        embeds_scaling=embeds_scaling
-    )[0]
+        **kwargs
+    )
     return unet
 
 @torch.inference_mode()
@@ -124,14 +110,14 @@ def apply_lora_to_unet(unet, clip, cached_model_dict, lora_request) :
         raise ValueError(f"Lora {lora_request.lora} not found in the cached_model_dict")
     unet, clip = load_lora_for_models(unet, clip, lora, lora_request.strength_model, strength_clip=lora_request.strength_clip)
     return unet, clip
-
+@torch.inference_mode()
 def get_init_noise(width, height, batch_size=1) :
     from ComfyUI.nodes import EmptyLatentImage
     latent_sampler = EmptyLatentImage()
     init_noise = latent_sampler.generate(width, height, batch_size)[0]
 
     return init_noise
-
+@torch.inference_mode()
 def make_image_batch(image_list) :
     piv_image = image_list.pop(0)
     image_batch = [piv_image]

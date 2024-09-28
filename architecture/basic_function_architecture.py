@@ -1,7 +1,7 @@
 import logging
 from .base_architecture import CntGenAPI
 from params import BaseFunctionRequestData
-from utils.image_process import *
+from cgen_utils.image_process import *
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)

@@ -1,15 +1,15 @@
 import torch
-from .utils import construct_condition
-from utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
-from utils.comfyui import (encode_prompt,
-                           sample_image,
-                           decode_latent,
-                           encode_image,
-                           encode_image_for_inpaint,
-                           apply_controlnet,
-                           get_init_noise,
-                           apply_lora_to_unet,
-                           mask_blur)
+from .utils import construct_ipadapter_condition, construct_controlnet_condition
+from cgen_utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
+from cgen_utils.comfyui import (encode_prompt,
+                                sample_image,
+                                decode_latent,
+                                encode_image,
+                                encode_image_for_inpaint,
+                                apply_controlnet,
+                                get_init_noise,
+                                apply_lora_to_unet,
+                                mask_blur)
 import random
 
 # prompt_post_fix = ", RAW photo, subject, 8k uhd, dslr, soft lighting, high quality, film grain, Fujifilm XT3"
@@ -51,17 +51,22 @@ def generate_image(cached_model_dict, request_data):
                 cached_model_dict,
                 lora_request)
 
+    unet = construct_ipadapter_condition(
+        unet,
+        cached_model_dict,
+        ipadapter_request
+    )
+
     positive_cond, negative_cond = encode_prompt(clip,
                                                  request_data.prompt_positive,
                                                  request_data.prompt_negative)
 
-    unet, positive_cond, negative_cond = construct_condition(
-        unet,
+    positive_cond, negative_cond = construct_controlnet_condition(
         cached_model_dict,
         positive_cond,
         negative_cond,
         controlnet_requests,
-        ipadapter_request)
+    )
 
     latent_image = sample_image(
         unet= unet,

@@ -1,13 +1,13 @@
 import torch
 from .utils import webui_lama_proprecessor, construct_condition
 from functions.gemini.utils import send_gemini_request_to_api
-from utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor, convert_image_array_to_base64
-from utils.comfyui import (encode_prompt,
-                           sample_image,
-                           decode_latent,
-                           encode_image,
-                           encode_image_for_inpaint,
-                           mask_blur)
+from cgen_utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor, convert_image_array_to_base64
+from cgen_utils.comfyui import (encode_prompt,
+                                sample_image,
+                                decode_latent,
+                                encode_image,
+                                encode_image_for_inpaint,
+                                mask_blur)
 import random
 
 

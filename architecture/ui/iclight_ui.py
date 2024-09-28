@@ -5,7 +5,7 @@ from functions.iclight.utils import generate_gradation, expand_mask
 import os
 import numpy as np
 from PIL import Image
-from utils.image_process import resize_image_for_sd
+from cgen_utils.image_process import resize_image_for_sd
 
 checkpoint_root = os.getenv('CHECKPOINT_ROOT')
 sd15_checkpoint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'checkpoints')) if 'SD15' in x]

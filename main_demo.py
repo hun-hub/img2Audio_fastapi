@@ -1,7 +1,11 @@
+from cgen_utils import set_comfyui_packages
 from dotenv import load_dotenv
 load_dotenv()
+set_comfyui_packages()
+
 from architecture.gradio_architecture import GradioApp
 import argparse
+
 
 
 parser = argparse.ArgumentParser(description="Run Gradio")

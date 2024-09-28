@@ -1,11 +1,11 @@
 import torch
-from .utils import model_patch, construct_condition, face_detailer
-from utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
-from utils.comfyui import (encode_prompt,
-                           sample_image,
-                           decode_latent,
-                           encode_image,
-                           )
+from .utils import model_patch, construct_controlnet_condition, construct_ipadapter_condition, face_detailer
+from cgen_utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
+from cgen_utils.comfyui import (encode_prompt,
+                                sample_image,
+                                decode_latent,
+                                encode_image,
+                                )
 from functions.gemini.utils import send_gemini_request_to_api
 import random
 
@@ -47,18 +47,22 @@ def generate_image(cached_model_dict, request_data):
     prompt_negative = request_data.prompt_negative
 
 
+    unet_base = construct_ipadapter_condition(
+        unet_base,
+        cached_model_dict,
+        ipadapter_request
+    )
+
     # Base Model Flow
     positive_cond, negative_cond = encode_prompt(clip_base,
                                                  prompt_positive_base,
                                                  prompt_negative)
 
-    unet_base, positive_cond_base, negative_cond_base = construct_condition(
-        unet_base,
+    positive_cond_base, negative_cond_base = construct_controlnet_condition(
         cached_model_dict,
         positive_cond,
         negative_cond,
         controlnet_requests,
-        ipadapter_request,
     )
 
     latent_image = sample_image(
@@ -102,6 +106,7 @@ def generate_image(cached_model_dict, request_data):
     )
 
     image_tensor = decode_latent(vae_refine if is_animation_style else vae_base, latent_image)
+    image_base64 = convert_image_tensor_to_base64(image_tensor * 255)
 
     seed = random.randint(1, int(1e9)) if request_data.seed == -1 else request_data.seed
 
@@ -115,7 +120,6 @@ def generate_image(cached_model_dict, request_data):
         seed
     )
 
-    image_base64 = convert_image_tensor_to_base64(image_tensor * 255)
     image_face_detailed_base64 = convert_image_tensor_to_base64(image_face_detailed_tensor * 255)
 
     return image_base64, image_face_detailed_base64

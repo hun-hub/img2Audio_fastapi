@@ -3,7 +3,6 @@
 ## 0. Install
 [Setting manual](https://www.notion.so/connectbrick/GCP-L4-Server-setting-21b19b610d044d018fcfae14d55f8fde)
 * Anaconda
-* g-cloud
 * huggingface 
 
 

@@ -1,17 +1,17 @@
 from fastapi import APIRouter, HTTPException
 import torch
-from utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
+from cgen_utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
 from .utils import (model_sampling_flux,
                     get_init_noise,
                     flux_guidance,
-                    construct_condition)
-from utils.comfyui import (encode_prompt,
-                           sample_image,
-                           decode_latent,
-                           encode_image,
-                           encode_image_for_inpaint,
-                           mask_blur,
-                           apply_lora_to_unet)
+                    construct_controlnet_condition)
+from cgen_utils.comfyui import (encode_prompt,
+                                sample_image,
+                                decode_latent,
+                                encode_image,
+                                encode_image_for_inpaint,
+                                mask_blur,
+                                apply_lora_to_unet)
 import random
 
 router = APIRouter()
@@ -60,8 +60,7 @@ def generate_image(cached_model_dict, request_data):
 
     positive_cond = flux_guidance(positive_cond, request_data.cfg)
 
-    unet, positive_cond, negative_cond = construct_condition(
-        unet,
+    positive_cond, negative_cond = construct_controlnet_condition(
         cached_model_dict,
         positive_cond,
         negative_cond,

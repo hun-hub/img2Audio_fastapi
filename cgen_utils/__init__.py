@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from tabulate import tabulate
 from typing import List, Dict, Any
 import pandas as pd
-import gc
+import torch
 from prettytable import PrettyTable
 
 
@@ -44,7 +44,7 @@ def set_comfyui_packages() :
     if COMFYUI_PATH not in sys.path:
         sys.path.append(os.path.abspath(COMFYUI_PATH))
         print(f'Setting ComfyUI Packages PATH to {COMFYUI_PATH}')
-
+@torch.inference_mode()
 def update_model_cache_from_blueprint(model_cache, model_cache_blueprint):
     # 테이블을 생성하여 변경된 내용을 기록
     changes_table = PrettyTable()
@@ -79,9 +79,9 @@ def update_model_cache_from_blueprint(model_cache, model_cache_blueprint):
     for model_type in model_cache.keys():
         recursive_update(model_cache[model_type], model_cache_blueprint[model_type], model_type)
     print(changes_table)
-
+@torch.inference_mode()
 def cache_checkpoint(model_cache, model_cache_blueprint, checkpoint_name, is_refiner=False) :
-    from utils.loader import load_checkpoint
+    from cgen_utils.loader import load_checkpoint
     checkpoint_type = checkpoint_name.split('_')[0].lower()
 
     sd_variant = 'refiner' if is_refiner else 'base'
@@ -90,12 +90,12 @@ def cache_checkpoint(model_cache, model_cache_blueprint, checkpoint_name, is_ref
     if cached_unet is not None and cached_unet[0] == checkpoint_name :
         return None
 
-    unet, vae, clip, _ = load_checkpoint(checkpoint_name)
+    unet, vae, clip = load_checkpoint(checkpoint_name)
 
     model_cache_blueprint['unet'][checkpoint_type][sd_variant] = (checkpoint_name, unet)
     model_cache_blueprint['vae'][checkpoint_type][sd_variant] = (checkpoint_name, vae)
     model_cache_blueprint['clip'][checkpoint_type][sd_variant] = (checkpoint_name, clip)
-
+@torch.inference_mode()
 def cache_unet(model_cache, model_cache_blueprint, unet_name) :
     from ComfyUI.nodes import UNETLoader
     unet_type = unet_name.split('_')[0].lower()
@@ -107,7 +107,7 @@ def cache_unet(model_cache, model_cache_blueprint, unet_name) :
     unet_loader = UNETLoader()
     unet = unet_loader.load_unet(unet_name, 'fp8_e4m3fn')[0]
     model_cache_blueprint['unet'][unet_type]['base'] = (unet_name, unet)
-
+@torch.inference_mode()
 def cache_vae(model_cache, model_cache_blueprint, vae_name) :
     from ComfyUI.nodes import VAELoader
     vae_type = vae_name.split('_')[0].lower()
@@ -121,6 +121,7 @@ def cache_vae(model_cache, model_cache_blueprint, vae_name) :
     model_cache_blueprint['vae'][vae_type]['base'] = (vae_name, vae)
 
 # TODO: 일단 CLIP 따로 load하는 case는 FLUX로 가정.
+@torch.inference_mode()
 def cache_clip(model_cache, model_cache_blueprint, clip_name) :
     from ComfyUI.nodes import DualCLIPLoader, CLIPLoader
     if isinstance(clip_name, tuple) :
@@ -135,8 +136,9 @@ def cache_clip(model_cache, model_cache_blueprint, clip_name) :
         model_cache_blueprint['clip'][clip_type]['base'] = (clip_name, clip)
 def cache_clip_vision(model_cache, clip_vision) :
     pass
+@torch.inference_mode()
 def cache_controlnet(model_cache, model_cache_blueprint, controlnet_requests) :
-    from utils.loader import load_controlnet
+    from cgen_utils.loader import load_controlnet
     for controlnet_request in controlnet_requests :
         control_model = controlnet_request['controlnet']
         control_type = controlnet_request['type']
@@ -148,8 +150,9 @@ def cache_controlnet(model_cache, model_cache_blueprint, controlnet_requests) :
 
         controlnet = load_controlnet(control_model)
         model_cache_blueprint['controlnet'][checkpoint_type][control_type] = (control_model, controlnet)
+@torch.inference_mode()
 def cache_ipadapter(model_cache, model_cache_blueprint, ipadapter_request) :
-    from utils.loader import load_ipadapter
+    from cgen_utils.loader import load_ipadapter
     ipadapter_model = ipadapter_request['ipadapter']
     ipadapter_type = ipadapter_model.split('_')[0].lower()
 
@@ -159,9 +162,9 @@ def cache_ipadapter(model_cache, model_cache_blueprint, ipadapter_request) :
 
     ipadapter = load_ipadapter(ipadapter_model)
     model_cache_blueprint['ipadapter'][ipadapter_type] = (ipadapter_model, ipadapter)
-
+@torch.inference_mode()
 def cache_lora(model_cache, model_cache_blueprint, lora_requests) :
-    from utils.loader import load_lora
+    from cgen_utils.loader import load_lora
     lora_type = lora_requests[0]['lora'].split('_')[0].lower()
     for i, lora_request in enumerate(lora_requests) :
         lora_model = lora_request['lora']

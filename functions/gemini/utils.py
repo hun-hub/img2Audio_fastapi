@@ -1,17 +1,17 @@
-from utils.image_process import (convert_base64_to_image_array,
-                                 convert_image_array_to_base64,
-                                 resize_image_for_sd,
-                                 convert_image_to_base64,
-                                 convert_base64_to_image_tensor,
-                                 convert_image_tensor_to_base64, convert_base64_to_image
-                                 )
+from cgen_utils.image_process import (convert_base64_to_image_array,
+                                      convert_image_array_to_base64,
+                                      resize_image_for_sd,
+                                      convert_image_to_base64,
+                                      convert_base64_to_image_tensor,
+                                      convert_image_tensor_to_base64, convert_base64_to_image
+                                      )
 from types import NoneType
 from PIL import Image
 import requests
 import numpy as np
 import os
 import torch
-from utils.handler import handle_response
+from cgen_utils.handler import handle_response
 
 def send_gemini_request_to_api(
         query_type,

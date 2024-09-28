@@ -2,9 +2,8 @@ import importlib, sys, os
 import torch
 import numpy as np
 import yaml, os
-from utils import set_comfyui_packages
-set_comfyui_packages()
 import folder_paths
+
 CHECKPOINT_ROOT = os.getenv('CHECKPOINT_ROOT')
 
 def load_extra_path_config(yaml_path):
@@ -58,12 +57,10 @@ def get_function_from_comfyui(module_path, func_name = None) :
 # TODO: clip_vision 가지고 다니면 IP-adapter 할 때 굳이 안불러와도됨.
 @torch.inference_mode()
 def load_checkpoint(model_name) :
-    from ComfyUI.comfy.sd import load_checkpoint_guess_config
-    model_path = os.path.join(CHECKPOINT_ROOT, 'checkpoints', model_name)
-    if not os.path.exists(model_path):
-        raise Exception(f"SD model path wrong: {model_path}")
-    model_patcher, clip, vae, clipvision = load_checkpoint_guess_config(model_path)
-    return model_patcher, vae, clip, clipvision
+    from ComfyUI.nodes import CheckpointLoaderSimple
+    checkpoint_loader = CheckpointLoaderSimple()
+    model_patcher, clip, vae = checkpoint_loader.load_checkpoint(model_name)
+    return model_patcher, vae, clip
 
 @torch.inference_mode()
 def load_controlnet(model_name) :
@@ -93,11 +90,9 @@ def load_upscaler(model_name) :
 
 @torch.inference_mode()
 def load_clip_vision(model_name) :
-    from ComfyUI.comfy.clip_vision import load
-    model_path = os.path.join(CHECKPOINT_ROOT, 'clip_vision', model_name)
-    if not os.path.exists(model_path):
-        raise Exception(f"CLIP_vision model path wrong: {model_path}")
-    clip_vision = load(model_path)
+    from ComfyUI.nodes import CLIPVisionLoader
+    clipvision_loader = CLIPVisionLoader()
+    clip_vision = clipvision_loader.load_clip(model_name)[0]
     return clip_vision
 
 @torch.inference_mode()
@@ -134,32 +129,32 @@ def resize_image_with_pad(image, resolution) :
     _resize_image_with_pad = get_function_from_comfyui(module_path, func_name)
 
     return _resize_image_with_pad(image, resolution, skip_hwc3=True)
-
+@torch.inference_mode()
 def load_lamaInpainting() :
     module_path = 'ComfyUI/custom_nodes/ComfyUI-LaMA-Preprocessor'
     func_name = 'inpaint_Lama.LamaInpainting'
     LamaInpainting = get_function_from_comfyui(module_path, func_name)
 
     return LamaInpainting()
-
+@torch.inference_mode()
 def load_controlnet_preprocessor() :
     module_path = 'ComfyUI/custom_nodes/comfyui-art-venture'
     func_name = 'modules.controlnet.AV_ControlNetPreprocessor'
     controlnet_preprocessor = get_function_from_comfyui(module_path, func_name)
     return controlnet_preprocessor()
-
+@torch.inference_mode()
 def load_face_detailer() :
     module_path = 'ComfyUI/custom_nodes/ComfyUI-Impact-Pack'
     func_name = 'impact.impact_pack.FaceDetailer'
     face_detailer = get_function_from_comfyui(module_path, func_name)
     return face_detailer()
-
+@torch.inference_mode()
 def load_sam(model_name='sam_vit_b_01ec64.pth') :
     module_path = 'ComfyUI/custom_nodes/ComfyUI-Impact-Pack'
     func_name = 'impact.impact_pack.SAMLoader'
     sam_loader = get_function_from_comfyui(module_path, func_name)
     return sam_loader().load_model(model_name)[0]
-
+@torch.inference_mode()
 def load_detect_provider(model_name='bbox/face_yolov8m.pt') :
     module_path = 'ComfyUI/custom_nodes/ComfyUI-Impact-Pack'
     func_name = 'impact.subpack_nodes.UltralyticsDetectorProvider'

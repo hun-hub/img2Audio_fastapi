@@ -1,5 +1,9 @@
+from cgen_utils import set_comfyui_packages
+set_comfyui_packages()
+
 import argparse
 from architecture.inference_architecture import Inference_API
+
 
 parser = argparse.ArgumentParser(description="Run FastAPI server with specified model")
 parser.add_argument("--port", type=int, default=7861, help="Port to serve the server on")
@@ -9,6 +13,7 @@ args = parser.parse_args()
 
 app_instance = Inference_API(args)
 app = app_instance.get_app()
+
 
 if __name__ == "__main__":
     import uvicorn
@@ -23,3 +28,4 @@ if __name__ == "__main__":
                                  'architecture/ui/*',
                                  'docs/*']
                 )
+

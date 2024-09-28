@@ -1,29 +1,29 @@
 import torch
 import requests
-from utils.handler import handle_response
-from utils.image_process import (convert_base64_to_image_array,
-                                 convert_image_array_to_base64,
-                                 resize_image_for_sd,
-                                 convert_image_to_base64,
-                                 convert_base64_to_image_tensor,
-                                 controlnet_image_preprocess
-                                 )
-from utils.comfyui import (apply_controlnet,
-                           apply_ipadapter,
-                           make_image_batch)
+from cgen_utils.handler import handle_response
+from cgen_utils.image_process import (convert_base64_to_image_array,
+                                      convert_image_array_to_base64,
+                                      resize_image_for_sd,
+                                      convert_image_to_base64,
+                                      convert_base64_to_image_tensor,
+                                      controlnet_image_preprocess
+                                      )
+from cgen_utils.comfyui import (apply_controlnet,
+                                apply_ipadapter,
+                                make_image_batch)
 
-from utils.loader import load_clip_vision
+from cgen_utils.loader import load_clip_vision
 from types import NoneType
 from PIL import Image
 import numpy as np
 
-def construct_condition(unet,
-                        cached_model_dict,
-                        positive,
-                        negative,
-                        controlnet_requests,
-                        ipadapter_request,
-                        ):
+@torch.inference_mode()
+def construct_controlnet_condition(
+        cached_model_dict,
+        positive,
+        negative,
+        controlnet_requests,
+):
 
     for controlnet_request in controlnet_requests:
         if controlnet_request.type == 'inpaint':
@@ -42,12 +42,25 @@ def construct_condition(unet,
                                               controlnet_request.start_percent,
                                               controlnet_request.end_percent, )
 
+
+    return positive, negative
+
+
+@torch.inference_mode()
+def construct_ipadapter_condition(
+        unet,
+        cached_model_dict,
+        ipadapter_request,
+):
+
     if ipadapter_request is not None:
         clip_vision = load_clip_vision(ipadapter_request.clip_vision)
         ipadapter = cached_model_dict['ipadapter']['sdxl'][1]
         ipadapter_images = [convert_base64_to_image_tensor(image) / 255 for image in ipadapter_request.images]
         image_batch = make_image_batch(ipadapter_images)
-        unet = apply_ipadapter(model= unet,
+
+        unet = apply_ipadapter(
+                               unet= unet,
                                ipadapter=ipadapter,
                                clip_vision=clip_vision,
                                image= image_batch,
@@ -57,7 +70,8 @@ def construct_condition(unet,
                                weight_type = ipadapter_request.weight_type,
                                combine_embeds = ipadapter_request.combine_embeds,
                                embeds_scaling= ipadapter_request.embeds_scaling,)
-    return unet, positive, negative
+    return unet
+
 
 def sned_sdxl_request_to_api(
         checkpoint,

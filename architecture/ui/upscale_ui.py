@@ -1,5 +1,5 @@
 import gradio as gr
-from utils import resolution_list
+from cgen_utils import resolution_list
 import os
 checkpoint_root = os.getenv('CHECKPOINT_ROOT')
 

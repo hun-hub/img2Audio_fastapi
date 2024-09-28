@@ -1,5 +1,5 @@
 import gradio as gr
-from utils import resolution_list
+from cgen_utils import resolution_list
 import os
 
 def generate_gen_type_ui(ip_addr) :

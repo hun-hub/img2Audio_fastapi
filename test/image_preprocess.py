@@ -1,5 +1,5 @@
-from utils.loader import get_function_from_comfyui
-from utils.image_process import resize_image_for_sd
+from cgen_utils.loader import get_function_from_comfyui
+from cgen_utils.image_process import resize_image_for_sd
 from torch.utils.data import Dataset, DataLoader
 import torch
 import os

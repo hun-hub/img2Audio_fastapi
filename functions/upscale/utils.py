@@ -1,8 +1,8 @@
 import requests
-from utils.handler import handle_response
-from utils.image_process import (convert_base64_to_image_array,
-                                 convert_image_to_base64,
-                                 )
+from cgen_utils.handler import handle_response
+from cgen_utils.image_process import (convert_base64_to_image_array,
+                                      convert_image_to_base64,
+                                      )
 from types import NoneType
 from PIL import Image
 import torch
@@ -13,7 +13,7 @@ def upscale_with_model(upscale_model, image) :
     upsclaer = ImageUpscaleWithModel()
     image_upscaled = upsclaer.upscale(upscale_model, image)[0]
     return image_upscaled
-
+@torch.inference_mode()
 def image_scale_by(image, method, scale) :
     from ComfyUI.nodes import ImageScaleBy
     image_scaler = ImageScaleBy()

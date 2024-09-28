@@ -1,33 +1,33 @@
 import torch
 import requests
-from utils.handler import handle_response
-from utils.image_process import (convert_base64_to_image_array,
-                                 convert_image_array_to_base64,
-                                 resize_image_for_sd,
-                                 convert_image_to_base64,
-                                 convert_base64_to_image_tensor,
-                                 controlnet_image_preprocess
-                                 )
-from utils.comfyui import (apply_controlnet,
-                           apply_ipadapter,
-                           make_image_batch)
+from cgen_utils.handler import handle_response
+from cgen_utils.image_process import (convert_base64_to_image_array,
+                                      convert_image_array_to_base64,
+                                      resize_image_for_sd,
+                                      convert_image_to_base64,
+                                      convert_base64_to_image_tensor,
+                                      controlnet_image_preprocess
+                                      )
+from cgen_utils.comfyui import (apply_controlnet,
+                                apply_ipadapter,
+                                make_image_batch)
 
 from types import NoneType
 from PIL import Image
-
+@torch.inference_mode()
 def flux_guidance(text_embed, cfg) :
     from ComfyUI.comfy_extras.nodes_flux import FluxGuidance
     flux_guidance = FluxGuidance()
     text_embed = flux_guidance.append(text_embed, cfg)[0]
     return text_embed
-
+@torch.inference_mode()
 def model_sampling_flux(unet, max_shift=1.15, base_shift=0.5, width=1024, height=1024) :
     from ComfyUI.comfy_extras.nodes_model_advanced import ModelSamplingFlux
     model_sampler = ModelSamplingFlux()
     unet = model_sampler.patch(unet, max_shift, base_shift, width, height)[0]
 
     return unet
-
+@torch.inference_mode()
 def get_init_noise(width, height, batch_size=1) :
     from ComfyUI.comfy_extras.nodes_sd3 import EmptySD3LatentImage
     latent_sampler = EmptySD3LatentImage()
@@ -35,18 +35,21 @@ def get_init_noise(width, height, batch_size=1) :
 
     return init_noise
 
-def construct_condition(unet,
-                        cached_model_dict,
-                        positive,
-                        negative,
-                        controlnet_requests,
-                        ):
+
+@torch.inference_mode()
+def construct_controlnet_condition(
+        cached_model_dict,
+        positive,
+        negative,
+        controlnet_requests,
+):
+
     for controlnet_request in controlnet_requests:
         if controlnet_request.type == 'inpaint':
             control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
             control_image, control_mask = control_image[:, :, :, :3], control_image[:, :, :, 3]
             control_image = torch.where(control_mask[:, :, :, None] > 0.5, 1, control_image)
-        else:
+        else :
             control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
             control_image = controlnet_image_preprocess(control_image, controlnet_request.preprocessor_type, 'sdxl')
         controlnet = cached_model_dict['controlnet']['flux'][controlnet_request.type][1]
@@ -58,7 +61,10 @@ def construct_condition(unet,
                                               controlnet_request.start_percent,
                                               controlnet_request.end_percent, )
 
-    return unet, positive, negative
+
+    return positive, negative
+
+
 
 def sned_flux_request_to_api(
         unet_name,

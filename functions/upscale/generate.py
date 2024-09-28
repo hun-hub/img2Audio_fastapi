@@ -1,6 +1,6 @@
 import torch
-from utils.loader import load_upscaler
-from utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor, convert_image_array_to_base64
+from cgen_utils.loader import load_upscaler
+from cgen_utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor, convert_image_array_to_base64
 from .utils import upscale_with_model, image_scale_by
 
 @torch.inference_mode()

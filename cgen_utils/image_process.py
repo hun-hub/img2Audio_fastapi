@@ -2,7 +2,7 @@ import numpy as np
 import io, base64
 import torch
 from PIL import Image
-from utils.loader import load_controlnet_preprocessor
+from cgen_utils.loader import load_controlnet_preprocessor
 
 
 def convert_image_to_base64(image):

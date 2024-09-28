@@ -8,15 +8,15 @@ from .utils import (construct_condition,
                     frequency_combination,
                     was_image_blend,
                     remap_image)
-from utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
-from utils.comfyui import (encode_prompt,
-                           sample_image,
-                           decode_latent,
-                           encode_image,
-                           encode_image_for_inpaint,
-                           apply_controlnet,
-                           get_init_noise,
-                           mask_blur)
+from cgen_utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
+from cgen_utils.comfyui import (encode_prompt,
+                                sample_image,
+                                decode_latent,
+                                encode_image,
+                                encode_image_for_inpaint,
+                                apply_controlnet,
+                                get_init_noise,
+                                mask_blur)
 import random
 
 

@@ -1,20 +1,20 @@
 import torch
-from utils.loader import load_face_detailer, load_sam, load_detect_provider
+from cgen_utils.loader import load_face_detailer, load_sam, load_detect_provider
 import requests
-from utils.handler import handle_response
-from utils.image_process import (convert_base64_to_image_array,
-                                 convert_image_array_to_base64,
-                                 convert_image_tensor_to_base64,
-                                 resize_image_for_sd,
-                                 convert_image_to_base64,
-                                 convert_base64_to_image_tensor,
-                                 controlnet_image_preprocess
-                                 )
-from utils.comfyui import (apply_controlnet,
-                           apply_ipadapter,
-                           make_image_batch)
-from utils.text_process import gemini_with_prompt_and_image
-from utils.loader import load_clip_vision
+from cgen_utils.handler import handle_response
+from cgen_utils.image_process import (convert_base64_to_image_array,
+                                      convert_image_array_to_base64,
+                                      convert_image_tensor_to_base64,
+                                      resize_image_for_sd,
+                                      convert_image_to_base64,
+                                      convert_base64_to_image_tensor,
+                                      controlnet_image_preprocess
+                                      )
+from cgen_utils.comfyui import (apply_controlnet,
+                                apply_ipadapter,
+                                make_image_batch)
+from cgen_utils.text_process import gemini_with_prompt_and_image
+from cgen_utils.loader import load_clip_vision
 from types import NoneType
 from PIL import Image
 import numpy as np
@@ -30,24 +30,30 @@ Do not just list the items in the image.
 Describe them like a prompt for image generation.
 Your description will be used as image generation prompt.
 So give me prompt that would work great when generating image."""
-
+@torch.inference_mode()
 def model_patch(unet) :
     from ComfyUI.comfy_extras.nodes_freelunch import FreeU_V2
     model_patcher = FreeU_V2()
     unet = model_patcher.patch(unet, b1=1.9, b2=1.4, s1=0.9, s2=0.2)[0]
     return unet
 
-def construct_condition(unet,
-                        cached_model_dict,
-                        positive,
-                        negative,
-                        controlnet_requests,
-                        ipadapter_request,
-                        ):
+
+@torch.inference_mode()
+def construct_controlnet_condition(
+        cached_model_dict,
+        positive,
+        negative,
+        controlnet_requests,
+):
 
     for controlnet_request in controlnet_requests:
-        control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
-        control_image = controlnet_image_preprocess(control_image, controlnet_request.preprocessor_type, 'sd15')
+        if controlnet_request.type == 'inpaint':
+            control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
+            control_image, control_mask = control_image[:, :, :, :3], control_image[:, :, :, 3]
+            control_image = torch.where(control_mask[:, :, :, None] > 0.5, 1, control_image)
+        else :
+            control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
+            control_image = controlnet_image_preprocess(control_image, controlnet_request.preprocessor_type, 'sd15')
         controlnet = cached_model_dict['controlnet']['sd15'][controlnet_request.type][1]
         positive, negative = apply_controlnet(positive,
                                               negative,
@@ -57,12 +63,25 @@ def construct_condition(unet,
                                               controlnet_request.start_percent,
                                               controlnet_request.end_percent, )
 
+
+    return positive, negative
+
+
+@torch.inference_mode()
+def construct_ipadapter_condition(
+        unet,
+        cached_model_dict,
+        ipadapter_request,
+):
+
     if ipadapter_request is not None:
         clip_vision = load_clip_vision(ipadapter_request.clip_vision)
         ipadapter = cached_model_dict['ipadapter']['sd15'][1]
         ipadapter_images = [convert_base64_to_image_tensor(image) / 255 for image in ipadapter_request.images]
         image_batch = make_image_batch(ipadapter_images)
-        unet = apply_ipadapter(model= unet,
+
+        unet = apply_ipadapter(
+                               unet= unet,
                                ipadapter=ipadapter,
                                clip_vision=clip_vision,
                                image= image_batch,
@@ -72,9 +91,10 @@ def construct_condition(unet,
                                weight_type = ipadapter_request.weight_type,
                                combine_embeds = ipadapter_request.combine_embeds,
                                embeds_scaling= ipadapter_request.embeds_scaling,)
-    return unet, positive, negative
+    return unet
 
 
+@torch.inference_mode()
 def face_detailer(image, unet, clip, vae, positive_cond, negative_cond, seed) :
     try:
         face_detail_module = load_face_detailer()
@@ -116,7 +136,7 @@ def face_detailer(image, unet, clip, vae, positive_cond, negative_cond, seed) :
         drop_size=10,
         noise_mask_feather=2
     )
-
+    del sam_model_opt, bbox_detector
     return image_face_detailed
 
 def sned_i2c_request_to_api(

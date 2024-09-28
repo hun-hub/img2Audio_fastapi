@@ -1,21 +1,21 @@
 import torch
 import requests
-from utils.handler import handle_response
-from utils.image_process import (convert_base64_to_image_array,
-                                 convert_image_array_to_base64,
-                                 resize_image_for_sd,
-                                 convert_image_to_base64,
-                                 convert_base64_to_image_tensor,
-                                 convert_image_tensor_to_base64
-                                 )
-from utils.comfyui import (apply_controlnet,
-                           apply_ipadapter,
-                           make_image_batch,
-                           encode_image_for_inpaint)
+from cgen_utils.handler import handle_response
+from cgen_utils.image_process import (convert_base64_to_image_array,
+                                      convert_image_array_to_base64,
+                                      resize_image_for_sd,
+                                      convert_image_to_base64,
+                                      convert_base64_to_image_tensor,
+                                      convert_image_tensor_to_base64
+                                      )
+from cgen_utils.comfyui import (apply_controlnet,
+                                apply_ipadapter,
+                                make_image_batch,
+                                encode_image_for_inpaint)
 
-from utils.loader import load_clip_vision, resize_image_with_pad, load_lamaInpainting, load_fooocus, get_function_from_comfyui
+from cgen_utils.loader import load_clip_vision, resize_image_with_pad, load_lamaInpainting, load_fooocus, get_function_from_comfyui
 from functions.gemini.generate import query_dict
-from utils.text_process import gemini_with_prompt_and_image
+from cgen_utils.text_process import gemini_with_prompt_and_image
 
 from types import NoneType
 from PIL import Image
@@ -24,7 +24,7 @@ import os
 import cv2
 
 
-
+@torch.inference_mode()
 def construct_condition(unet,
                         vae,
                         image,

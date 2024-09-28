@@ -1,13 +1,13 @@
 import torch
-from utils.loader import get_function_from_comfyui
+from cgen_utils.loader import get_function_from_comfyui
 import requests
-from utils.handler import handle_response
-from utils.image_process import (convert_base64_to_image_array,
-                                 convert_image_array_to_base64,
-                                 resize_image_for_sd,
-                                 convert_image_to_base64,
-                                 convert_base64_to_image_tensor
-                                 )
+from cgen_utils.handler import handle_response
+from cgen_utils.image_process import (convert_base64_to_image_array,
+                                      convert_image_array_to_base64,
+                                      resize_image_for_sd,
+                                      convert_image_to_base64,
+                                      convert_base64_to_image_tensor
+                                      )
 from types import NoneType
 from PIL import Image
 import numpy as np
@@ -68,21 +68,21 @@ def expand_mask(mask: np.ndarray, expand:int, tapered_corners:bool = True):
     mask_expanded_array = torch.stack(out, dim=0).squeeze().numpy() * 255
     return np.stack([mask_expanded_array] * 3, axis=-1).astype(np.uint8)
 
-
+@torch.inference_mode()
 def load_and_apply_iclight(unet, iclight_model_path):
     module_path = 'ComfyUI/custom_nodes/ComfyUI-IC-Light'
     func_name = 'nodes.LoadAndApplyICLightUnet'
     iclight_applier = get_function_from_comfyui(module_path, func_name)
     unet = iclight_applier().load(unet, iclight_model_path)
     return unet[0]
-
+@torch.inference_mode()
 def load_iclight_condition_applier() :
     module_path = 'ComfyUI/custom_nodes/ComfyUI-IC-Light'
     func_name = 'nodes.ICLightConditioning'
     iclight_conditioning = get_function_from_comfyui(module_path, func_name)
     return iclight_conditioning()
 
-
+@torch.inference_mode()
 def construct_condition(unet,
                         iclight_model,
                         positive,

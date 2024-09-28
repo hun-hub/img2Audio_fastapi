@@ -34,7 +34,7 @@ async def main():
     print(f'총합={result1+result2}, 총시간={end-start}')
 
 import requests
-from utils.handler import handle_response
+from cgen_utils.handler import handle_response
 if __name__ == "__main__":
     ip_addr = '117.52.72.82'
 
