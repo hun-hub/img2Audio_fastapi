@@ -70,7 +70,7 @@ class GradioApp:
                         gemini_inputs, (gemini_result, gemini_button) = build_gemini_ui()
 
                 with gr.Column() :
-                    generated_image = gr.Image(sources='upload', type="numpy", label="Generated Image", interactive=False)
+                    generated_image = gr.Gallery(label="Generated Images")
                     # api_restart_button = gr.Button("API Restart")
             gemini_inputs_for_imagen = [gr.Text('prompt_refine', visible=False),
                                         gr.Image(sources='upload', type="numpy", visible=False),

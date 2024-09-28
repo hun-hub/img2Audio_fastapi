@@ -23,6 +23,41 @@ import numpy as np
 import os
 import cv2
 
+@torch.inference_mode()
+def apply_fooocus_inpaint(unet, patch, latent) :
+    module_path = 'ComfyUI/custom_nodes/comfyui-inpaint-nodes'
+    func_name = 'nodes.ApplyFooocusInpaint'
+    fooocus_applier = get_function_from_comfyui(module_path, func_name)
+    unet = fooocus_applier().patch(unet, patch, latent)[0]
+    return unet
+
+@torch.inference_mode()
+def webui_lama_proprecessor(image, mask) :
+    mask = mask.unsqueeze(-1)
+    image_rgba = torch.cat([image, mask], dim=-1).squeeze() * 255
+    img = np.array(image_rgba).astype(np.uint8)
+    H, W, C = img.shape
+    assert C == 4, "No mask is provided!"
+    raw_color = img[:, :, 0:3].copy()
+    raw_mask = img[:, :, 3:4].copy()
+
+    res = 256  # Always use 256 since lama is trained on 256
+
+    img_res, remove_pad = resize_image_with_pad(img, res)
+
+    model = load_lamaInpainting()
+    # applied auto inversion
+    prd_color = model(img_res)
+    prd_color = remove_pad(prd_color)
+    prd_color = cv2.resize(prd_color, (W, H))
+
+    alpha = raw_mask.astype(np.float32) / 255.0
+    fin_color = prd_color.astype(np.float32) * alpha + raw_color.astype(
+        np.float32
+    ) * (1 - alpha)
+    fin_color = fin_color.clip(0, 255).astype(np.uint8)
+
+    return torch.Tensor(fin_color)
 
 @torch.inference_mode()
 def construct_condition(unet,
@@ -76,40 +111,4 @@ def sned_object_remove_request_to_api(
     data = handle_response(response)
     image_base64 = data['image_base64']
     image = convert_base64_to_image_array(image_base64)
-    return image
-
-@torch.inference_mode()
-def apply_fooocus_inpaint(unet, patch, latent) :
-    module_path = 'ComfyUI/custom_nodes/comfyui-inpaint-nodes'
-    func_name = 'nodes.ApplyFooocusInpaint'
-    fooocus_applier = get_function_from_comfyui(module_path, func_name)
-    unet = fooocus_applier().patch(unet, patch, latent)[0]
-    return unet
-
-@torch.inference_mode()
-def webui_lama_proprecessor(image, mask) :
-    mask = mask.unsqueeze(-1)
-    image_rgba = torch.cat([image, mask], dim=-1).squeeze() * 255
-    img = np.array(image_rgba).astype(np.uint8)
-    H, W, C = img.shape
-    assert C == 4, "No mask is provided!"
-    raw_color = img[:, :, 0:3].copy()
-    raw_mask = img[:, :, 3:4].copy()
-
-    res = 256  # Always use 256 since lama is trained on 256
-
-    img_res, remove_pad = resize_image_with_pad(img, res)
-
-    model = load_lamaInpainting()
-    # applied auto inversion
-    prd_color = model(img_res)
-    prd_color = remove_pad(prd_color)
-    prd_color = cv2.resize(prd_color, (W, H))
-
-    alpha = raw_mask.astype(np.float32) / 255.0
-    fin_color = prd_color.astype(np.float32) * alpha + raw_color.astype(
-        np.float32
-    ) * (1 - alpha)
-    fin_color = fin_color.clip(0, 255).astype(np.uint8)
-
-    return torch.Tensor(fin_color)
+    return [image]

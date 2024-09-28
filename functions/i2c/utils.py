@@ -222,7 +222,6 @@ def sned_i2c_request_to_api(
 
     image = convert_base64_to_image_array(image_base64)
     image_face_detail = convert_base64_to_image_array(image_face_detail_base64)
-    image_concat = np.concatenate((image, image_face_detail), axis=0)
 
-    return image_concat
+    return [image, image_face_detail]
 

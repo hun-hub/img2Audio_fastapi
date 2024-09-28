@@ -300,4 +300,4 @@ def sned_sdxl_request_to_api(
     data = handle_response(response)
     image_base64 = data['image_base64']
     image = convert_base64_to_image_array(image_base64)
-    return image
+    return [image]
