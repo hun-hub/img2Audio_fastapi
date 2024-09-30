@@ -2,7 +2,7 @@
 
 # Conda 환경 활성화
 eval "$(conda shell.bash hook)"
-conda activate api
+conda activate cnt_api
 
 # 로그 디렉토리 확인 및 생성
 LOG_DIR="logs"

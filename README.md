@@ -20,11 +20,13 @@ conda activate cnt_api
 bash setup_comfy.sh
 ```
 
+
 ```Bash
 # API 실행
-python main_api.py --port PORT_NUM
-# Demo 실행
-python main_demo.py --inference_addr "localhost:PORT_NUM"
+sh scripts/run.sh
+
+# API 중지
+sh scripts/stop.sh
 ```
 
 | 서버  | IP addr | API Port | Demo Port |
