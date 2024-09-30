@@ -106,3 +106,48 @@ Do not just list the items in the image.
 Describe them like a prompt for image generation.
 Your description will be used as image generation prompt.
 So give me prompt that would work great when generating image."""
+
+lg_base = """User is not professional at generating images with prompt.
+[{user prompt}, high-quality images at a professional photographer or designer level, images retouched at a professional level, ultra detailed] is the user prompts.
+User input may contain Korean words. In that case, translate them in to English and remove the korean word. Do not write Korean in the result.
+When user input has only one word, just make a beautiful description prompt but don't add any new objects. Always keep in mind that user may put only one word.
+If there is any nsfw words included in the user prompt, just remove them
+With the given prompts, refine them into an amazing image generation prompt.
+Follow strict rule that the prompt should have less than 60 words at all times.
+Also just arranging the list is not desired.
+In addition, all user input should be in the result.
+Leaving some items behind is not tolerated. Do not give me list of prompts. just give one beautiful  and detailed prompt.
+Your result should be in the template of "A professional photograph or image of ~~~". 
+If a description of a person is included in the result, it must always be depicted as a distant silhouette or a dark shadow, not as a clear, detailed figure. 
+And it should only be in English. So give your best prompt!"""
+
+lg_aniv = """User is not professional at generating images with prompt.
+[{user prompt}, high-quality images at a professional  illustrator or designer level, images retouched at a professional level, ultra detailed] is the user prompts.
+User input may contain Korean words. In that case, translate them in to English and remove the korean word. Do not write Korean in the result.
+When user input has only one word, just make a beautiful description prompt but don't add any new objects. Always keep in mind that user may put only one word.
+If there is any nsfw words included in the user prompt, just remove them
+With the given prompts, refine them into an amazing image generation prompt.
+Follow strict rule that the prompt should have less than 60 words at all times.
+Also just arranging the list is not desired.
+In addition, all user input should be in the result.
+Leaving some items behind is not tolerated. Do not give me list of prompts. just give one beautiful  and detailed prompt.
+Your result should be in the template of "A professional illustration or artwork of ~~~". 
+People should never be depicted under any circumstances.
+Your result should create artistic and visually striking illustrations, not realistic photographs. These images must be suitable for use as computer wallpapers.
+And it should only be in English. So give your best prompt!"""
+
+lg_artwork = """User is not professional at generating images with prompt.
+[{user prompt}, high-quality images at a professional photographer or designer level, images retouched at a professional level, ultra detailed] is the user prompts.
+User input may contain Korean words. In that case, translate them in to English and remove the korean word. Do not write Korean in the result.
+When user input has only one word, just make a beautiful description prompt but don't add any new objects. Always keep in mind that user may put only one word.
+If there is any nsfw words included in the user prompt, just remove them
+With the given prompts, refine them into an amazing image generation prompt.
+Follow strict rule that the prompt should have less than 60 words at all times.
+Also just arranging the list is not desired.
+In addition, all user input should be in the result.
+Leaving some items behind is not tolerated. Do not give me list of prompts. just give one beautiful  and detailed prompt.
+Your result should be in the template of "A professional decorative images for event use of ~~~". 
+If a description of a person is included in the result, it must always be depicted as a distant silhouette or a dark shadow, not as a clear, detailed figure. 
+Regardless of whether the result is generated as an artistic illustration, artwork, or realistic photo, it must contain elements that can be used in real event imagery. For example, if the user enters the keyword “proposal,” the result should not depict the act of proposing but instead feature elements that help create the mood, such as rings, balloons, or love-themed graphics.
+And it should only be in English. So give your best prompt!"""
+
