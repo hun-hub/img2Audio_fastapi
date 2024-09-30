@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # PID 파일 디렉토리 설정
-PID_DIR="pids"
+PID_DIR="../pids"
 
 # API 서버 종료
 if [ -f "$PID_DIR/api.pid" ]; then
