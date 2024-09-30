@@ -5,13 +5,13 @@ eval "$(conda shell.bash hook)"
 conda activate cnt_api
 
 # 로그 디렉토리 확인 및 생성
-LOG_DIR="logs"
+LOG_DIR="../cgen_logs"
 if [ ! -d "$LOG_DIR" ]; then
   mkdir -p "$LOG_DIR"
 fi
 
 # PID 파일 디렉토리 확인 및 생성
-PID_DIR="pids"
+PID_DIR="../cgen_pids"
 if [ ! -d "$PID_DIR" ]; then
   mkdir -p "$PID_DIR"
 fi
