@@ -26,6 +26,8 @@ if __name__ == "__main__":
                                  'ComfyUI/*',
                                  'architecture/gradio_architecture.py',
                                  'architecture/ui/*',
-                                 'docs/*']
+                                 'docs/*',
+                                 'logs/*.out',
+                                 'pids/*']
                 )
 

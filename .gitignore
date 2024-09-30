@@ -1,3 +1,5 @@
 /outputs/
 /ComfyUI/
 .env
+/logs/*.out
+/pids/
