@@ -13,7 +13,10 @@ Your description will be used as image generation prompt. So give me prompt that
 """
 prompt_refine = """
 user is not professional at generating images with prompt. 
-[{user_prompt}, high-quality, realistic, detailed] is the user prompts. 
+The given user input list is as follows.
+
+[{user_prompt}, high-quality, realistic, detailed]
+
 user input may contain Korean words. In that case, translate them in to English and remove the korean word. Do not write Korean in the result.
 When user input has only one word, just make a beautiful description prompt but don't add any new objects. Always keep in mind that user may put only one word.
 If there is any nsfw words included in the user prompt, just remove them
