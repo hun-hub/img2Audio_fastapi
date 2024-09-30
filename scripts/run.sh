@@ -17,11 +17,11 @@ if [ ! -d "$PID_DIR" ]; then
 fi
 
 # API 서버 실행 및 PID 저장
-nohup python main_api.py > logs/api_log.out 2>&1 &
+nohup python main_api.py > $LOG_DIR/api_log.out 2>&1 &
 echo $! > "$PID_DIR/api.pid"
 
 # Demo 서버 실행 및 PID 저장
-nohup python main_demo.py > logs/demo_log.out 2>&1 &
+nohup python main_demo.py > $LOG_DIR/demo_log.out 2>&1 &
 echo $! > "$PID_DIR/demo.pid"
 
 echo "Servers are running in the background."
