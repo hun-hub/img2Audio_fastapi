@@ -1,6 +1,8 @@
-from cgen_utils.loader import get_function_from_comfyui
+from cgen_utils import set_comfyui_packages
+set_comfyui_packages()
 from cgen_utils.image_process import resize_image_for_sd
 from torch.utils.data import Dataset, DataLoader
+from collections import defaultdict
 import torch
 import os
 from PIL import Image
@@ -13,56 +15,106 @@ from ComfyUI.custom_nodes.comfyui_controlnet_aux.src.custom_controlnet_aux.onefo
 
 from ComfyUI.custom_nodes.comfyui_controlnet_aux.utils import common_annotator_call
 
+from multiprocessing.dummy import Pool as ThreadPool  # 멀티스레딩용 Pool
+
+
 class CustomImageDataset(Dataset):
-    def __init__(self, image_dir, transform=None):
-        self.image_dir = image_dir
+    def __init__(self, filepaths, transform=None):
         self.transform = transform
-        self.filenames = [fname for fname in os.listdir(image_dir) if fname.endswith(('png', 'jpg', 'jpeg'))]
-        self.filenames.sort()
+        self.filepaths = filepaths
+        self.filepaths.sort()
 
     def __len__(self):
-        return len(self.filenames)
+        return len(self.filepaths)
 
     def __getitem__(self, idx):
-        filename = self.filenames[idx]
-        img_path = os.path.join(self.image_dir, filename)
-        image = Image.open(img_path).convert("RGB")
+        filepath = self.filepaths[idx]
+        image = Image.open(filepath).convert("RGB")
         image_resize_and_cropped = resize_image_for_sd(image)
         image_resize_and_cropped_tensor = self.transform(image_resize_and_cropped)
+        filename = filepath.split("/")[-1]
         return image_resize_and_cropped_tensor.permute(1, 2, 0), filename
 
-device = torch.device("cuda")
-
-root = '/home/gkalstn000/type_4'
-preprocess_type = {'seg_ofcoco': (OneformerSegmentor.from_pretrained(filename="150_16_swin_l_oneformer_coco_100ep.pth"), 'seg_map'),
-                   'depth': (ZoeDetector.from_pretrained(), 'depth_map'), # ZoeD_M12_N.pt
-                   'normalmap_bae': (NormalBaeDetector.from_pretrained(), 'normal_map'),
-
-                   }
 
 transform = transforms.Compose([
     transforms.ToTensor(),
 ])
 
-bucket_root = os.path.join(root, 'bucket')
-batch_size = 1
 
-dataset = CustomImageDataset(image_dir=os.path.join(root, 'images'), transform=transform)
-image_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
+root = '/home/gkalstn000/coco_2014'
+image_root = os.path.join(root, 'val2014_img')
+image_bucket = defaultdict(list)
+
+def process_image(filepath):
+    try:
+        image = Image.open(filepath).convert("RGB")
+        image_resize_and_cropped = resize_image_for_sd(image)
+        w, h = image_resize_and_cropped.size
+        return (w, h, filepath)
+    except Exception as e:
+        print(f"Error processing {filepath}: {e}")
+        return None  # 에러 발생 시 None 반환
+
+filepaths = [os.path.join(image_root, filename) for filename in os.listdir(image_root)]
+
+pool = ThreadPool(os.cpu_count() * 2)
+
+# 멀티스레딩으로 이미지 처리
+results = []
+for result in tqdm(pool.imap_unordered(process_image, filepaths), total=len(filepaths)):
+    if result is not None:
+        w, h, filepath = result
+        image_bucket[(w, h)].append(filepath)
+
+pool.close()
+pool.join()
+
+dataloader_list = []
+batch_size = 20
+for (w, h), filepaths in image_bucket.items():
+    dataset = CustomImageDataset(filepaths=filepaths, transform=transform)
+    image_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers = 8)
+    dataloader_list.append(image_loader)
+
+preprocess_type = {
+    'depth': (ZoeDetector.from_pretrained(), 'depth_map'),
+    'seg_ofcoco': (OneformerSegmentor.from_pretrained(filename="150_16_swin_l_oneformer_coco_100ep.pth"), 'seg_map'),
+    'normalmap_bae': (NormalBaeDetector.from_pretrained(), 'normal_map'),
+                   }
+device = torch.device("cuda")
+
+def process_and_save(args):
+    imaeg_tensor, filename, save_root, w, h = args
+    save_path = os.path.join(save_root, filename)
+    image_processed = Image.fromarray(imaeg_tensor).resize((w, h))
+    image_processed.save(save_path)
+
+def do_jump(save_root, filenames) :
+    for filename in filenames:
+        save_path = os.path.join(save_root, filename)
+        if not os.path.exists(save_path):
+            return False
+    return True
+# 최상위 수준에서 Pool 생성
+pool = ThreadPool(os.cpu_count() * 2)
 
 for process_type, (preprocessor, save_name) in preprocess_type.items():
     save_root = os.path.join(root, save_name)
     os.makedirs(save_root, exist_ok=True)
-    for batch_idx, (images, filename) in enumerate(tqdm(image_loader)):
-        b, h, w, c = images.size()
-        save_path = os.path.join(save_root, filename[0])
-        if os.path.exists(save_path): continue
-        preprocessor = preprocessor.to(device)
-        images = images.to(device)
+    preprocessor = preprocessor.to(device)
+    for image_loader in tqdm(dataloader_list):
+        for batch_idx, (images, filenames) in enumerate(tqdm(image_loader)):
+            if do_jump(save_root, filenames) : continue
+            b, h, w, c = images.size()
+            images = images.to(device)
 
-        image_processed_tensor = common_annotator_call(preprocessor, images, resolution=512).squeeze()
-        image_processed_tensor = (image_processed_tensor.detach().cpu() * 255).numpy().astype(np.uint8)
-        image_processed = Image.fromarray(image_processed_tensor).resize((w, h))
-        image_processed.save(save_path)
+            image_processed_tensor = common_annotator_call(preprocessor, images, resolution=512).squeeze()
+            image_processed_tensor = (image_processed_tensor.detach().cpu() * 255).numpy().astype(np.uint8)
+            args_list = [(imaeg_tensor, filename, save_root, w, h)
+                         for imaeg_tensor, filename in zip(image_processed_tensor, filenames)]
 
+            pool.map(process_and_save, args_list)
     del preprocessor
+
+pool.close()
+pool.join()
