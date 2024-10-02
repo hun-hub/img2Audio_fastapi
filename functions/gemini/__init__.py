@@ -108,7 +108,7 @@ Your description will be used as image generation prompt.
 So give me prompt that would work great when generating image."""
 
 lg_base = """User is not professional at generating images with prompt.
-[{user prompt}, high-quality images at a professional photographer or designer level, images retouched at a professional level, ultra detailed] is the user prompts.
+[{user_prompt}, high-quality images at a professional photographer or designer level, images retouched at a professional level, ultra detailed] is the user prompts.
 User input may contain Korean words. In that case, translate them in to English and remove the korean word. Do not write Korean in the result.
 When user input has only one word, just make a beautiful description prompt but don't add any new objects. Always keep in mind that user may put only one word.
 If there is any nsfw words included in the user prompt, just remove them
@@ -127,7 +127,7 @@ Task: Generate approximately 10 English keywords related to the given word(s) be
 
 Example: If the given word is "birthday," acceptable keywords would be "cone, cake, blessing, atmosphere, gift box," but not "candle-buster."
 Note: The given word(s) may be in Korean or English.
-Given Word(s): 약혼
+Given Word(s): {user_prompt}
 
 Output Format: Provide the english keywords in the following format:
 
@@ -136,7 +136,7 @@ Output Format: Provide the english keywords in the following format:
 """
 
 lg_artwork = """User is not professional at generating images with prompt.
-[{user prompt}, high-quality images at a professional photographer or designer level, images retouched at a professional level, ultra detailed] is the user prompts.
+[{user_prompt}, high-quality images at a professional photographer or designer level, images retouched at a professional level, ultra detailed] is the user prompts.
 User input may contain Korean words. In that case, translate them in to English and remove the korean word. Do not write Korean in the result.
 When user input has only one word, just make a beautiful description prompt but don't add any new objects. Always keep in mind that user may put only one word.
 If there is any nsfw words included in the user prompt, just remove them
