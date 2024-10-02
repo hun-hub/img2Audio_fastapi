@@ -121,15 +121,19 @@ Your result should be in the template of "A professional photograph or image of 
 If a description of a person is included in the result, it must always be depicted as a distant silhouette or a dark shadow, not as a clear, detailed figure. 
 And it should only be in English. So give your best prompt!"""
 
-lg_aniv = """Pick about 10 keywords related to the given word below.
-Instead, there should be no keywords related to people in related keywords.
-For example, when the word "birthday" comes in print, "cone, cake, blessing atmosphere, gift box." Not "candle-buster."
+lg_aniv = """
 
-The given words are as follows.
+Task: Generate approximately 10 English keywords related to the given word(s) below. The keywords should not be related to people.
 
-{user prompt}
+Example: If the given word is "birthday," acceptable keywords would be "cone, cake, blessing, atmosphere, gift box," but not "candle-buster."
+Note: The given word(s) may be in Korean or English.
+Given Word(s): 약혼
 
-Give me the keywords list output like this Keyword_1, Keyword_2, Keyword_3, ..., Keyword_n"""
+Output Format: Provide the english keywords in the following format:
+
+"A photograph of Keyword_1, Keyword_2, Keyword_3, ..., Keyword_n"
+
+"""
 
 lg_artwork = """User is not professional at generating images with prompt.
 [{user prompt}, high-quality images at a professional photographer or designer level, images retouched at a professional level, ultra detailed] is the user prompts.
