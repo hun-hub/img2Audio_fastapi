@@ -43,3 +43,4 @@ omegaconf
 # Non-essential dependencies
 spandrel
 fvcore
+rtree

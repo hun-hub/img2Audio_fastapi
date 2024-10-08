@@ -68,7 +68,7 @@ def generate_controlnet_ui(sd_type: str, controlnet_type: str, checkpoint_root: 
         else :
             image = gr.Image(sources='upload', type="numpy", label=f"Control({controlnet_type}) Image, Auto Transform")
         preprocessor_type = gr.Dropdown(preprocessor_type_list, label=f"Select {controlnet_type} pre-processor type", value=preprocessor_type_list[0])
-        control_weight = gr.Slider(label=f"Canny {controlnet_type} Weight", minimum=0, maximum=3, value=0.7, step=0.05)
+        control_weight = gr.Slider(label=f"{controlnet_type} Weight", minimum=0, maximum=3, value=0.7, step=0.05)
         start = gr.Slider(label=f"{controlnet_type} Start", minimum=0.0, maximum=1.0, value=0, step=0.05)
         end = gr.Slider(label=f"{controlnet_type} End", minimum=0.0, maximum=1.0, value=0.4, step=0.05)
 
