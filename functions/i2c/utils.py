@@ -1,5 +1,5 @@
 import torch
-from cgen_utils.loader import load_face_detailer, load_sam, load_detect_provider, load_dwpose_proprecessor
+from cgen_utils.loader import load_face_detailer, load_sam, load_detect_provider, load_dwpose_proprecessor, load_controlnet
 import requests
 from cgen_utils.handler import handle_response
 from cgen_utils.image_process import (convert_base64_to_image_array,
@@ -68,6 +68,26 @@ def construct_controlnet_condition(
 
     return positive, negative
 
+@torch.inference_mode()
+def construct_hand_detailer_condition(
+        control_image,
+        positive,
+        negative,
+):
+
+    control_image = controlnet_image_preprocess(control_image, 'depth_midas', 'sd15')
+    controlnet = load_controlnet('SD15_Depth_control_sd15_inpaint_depth_hand_fp16.safetensors')
+    positive, negative = apply_controlnet(positive,
+                                          negative,
+                                          controlnet,
+                                          control_image,
+                                          1,
+                                          0,
+                                          1, )
+
+
+    return positive, negative
+
 
 @torch.inference_mode()
 def construct_ipadapter_condition(
@@ -97,13 +117,22 @@ def construct_ipadapter_condition(
 
 
 @torch.inference_mode()
-def face_detailer(image, unet, clip, vae, positive_cond, negative_cond, seed) :
+def detailer(image, unet, clip, vae, positive_cond, negative_cond, seed,
+             sam_model_name = 'sam_vit_b_01ec64.pth',
+             bbox_detector_name = 'bbox/face_yolov8m.pt',
+             guide_size = 512,
+             max_size = 512,
+             steps = 10,
+             cfg = 3,
+             denoise = 0.3,
+             bbox_threshold = 0.8,
+             wildcard_opt = '') :
     try:
         face_detail_module = load_face_detailer()
     except:
         face_detail_module = load_face_detailer()
-    sam_model_opt = load_sam()
-    bbox_detector = load_detect_provider()
+    sam_model_opt = load_sam(model_name=sam_model_name)
+    bbox_detector = load_detect_provider(model_name=bbox_detector_name)
 
     image_face_detailed, _, _, _, _ = face_detail_module.enhance_face(
         image,
@@ -112,21 +141,21 @@ def face_detailer(image, unet, clip, vae, positive_cond, negative_cond, seed) :
         vae,
         bbox_detector=bbox_detector,
         sam_model_opt = sam_model_opt,
-        guide_size = 512,
+        guide_size = guide_size,
         guide_size_for_bbox=True,
-        max_size=512,
+        max_size=max_size,
         seed = seed,
-        steps = 10,
-        cfg = 3,
+        steps = steps,
+        cfg = cfg,
         sampler_name='euler_ancestral',
         scheduler='simple',
         positive=positive_cond,
         negative=negative_cond,
-        denoise=0.3,
+        denoise=denoise,
         feather=10,
         noise_mask=True,
         force_inpaint=True,
-        bbox_threshold=0.8,
+        bbox_threshold=bbox_threshold,
         bbox_dilation=8,
         bbox_crop_factor=1.5,
         sam_detection_hint='center-1',
@@ -136,7 +165,8 @@ def face_detailer(image, unet, clip, vae, positive_cond, negative_cond, seed) :
         sam_mask_hint_threshold=0.7,
         sam_mask_hint_use_negative='False',
         drop_size=10,
-        noise_mask_feather=2
+        noise_mask_feather=2,
+        wildcard_opt = wildcard_opt
     )
     del sam_model_opt, bbox_detector
     return image_face_detailed
