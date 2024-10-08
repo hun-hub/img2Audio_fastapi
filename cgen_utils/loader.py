@@ -168,6 +168,12 @@ def load_lllite(unet, lllite_model_name, cond_image, strength=1.0, steps=0, star
     lllite_loader = get_function_from_comfyui(module_path, func_name)
     unet = lllite_loader().load_lllite(unet, lllite_model_name, cond_image, strength, steps, start_percent, end_percent)[0]
     return unet
+@torch.inference_mode()
+def load_dwpose_proprecessor() :
+    module_path = 'ComfyUI/custom_nodes/comfyui_controlnet_aux'
+    func_name = 'node_wrappers.dwpose.DWPose_Preprocessor'
+    pose_processor = get_function_from_comfyui(module_path, func_name)
+    return pose_processor()
 if __name__ == '__main__':
     # module_path = 'ComfyUI/custom_nodes/ComfyUI-LaMA-Preprocessor'
     # func_name = 'annotator.lama.LamaInpainting'

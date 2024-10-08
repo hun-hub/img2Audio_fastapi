@@ -1,5 +1,5 @@
 import torch
-from cgen_utils.loader import load_face_detailer, load_sam, load_detect_provider
+from cgen_utils.loader import load_face_detailer, load_sam, load_detect_provider, load_dwpose_proprecessor
 import requests
 from cgen_utils.handler import handle_response
 from cgen_utils.image_process import (convert_base64_to_image_array,
@@ -47,12 +47,14 @@ def construct_controlnet_condition(
 ):
 
     for controlnet_request in controlnet_requests:
+        control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
         if controlnet_request.type == 'inpaint':
-            control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
             control_image, control_mask = control_image[:, :, :, :3], control_image[:, :, :, 3]
             control_image = torch.where(control_mask[:, :, :, None] > 0.5, 1, control_image)
+        elif 'pose' in controlnet_request.type:
+            proprecessor = load_dwpose_proprecessor()
+            control_image = proprecessor.estimate_pose(control_image, pose_estimator='dw-ll_ucoco_384_bs5.torchscript.pt')['result'][0]
         else :
-            control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
             control_image = controlnet_image_preprocess(control_image, controlnet_request.preprocessor_type, 'sd15')
         controlnet = cached_model_dict['controlnet']['sd15'][controlnet_request.type][1]
         positive, negative = apply_controlnet(positive,
