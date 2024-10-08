@@ -1,5 +1,5 @@
 import torch
-from .utils import model_patch, construct_controlnet_condition, construct_ipadapter_condition, face_detailer
+from .utils import model_patch, construct_controlnet_condition, construct_ipadapter_condition, detailer, construct_hand_detailer_condition
 from cgen_utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
 from cgen_utils.comfyui import (encode_prompt,
                                 sample_image,
@@ -106,11 +106,10 @@ def generate_image(cached_model_dict, request_data):
     )
 
     image_tensor = decode_latent(vae_refine if is_animation_style else vae_base, latent_image)
-    image_base64 = convert_image_tensor_to_base64(image_tensor * 255)
 
     seed = random.randint(1, int(1e9)) if request_data.seed == -1 else request_data.seed
 
-    image_face_detailed_tensor = face_detailer(
+    image_face_detailed_tensor = detailer(
         image_tensor,
         unet_refine if is_animation_style else unet_base,
         clip_refine,
@@ -120,6 +119,41 @@ def generate_image(cached_model_dict, request_data):
         seed
     )
 
+
+    # Add Hand detailer
+
+    positive_cond, negative_cond = construct_hand_detailer_condition(
+        init_image,
+        positive_cond,
+        negative_cond
+    )
+
+    image_tensor = detailer(
+        image_tensor,
+        unet_refine if is_animation_style else unet_base,
+        clip_refine,
+        vae_refine,
+        positive_cond,
+        negative_cond,
+        seed,
+        bbox_detector_name = 'bbox/hand_yolov8s.pt',
+        bbox_threshold = 0.5,
+        wildcard_opt= 'perfect hand,fine fingers'
+    )
+    image_face_detailed_tensor = detailer(
+        image_face_detailed_tensor,
+        unet_refine if is_animation_style else unet_base,
+        clip_refine,
+        vae_refine,
+        positive_cond,
+        negative_cond,
+        seed,
+        bbox_detector_name='bbox/hand_yolov8s.pt',
+        bbox_threshold=0.5,
+        wildcard_opt='perfect hand,fine fingers'
+    )
+
+    image_base64 = convert_image_tensor_to_base64(image_tensor * 255)
     image_face_detailed_base64 = convert_image_tensor_to_base64(image_face_detailed_tensor * 255)
 
     return image_base64, image_face_detailed_base64
