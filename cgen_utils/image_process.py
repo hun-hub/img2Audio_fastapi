@@ -84,3 +84,6 @@ def controlnet_image_preprocess(images, preprocessor_type, sd_version, resolutio
     preprocessor = load_controlnet_preprocessor()
     image_preprocessed, _ = preprocessor.detect_controlnet(images, preprocessor_type, sd_version=sd_version, resolution=resolution)
     return image_preprocessed
+
+if __name__ == '__main__':
+    image = ''
