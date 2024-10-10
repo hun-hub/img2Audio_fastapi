@@ -18,6 +18,7 @@ from cgen_utils.loader import load_clip_vision
 from types import NoneType
 from PIL import Image
 import numpy as np
+import torch.nn.functional as F
 
 
 query = """give a detailed description of a given image.
@@ -30,6 +31,31 @@ Do not just list the items in the image.
 Describe them like a prompt for image generation.
 Your description will be used as image generation prompt.
 So give me prompt that would work great when generating image."""
+
+def pad_image_to_aspect_ratio(image_tensor):
+    # image_tensor: (H, W, 3) 형태이고 값의 범위는 [0, 255]인 정수형 텐서
+    assert len(image_tensor.shape) == 3 and image_tensor.shape[2] == 3, "입력 텐서는 (H, W, 3) 형태여야 합니다."
+    image_tensor = image_tensor.permute(2, 0, 1)
+    C, H, W = image_tensor.shape
+
+    # H < W인 경우 90도 회전하여 H > W로 만듦
+    if H < W:
+        image_tensor = torch.rot90(image_tensor, k=1, dims=(1, 2))
+        H, W = W, H
+
+    if (H / W) > 1.5:
+        pad_w = (2*H - 3*W) // 6
+        padding = (pad_w, pad_w, 0, 0 )
+        padded_image = F.pad(image_tensor, padding, mode='constant', value=1)
+    elif (H / W) < 1.5:
+        pad_h = (3*W - 2*H) //4
+        padding = (0, 0, pad_h, pad_h)
+        padded_image = F.pad(image_tensor, padding, mode='constant', value=1)
+    else:
+        padded_image = image_tensor
+
+    return padded_image.permute(1, 2, 0)
+
 @torch.inference_mode()
 def model_patch(unet) :
     from ComfyUI.comfy_extras.nodes_freelunch import FreeU_V2

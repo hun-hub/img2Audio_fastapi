@@ -1,5 +1,10 @@
 import torch
-from .utils import model_patch, construct_controlnet_condition, construct_ipadapter_condition, detailer, construct_hand_detailer_condition
+from .utils import (model_patch,
+                    construct_controlnet_condition,
+                    construct_ipadapter_condition,
+                    detailer,
+                    construct_hand_detailer_condition,
+                    pad_image_to_aspect_ratio)
 from cgen_utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
 from cgen_utils.comfyui import (encode_prompt,
                                 sample_image,
@@ -153,7 +158,12 @@ def generate_image(cached_model_dict, request_data):
         wildcard_opt='perfect hand,fine fingers'
     )
 
+    image_tensor = pad_image_to_aspect_ratio(image_tensor.squeeze())
+    image_face_detailed_tensor = pad_image_to_aspect_ratio(image_face_detailed_tensor.squeeze())
+
     image_base64 = convert_image_tensor_to_base64(image_tensor * 255)
     image_face_detailed_base64 = convert_image_tensor_to_base64(image_face_detailed_tensor * 255)
+    # Image resize H:W = 3:2
+
 
     return image_base64, image_face_detailed_base64
