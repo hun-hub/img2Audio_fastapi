@@ -77,7 +77,7 @@ def resize_image_for_sd(image: Image, is_mask=False, resolution = 1024) :
     interpolation = Image.NEAREST if is_mask else Image.BICUBIC
     image_resized = image.resize((int(w_scaled), int(h_scaled)), interpolation)
     image_resized_cropped = _crop_image(image_resized)
-    return image_resized_cropped
+    return image_resized_cropped.convert('RGB')
 
 
 def controlnet_image_preprocess(images, preprocessor_type, sd_version, resolution=512) :
