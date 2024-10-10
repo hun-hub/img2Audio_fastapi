@@ -153,7 +153,7 @@ def load_sam(model_name='sam_vit_b_01ec64.pth') :
     module_path = 'ComfyUI/custom_nodes/ComfyUI-Impact-Pack'
     func_name = 'impact.impact_pack.SAMLoader'
     sam_loader = get_function_from_comfyui(module_path, func_name)
-    return sam_loader().load_model(model_name)[0]
+    return sam_loader().load_model(model_name, device_mode='Prefer GPU')[0]
 @torch.inference_mode()
 def load_detect_provider(model_name='bbox/face_yolov8m.pt') :
     module_path = 'ComfyUI/custom_nodes/ComfyUI-Impact-Pack'
