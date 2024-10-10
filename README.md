@@ -686,51 +686,22 @@ style_type: str, ['type_1', 'type_2'] 둘 중 하나
 import io, base64, os
 from PIL import Image
 import requests
-
-def _crop_image(image: Image):
-    w, h = image.size
-
-    h_ = h - h % 64
-    w_ = w - w % 64
-
-    # 중앙을 기준으로 크롭할 영역 계산
-    left = (w - w_) // 2
-    top = (h - h_) // 2
-    right = left + w_
-    bottom = top + h_
-    image = image.crop((left, top, right, bottom))
-    return image
-
-def resize_image_for_sd(image: Image, is_mask=False, resolution = 1024) :
-    w, h = image.size
-    scale = (resolution ** 2 / (w * h)) ** 0.5
-
-    scale = 1 if scale > 1 else scale
-    w_scaled = w * scale
-    h_scaled = h * scale
-    interpolation = Image.NEAREST if is_mask else Image.BICUBIC
-    image_resized = image.resize((int(w_scaled), int(h_scaled)), interpolation)
-    image_resized_cropped = _crop_image(image_resized)
-    return image_resized_cropped
-
-def convert_image_to_base64(image):
-    buffered = io.BytesIO()
-    image.save(buffered, format="PNG")
-    image_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
-
-    return image_base64
-
-def convert_base64_to_image(image_base64):
-    image_data = base64.b64decode(image_base64)
-    image_rgb = Image.open(io.BytesIO(image_data))
-    return image_rgb
-
 image = Image.open(IMAGE_PATH)
-image = resize_image_for_sd(image)
-image = convert_image_to_base64(image)
-
 style_type = 'type_X'
+ip_addr = '117.52.72.83:7861'
 
+# Resize Image
+image_base64 = CONVERT_IMAGE_TO_BASE64(image)
+request_body = {
+    'image': image_base64
+}
+
+url = f"http://{ip_addr}/functions/resize_image_for_sd"
+response = requests.post(url, json=request_body)
+data = response.json()
+image_base64_resized = data['image_base64']
+
+# Image-to-Cartoon
 sampler_name = 'euler_ancestral' if style_type == 'type_1' else 'dpmpp_2m_sde_gpu'
 scheduler = 'simple' if style_type == 'type_1' else 'karras'
 
@@ -738,7 +709,7 @@ request_body = {
     'checkpoint': 'SD15_disneyPixarCartoon_v10.safetensors',
     'vae': 'SD15_vae-ft-mse-840000-ema-pruned.safetensors',
     'prompt_negative': 'worst quality, low quality, normal quality, bad hands,text,bad anatomy',
-    'init_image': image,
+    'init_image': image_base64_resized,
     'steps': 30,
     'sampler_name': sampler_name,
     'scheduler': scheduler,
@@ -754,7 +725,7 @@ refiner_body = {
 canny_body = {
     'controlnet': 'SD15_Canny_control_v11p_sd15_lineart.pth',
     'type': 'canny',
-    'image': image,
+    'image': image_base64_resized,
     'preprocessor_type': 'lineart',
     'strength': 0.8 if style_type == 'type_1' else 0.65,
     'start_percent': 0,
@@ -764,7 +735,7 @@ canny_body = {
 depth_body = {
     'controlnet': 'SD15_Depth_control_sd15_depth.pth',
     'type': 'depth',
-    'image': image,
+    'image': image_base64_resized,
     'preprocessor_type': 'depth_zoe',
     'strength': 0.6,
     'start_percent': 0,
@@ -774,7 +745,7 @@ depth_body = {
 pose_body = {
     'controlnet': 'SD15_Pose_control_v11p_sd15_openpose.pth',
     'type': 'pose',
-    'image': image,
+    'image': image_base64_resized,
     'preprocessor_type': 'dwpose',
     'strength': 0.6,
     'start_percent': 0,
@@ -784,7 +755,7 @@ pose_body = {
 ipadapter_body = {
     'ipadapter': 'SD15_ip-adapter-plus_sd15.safetensors',
     'clip_vision': 'CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors',
-    'images': [image],
+    'images': [image_base64_resized],
     'weight': 0.7 if style_type == 'type_1' else 0.6,
     'start_at': 0,
     'end_at': 1,
@@ -797,7 +768,6 @@ if style_type == 'type_2':
     request_body['controlnet_requests'].append(pose_body)
 request_body['ipadapter_request'] = ipadapter_body
 
-ip_addr = '130.211.239.93:7861'
 url = f"http://{ip_addr}/i2c/generate"
 response = requests.post(url, json=request_body)
 data = response.json()
