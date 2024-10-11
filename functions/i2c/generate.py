@@ -165,5 +165,4 @@ def generate_image(cached_model_dict, request_data):
     image_face_detailed_base64 = convert_image_tensor_to_base64(image_face_detailed_tensor * 255)
     # Image resize H:W = 3:2
 
-
     return image_base64, image_face_detailed_base64
