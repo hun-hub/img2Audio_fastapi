@@ -17,7 +17,7 @@ if [ ! -d "$PID_DIR" ]; then
 fi
 
 # API 서버 실행 및 PID 저장
-nohup python main_api.py > $LOG_DIR/api_log.out 2>&1 &
+nohup bash -c 'CUDA_LAUNCH_BLOCKING=1 python main_api.py' > $LOG_DIR/api_log.out 2>&1 &
 echo $! > "$PID_DIR/api.pid"
 
 # Demo 서버 실행 및 PID 저장
