@@ -1,7 +1,7 @@
 import numpy as np
 import io, base64
 import torch
-from PIL import Image
+from PIL import Image, ExifTags
 from cgen_utils.loader import load_controlnet_preprocessor
 
 
@@ -14,7 +14,7 @@ def convert_image_to_base64(image):
 
 def convert_base64_to_image(image_base64):
     image_data = base64.b64decode(image_base64)
-    image_rgb = Image.open(io.BytesIO(image_data))
+    image_rgb = Image.open(io.BytesIO(image_data)).convert('RGB')
     return image_rgb
 def convert_image_array_to_base64(image_array: np.ndarray) -> str:
     '''
@@ -68,6 +68,24 @@ def _crop_image(image: Image):
     return image
 
 def resize_image_for_sd(image: Image, is_mask=False, resolution = 1024) :
+    exif_data = image.getexif()
+
+    if exif_data is not None:
+        for tag, value in exif_data.items():
+            if ExifTags.TAGS.get(tag) == 'Orientation':
+                orientation = value
+                break
+        else:
+            orientation = None
+
+        # 회전 정보에 따라 이미지를 회전
+        if orientation == 3:
+            image = image.rotate(180, expand=True)
+        elif orientation == 6:
+            image = image.rotate(270, expand=True)
+        elif orientation == 8:
+            image = image.rotate(90, expand=True)
+
     w, h = image.size
     scale = (resolution ** 2 / (w * h)) ** 0.5
 
