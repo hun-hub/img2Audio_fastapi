@@ -121,13 +121,15 @@ class CntGenAPI:
             # self.queue.get()
             gc.collect()
             comfy.model_management.soft_empty_cache()
-            torch.cuda.empty_cache()
             return generate_output
 
         except Exception as e:
             # self.queue.get()
+            comfy.model_management.unload_all_models()
+            comfy.model_management.cleanup_models()
+            # self.queue.get()
             gc.collect()
-            torch.cuda.empty_cache()
+            comfy.model_management.soft_empty_cache()
 
             raise HTTPException(status_code=500, detail=str(e))
 
