@@ -66,8 +66,11 @@ class Inference_API(BaseFunction_API):
         return {"image_base64": image_base64}
 
     def i2c_generate(self, request_data: SD15_RequestData):
-        image_base64, image_face_detail_base64 = self.generate_blueprint(functions.i2c.generate.generate_image, request_data)
-        return {"image_base64": image_base64, "image_face_detail_base64": image_face_detail_base64}
+        image_base64, image_base64_print, image_face_detailed_base64, image_face_detailed_base64_print = self.generate_blueprint(functions.i2c.generate.generate_image, request_data)
+        return {"image_base64": image_base64,
+                "image_face_detail_base64": image_face_detailed_base64,
+                'image_base64_print': image_base64_print,
+                'image_face_detail_base64_print': image_face_detailed_base64_print,}
 
     def gemini_generate(self, request_data: Gemini_RequestData):
         prompt = self.gemini(functions.gemini.generate.generate_prompt, request_data)

@@ -158,11 +158,13 @@ def generate_image(cached_model_dict, request_data):
         wildcard_opt='perfect hand,fine fingers'
     )
 
-    image_tensor = pad_image_to_aspect_ratio(image_tensor.squeeze())
-    image_face_detailed_tensor = pad_image_to_aspect_ratio(image_face_detailed_tensor.squeeze())
+    image_tensor_print = pad_image_to_aspect_ratio(image_tensor.squeeze())
+    image_face_detailed_tensor_print = pad_image_to_aspect_ratio(image_face_detailed_tensor.squeeze())
 
     image_base64 = convert_image_tensor_to_base64(image_tensor * 255)
+    image_base64_print = convert_image_tensor_to_base64(image_tensor_print * 255)
     image_face_detailed_base64 = convert_image_tensor_to_base64(image_face_detailed_tensor * 255)
+    image_face_detailed_base64_print = convert_image_tensor_to_base64(image_face_detailed_tensor_print * 255)
     # Image resize H:W = 3:2
 
-    return image_base64, image_face_detailed_base64
+    return image_base64, image_base64_print, image_face_detailed_base64, image_face_detailed_base64_print
