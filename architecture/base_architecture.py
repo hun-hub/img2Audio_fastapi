@@ -1,4 +1,5 @@
 import torch
+import threading
 from fastapi import FastAPI, HTTPException
 from logs.log_middleware import LogRequestMiddleware
 from fastapi.middleware.cors import CORSMiddleware
@@ -29,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 class CntGenAPI:
+    _lock = threading.Lock()
     def __init__(self, args):
         self.args = args
         self.queue = Queue()
@@ -47,6 +49,7 @@ class CntGenAPI:
 
         self.app.on_event("startup")(self.startup_event)
         self.app.post('/restart')(self.restart)
+
 
     def check_memory_usage(self, threshold=50):
         # 시스템의 메모리 사용량을 퍼센트로 반환
@@ -112,24 +115,27 @@ class CntGenAPI:
 
     def generate_blueprint(self, gen_function, request_data):
         try:
-            # cache check & load model
-            self._cached_model_update(request_data)
-            generate_output = gen_function(self.model_cache, request_data)
+            with self._lock:
+                # cache check & load model
+                self._cached_model_update(request_data)
+                generate_output = gen_function(self.model_cache, request_data)
 
-            comfy.model_management.unload_all_models()
-            comfy.model_management.cleanup_models()
-            # self.queue.get()
-            gc.collect()
-            comfy.model_management.soft_empty_cache()
+                comfy.model_management.unload_all_models()
+                comfy.model_management.cleanup_models()
+                # self.queue.get()
+                gc.collect()
+                comfy.model_management.soft_empty_cache()
             return generate_output
 
         except Exception as e:
-            # self.queue.get()
-            comfy.model_management.unload_all_models()
-            comfy.model_management.cleanup_models()
-            # self.queue.get()
-            gc.collect()
-            comfy.model_management.soft_empty_cache()
+            with self._lock:
+
+                # self.queue.get()
+                comfy.model_management.unload_all_models()
+                comfy.model_management.cleanup_models()
+                # self.queue.get()
+                gc.collect()
+                comfy.model_management.soft_empty_cache()
 
             raise HTTPException(status_code=500, detail=str(e))
 
