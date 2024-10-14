@@ -11,4 +11,5 @@ class Half_Inpainting_RequestData(RequestData):
     init_image: Optional[str]= None
     mask: Optional[str]= None
     controlnet_requests: Optional[List[ControlNet_RequestData]] = []
+    ipadapter_request: Optional[IPAdapter_RequestData] = None
 

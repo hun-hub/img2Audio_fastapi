@@ -21,7 +21,9 @@ def build_half_inpainting_ui(image, mask, prompt, ip_addr) :
                 normal_inputs = generate_controlnet_ui('SDXL', 'Normal', checkpoint_root)
                 depth_inputs = generate_controlnet_ui('SDXL', 'Depth', checkpoint_root)
 
+    ipadapter_inputs = generate_ipadapter_ui('SDXL', checkpoint_root)
+
     with gr.Row() :
         generate = gr.Button("Generate!")
 
-    return base_inputs + canny_inputs + depth_inputs + normal_inputs + pose_inputs + extra_inputs, generate
+    return base_inputs + canny_inputs + depth_inputs + normal_inputs + pose_inputs + ipadapter_inputs + extra_inputs, generate

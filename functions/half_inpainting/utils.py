@@ -40,6 +40,31 @@ def construct_controlnet_condition(
 
     return positive, negative
 
+@torch.inference_mode()
+def construct_ipadapter_condition(
+        unet,
+        cached_model_dict,
+        ipadapter_request,
+):
+
+    if ipadapter_request is not None:
+        clip_vision = load_clip_vision(ipadapter_request.clip_vision)
+        ipadapter = cached_model_dict['ipadapter']['sdxl'][1]
+        ipadapter_images = [convert_base64_to_image_tensor(image) / 255 for image in ipadapter_request.images]
+        image_batch = make_image_batch(ipadapter_images)
+
+        unet = apply_ipadapter(
+                               unet= unet,
+                               ipadapter=ipadapter,
+                               clip_vision=clip_vision,
+                               image= image_batch,
+                               weight= ipadapter_request.weight,
+                               start_at = ipadapter_request.start_at,
+                               end_at = ipadapter_request.end_at,
+                               weight_type = ipadapter_request.weight_type,
+                               combine_embeds = ipadapter_request.combine_embeds,
+                               embeds_scaling= ipadapter_request.embeds_scaling,)
+    return unet
 
 def sned_half_inpainting_request_to_api(
         checkpoint,
@@ -84,6 +109,13 @@ def sned_half_inpainting_request_to_api(
         pose_start,
         pose_end,
 
+        ipadapter_enable,
+        ipadapter_model_name,
+        ipadapter_images,
+        ipadapter_weight,
+        ipadapter_start,
+        ipadapter_end,
+
         ip_addr
 ) :
     height, width = eval(resolution)
@@ -106,6 +138,9 @@ def sned_half_inpainting_request_to_api(
     if not isinstance(pose_image, NoneType):
         pose_image = resize_image_for_sd(Image.fromarray(pose_image))
         pose_image = convert_image_to_base64(pose_image)
+    if not isinstance(ipadapter_images, NoneType):
+        ipadapter_images = [resize_image_for_sd(Image.fromarray(ipadapter_image[0])) for ipadapter_image in ipadapter_images]
+        ipadapter_images = [convert_image_to_base64(ipadapter_image) for ipadapter_image in ipadapter_images]
 
     request_body = {
         'checkpoint': checkpoint,
@@ -162,6 +197,15 @@ def sned_half_inpainting_request_to_api(
         'end_percent': pose_end,
     }
 
+    ipadapter_body = {
+        'ipadapter': ipadapter_model_name,
+        'clip_vision': 'CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors',
+        'images': ipadapter_images,
+        'weight': ipadapter_weight,
+        'start_at': ipadapter_start,
+        'end_at': ipadapter_end,
+    }
+
     if canny_enable :
         request_body['controlnet_requests'].append(canny_body)
     if depth_enable :
@@ -170,6 +214,8 @@ def sned_half_inpainting_request_to_api(
         request_body['controlnet_requests'].append(normal_body)
     if pose_enable :
         request_body['controlnet_requests'].append(pose_body)
+    if ipadapter_enable :
+        request_body['ipadapter_request'] = ipadapter_body
 
     url = f"http://{ip_addr}/sdxl/half_inpainting"
     response = requests.post(url, json=request_body)

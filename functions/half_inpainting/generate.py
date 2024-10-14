@@ -8,7 +8,7 @@ from cgen_utils.comfyui import (encode_prompt,
                                 apply_lora_to_unet,
                                 get_init_noise,
                                 mask_blur)
-from .utils import construct_controlnet_condition
+from .utils import construct_controlnet_condition, construct_ipadapter_condition
 
 import random
 import copy
@@ -29,7 +29,14 @@ def generate_image(cached_model_dict, request_data):
     mask = mask_blur(mask)
     init_noise = encode_image_for_inpaint(vae, init_image, mask, grow_mask_by=0)
 
+    ipadapter_request = request_data.ipadapter_request
     controlnet_requests = request_data.controlnet_requests
+
+    unet = construct_ipadapter_condition(
+        unet,
+        cached_model_dict,
+        ipadapter_request
+    )
 
     # Base Model Flow
     positive_cond, negative_cond = encode_prompt(clip,
