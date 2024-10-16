@@ -154,6 +154,18 @@ def load_sam(model_name='sam_vit_b_01ec64.pth') :
     func_name = 'impact.impact_pack.SAMLoader'
     sam_loader = get_function_from_comfyui(module_path, func_name)
     return sam_loader().load_model(model_name, device_mode='Prefer GPU')[0]
+def load_dino_model(model_name='GroundingDINO_SwinB (938MB)') :
+    module_path = 'ComfyUI/custom_nodes/comfyui_segment_anything'
+    func_name = 'node.GroundingDinoModelLoader'
+    dino_loader = get_function_from_comfyui(module_path, func_name)
+    dino_model = dino_loader().main(model_name)[0]
+    return dino_model
+def load_dino_segment_module() :
+    module_path = 'ComfyUI/custom_nodes/comfyui_segment_anything'
+    func_name = 'node.GroundingDinoSAMSegment'
+    dino_segment = get_function_from_comfyui(module_path, func_name)
+    return dino_segment()
+
 @torch.inference_mode()
 def load_detect_provider(model_name='bbox/face_yolov8m.pt') :
     module_path = 'ComfyUI/custom_nodes/ComfyUI-Impact-Pack'

@@ -14,8 +14,12 @@ import functions.upscale.generate
 from functions.iclight.params import ICLight_RequestData
 import functions.iclight.generate
 import functions.i2c.generate
+from functions.half_inpainting.params import Half_Inpainting_RequestData
+import functions.half_inpainting.generate
 from functions.gemini.params import Gemini_RequestData
 import functions.gemini.generate
+from functions.sam.params import SAM_RequestData
+import functions.sam.generate
 
 from .basic_function_architecture import BaseFunction_API
 
@@ -35,7 +39,9 @@ class Inference_API(BaseFunction_API):
         self.app.post('/upscale')(self.upscale)
         self.app.post('/iclight/generate')(self.iclight_generate)
         self.app.post('/i2c/generate')(self.i2c_generate)
+        self.app.post('/sdxl/half_inpainting')(self.half_inpainting_generate)
         self.app.post('/gemini')(self.gemini_generate)
+        self.app.post('/sam')(self.sam)
 
     def flux_generate(self, request_data: FLUX_RequestData):
         image_base64 = self.generate_blueprint(functions.flux.generate.generate_image, request_data)
@@ -71,6 +77,14 @@ class Inference_API(BaseFunction_API):
                 "image_face_detail_base64": image_face_detailed_base64,
                 'image_base64_print': image_base64_print,
                 'image_face_detail_base64_print': image_face_detailed_base64_print,}
+
+    def sam(self, request_data: SAM_RequestData):
+        image_base64, mask_base64, mask_inv_base64 = self.generate_blueprint(functions.sam.generate.predict, request_data)
+        return {'image_base64': image_base64, 'mask_base64': mask_base64, 'mask_inv_base64': mask_inv_base64}
+
+    def half_inpainting_generate(self, request_data: Half_Inpainting_RequestData):
+        image_base64 = self.generate_blueprint(functions.half_inpainting.generate.generate_image, request_data)
+        return {"image_base64": image_base64}
 
     def gemini_generate(self, request_data: Gemini_RequestData):
         prompt = self.gemini(functions.gemini.generate.generate_prompt, request_data)

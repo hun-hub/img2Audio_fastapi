@@ -87,8 +87,7 @@ def cache_checkpoint(model_cache, model_cache_blueprint, checkpoint_name, is_ref
     sd_variant = 'refiner' if is_refiner else 'base'
     cached_unet = model_cache['unet'][checkpoint_type][sd_variant]
 
-    if cached_unet is not None and cached_unet[0] == checkpoint_name :
-        return None
+    if cached_unet is not None and cached_unet[0] == checkpoint_name : return
 
     unet, vae, clip = load_checkpoint(checkpoint_name)
 

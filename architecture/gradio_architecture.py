@@ -17,6 +17,10 @@ from functions.iclight.utils import sned_iclight_request_to_api
 from .ui.iclight_ui import build_iclight_ui
 from functions.i2c.utils import sned_i2c_request_to_api
 from .ui.i2c_ui import build_i2c_ui
+from functions.half_inpainting.utils import sned_half_inpainting_request_to_api
+from .ui.half_inpainting_ui import build_half_inpainting_ui
+from functions.sam.utils import sned_sam_request_to_api
+from .ui.sam_ui import build_sam_ui
 
 
 from .ui.gemini_ui import build_gemini_ui
@@ -64,8 +68,10 @@ class GradioApp:
                         iclight_inputs, iclight_generate = build_iclight_ui(image, mask, gemini_prompt, self.inference_addr)
                     with gr.Tab("Image-to-Cartoon"):
                         i2c_inputs, i2c_generate = build_i2c_ui(self.inference_addr)
+                    with gr.Tab("Half-Inpainting"):
+                        half_inpainting_inputs, half_inpainting_generate = build_half_inpainting_ui(image, mask, gemini_prompt, self.inference_addr)
                     with gr.Tab("Segment Anything"):
-                        gr.Markdown("SAM Functions")
+                        sam_inputs, sam_generate = build_sam_ui(image, gemini_prompt, self.inference_addr)
                     with gr.Tab("Gemini"):
                         gemini_inputs, (gemini_result, gemini_button) = build_gemini_ui()
 
@@ -99,6 +105,10 @@ class GradioApp:
             iclight_generate.click(fn=sned_iclight_request_to_api, inputs=iclight_inputs, outputs=generated_image)
             # I2C
             i2c_generate.click(fn=sned_i2c_request_to_api, inputs=i2c_inputs, outputs=generated_image)
+            # Half-Inpainting
+            half_inpainting_generate.click(fn=sned_half_inpainting_request_to_api, inputs=half_inpainting_inputs, outputs=generated_image)
+            # SAM
+            sam_generate.click(fn=sned_sam_request_to_api, inputs=sam_inputs, outputs=generated_image)
             # API Restart Button
             # api_restart_button.click(fn=self.restart)
     def launch(self):

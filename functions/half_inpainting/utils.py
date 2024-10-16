@@ -26,13 +26,8 @@ def construct_controlnet_condition(
 ):
 
     for controlnet_request in controlnet_requests:
-        if controlnet_request.type == 'inpaint':
-            control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
-            control_image, control_mask = control_image[:, :, :, :3], control_image[:, :, :, 3]
-            control_image = torch.where(control_mask[:, :, :, None] > 0.5, 1, control_image)
-        else :
-            control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
-            control_image = controlnet_image_preprocess(control_image, controlnet_request.preprocessor_type, 'sdxl')
+        control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
+        control_image = controlnet_image_preprocess(control_image, controlnet_request.preprocessor_type, 'sdxl')
         controlnet = cached_model_dict['controlnet']['sdxl'][controlnet_request.type][1]
         positive, negative = apply_controlnet(positive,
                                               negative,
@@ -44,7 +39,6 @@ def construct_controlnet_condition(
 
 
     return positive, negative
-
 
 @torch.inference_mode()
 def construct_ipadapter_condition(
@@ -72,8 +66,7 @@ def construct_ipadapter_condition(
                                embeds_scaling= ipadapter_request.embeds_scaling,)
     return unet
 
-
-def sned_sdxl_request_to_api(
+def sned_half_inpainting_request_to_api(
         checkpoint,
         image,
         mask,
@@ -84,10 +77,6 @@ def sned_sdxl_request_to_api(
         denoising_strength,
         seed,
 
-        refiner_enable,
-        refiner_name,
-        refine_switch,
-
         canny_enable,
         canny_model_name,
         canny_image,
@@ -95,15 +84,6 @@ def sned_sdxl_request_to_api(
         canny_control_weight,
         canny_start,
         canny_end,
-
-        inpaint_enable,
-        inpaint_model_name,
-        inpaint_image,
-        inpaint_mask,
-        inpaint_preprocessor_type,
-        inpaint_control_weight,
-        inpaint_start,
-        inpaint_end,
 
         depth_enable,
         depth_model_name,
@@ -136,21 +116,10 @@ def sned_sdxl_request_to_api(
         ipadapter_start,
         ipadapter_end,
 
-        lora_enable,
-        lora_model_name_1,
-        strength_model_1,
-        strength_clip_1,
-        lora_model_name_2,
-        strength_model_2,
-        strength_clip_2,
-        lora_model_name_3,
-        strength_model_3,
-        strength_clip_3,
-
-        gen_type,
         ip_addr
 ) :
     height, width = eval(resolution)
+
     if not isinstance(image, NoneType):
         image = resize_image_for_sd(Image.fromarray(image))
         image = convert_image_to_base64(image)
@@ -160,16 +129,6 @@ def sned_sdxl_request_to_api(
     if not isinstance(canny_image, NoneType):
         canny_image = resize_image_for_sd(Image.fromarray(canny_image))
         canny_image = convert_image_to_base64(canny_image)
-    if not isinstance(inpaint_image, NoneType) and not isinstance(inpaint_mask, NoneType):
-        inpaint_image = resize_image_for_sd(Image.fromarray(inpaint_image))
-        inpaint_mask = resize_image_for_sd(Image.fromarray(inpaint_mask[:, :, 0]), is_mask=True)
-
-        inpaint_image_arr = np.array(inpaint_image)
-        inpaint_mask_arr = np.expand_dims(np.array(inpaint_mask), axis=2)
-        inpaint_image_arr = np.concatenate((inpaint_image_arr, inpaint_mask_arr), axis=2)
-        inpaint_image = Image.fromarray(inpaint_image_arr)
-
-        inpaint_image = convert_image_to_base64(inpaint_image)
     if not isinstance(depth_image, NoneType):
         depth_image = resize_image_for_sd(Image.fromarray(depth_image))
         depth_image = convert_image_to_base64(depth_image)
@@ -195,14 +154,7 @@ def sned_sdxl_request_to_api(
         'cfg': guidance_scale,
         'denoise': denoising_strength,
         'seed': seed,
-        'gen_type': gen_type,
-        'controlnet_requests': [],
-        'lora_requests': [],
-    }
-
-    refiner_body = {
-        'refiner': refiner_name,
-        'refine_switch': refine_switch,
+        'controlnet_requests': []
     }
 
     canny_body = {
@@ -213,16 +165,6 @@ def sned_sdxl_request_to_api(
         'strength': canny_control_weight,
         'start_percent': canny_start,
         'end_percent': canny_end,
-    }
-
-    inpaint_body = {
-        'controlnet': inpaint_model_name,
-        'type': 'inpaint',
-        'image': inpaint_image,
-        'preprocessor_type': inpaint_preprocessor_type,
-        'strength': inpaint_control_weight,
-        'start_percent': inpaint_start,
-        'end_percent': inpaint_end,
     }
 
     depth_body = {
@@ -264,24 +206,8 @@ def sned_sdxl_request_to_api(
         'end_at': ipadapter_end,
     }
 
-    lora_requests_sorted = sorted([[lora_model_name_1, strength_model_1, strength_clip_1],
-                                   [lora_model_name_2, strength_model_2, strength_clip_2],
-                                   [lora_model_name_3, strength_model_3, strength_clip_3]])
-    lora_body_list = []
-
-    for lora_request_sorted in lora_requests_sorted:
-        if lora_request_sorted[0] == 'None' : continue
-        lora_body = {'lora': lora_request_sorted[0],
-                     'strength_model': lora_request_sorted[1],
-                     'strength_clip': lora_request_sorted[2],}
-        lora_body_list.append(lora_body)
-
-    if refiner_enable:
-        request_body.update(refiner_body)
     if canny_enable :
         request_body['controlnet_requests'].append(canny_body)
-    if inpaint_enable :
-        request_body['controlnet_requests'].append(inpaint_body)
     if depth_enable :
         request_body['controlnet_requests'].append(depth_body)
     if normal_enable :
@@ -290,15 +216,10 @@ def sned_sdxl_request_to_api(
         request_body['controlnet_requests'].append(pose_body)
     if ipadapter_enable :
         request_body['ipadapter_request'] = ipadapter_body
-    if lora_enable :
-        for lora_body in lora_body_list:
-            if lora_body['lora'] != 'None' :
-                request_body['lora_requests'].append(lora_body)
 
-    url = f"http://{ip_addr}/sdxl/generate"
+    url = f"http://{ip_addr}/sdxl/half_inpainting"
     response = requests.post(url, json=request_body)
     data = handle_response(response)
     image_base64 = data['image_base64']
     image = convert_base64_to_image_array(image_base64)
     return [image]
-
