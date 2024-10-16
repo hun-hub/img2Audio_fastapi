@@ -79,8 +79,8 @@ class Inference_API(BaseFunction_API):
                 'image_face_detail_base64_print': image_face_detailed_base64_print,}
 
     def sam(self, request_data: SAM_RequestData):
-        image_base64, mask_base64 = self.generate_blueprint(functions.sam.generate.predict, request_data)
-        return {'image_base64': image_base64, 'mask_base64': mask_base64}
+        image_base64, mask_base64, mask_inv_base64 = self.generate_blueprint(functions.sam.generate.predict, request_data)
+        return {'image_base64': image_base64, 'mask_base64': mask_base64, 'mask_inv_base64': mask_inv_base64}
 
     def half_inpainting_generate(self, request_data: Half_Inpainting_RequestData):
         image_base64 = self.generate_blueprint(functions.half_inpainting.generate.generate_image, request_data)

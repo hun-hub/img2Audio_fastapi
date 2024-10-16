@@ -10,7 +10,7 @@ def build_half_inpainting_ui(image, mask, prompt, ip_addr) :
 
     extra_inputs = [gr.Textbox(ip_addr, visible=False)]
 
-    base_inputs = [checkpoint, image, mask, prompt] + generate_base_checkpoint_ui()
+    base_inputs = [checkpoint, image, mask, prompt] + generate_base_checkpoint_ui(denoise=0.25)
 
     with gr.Group():
         with gr.Row():
