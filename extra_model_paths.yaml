@@ -38,7 +38,7 @@ comfyui:
      inpaint: inpaint/
      ipadapter: ipadapter/
      instantid: instantid/
-
+     birefnet: BiRefNet/
 #other_ui:
 #    base_path: path/to/ui
 #    checkpoints: models/checkpoints

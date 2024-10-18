@@ -114,19 +114,24 @@ def generate_image(cached_model_dict, request_data):
 
     seed = random.randint(1, int(1e9)) if request_data.seed == -1 else request_data.seed
 
+    face_prompt = prompt_positive_prefix + 'Detailed Face, eye, nose, lips.'
+    # Base Model Flow
+    positive_face, negative_face = encode_prompt(clip_base,
+                                                 face_prompt,
+                                                 prompt_negative)
+
     image_face_detailed_tensor = detailer(
         image_tensor,
         unet_refine if is_animation_style else unet_base,
         clip_refine,
         vae_refine,
-        positive_cond,
-        negative_cond,
+        positive_face,
+        negative_face,
         seed
     )
 
 
     # Add Hand detailer
-
     positive_cond, negative_cond = construct_hand_detailer_condition(
         init_image,
         positive_cond,

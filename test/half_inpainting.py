@@ -29,7 +29,7 @@ prompt = 'A photograph of a crispy, golden-brown pork cutlet (Tonkatsu) on a sle
 
 
 denoise_range = [0.2, 0.25, 0.3]
-model_range = [ 'SDXL_copaxTimelessxlSDXL1_v12.safetensors', 'SDXL_RealVisXL_V40.safetensors', 'SDXL_copaxPhotoxl_v2.safetensors']
+model_range = [ 'SDXL_copaxPhotoxl_v2.safetensors']
 controlnet_range = ['SDXL_Canny.safetensors', 'SDXL_Canny_sai_xl_canny_256lora.safetensors']
 
 out_iteration = len(denoise_range) * len(model_range) * len(controlnet_range)
@@ -77,7 +77,7 @@ for model, controlnet, denoise in tqdm(product(model_range, controlnet_range, de
         }
         request_body['controlnet_requests'].append(canny_body)
 
-        url = f"http://localhost:7861/sdxl/half_inpainting"
+        url = f"http://117.52.72.82:7861/sdxl/half_inpainting"
         try :
             response = requests.post(url, json=request_body)
             data = handle_response(response)
