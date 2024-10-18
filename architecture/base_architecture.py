@@ -59,13 +59,13 @@ class CntGenAPI:
     def startup_event(self):
         logger.info(" \n============ 초기 모델 로드 중 ============")
         load_extra_path_config('ComfyUI/extra_model_paths.yaml')
-        with open('model_cache.json', 'r') as file:
-            model_cache_blueprint = json.load(file)
-        cache_checkpoint(self.model_cache, model_cache_blueprint, self.args.default_ckpt)
-        update_model_cache_from_blueprint(self.model_cache, model_cache_blueprint)
-        logger.info("\n============ 초기 모델 로드 완료 ============")
-
-        del model_cache_blueprint
+        # with open('model_cache.json', 'r') as file:
+        #     model_cache_blueprint = json.load(file)
+        # cache_checkpoint(self.model_cache, model_cache_blueprint, self.args.default_ckpt)
+        # update_model_cache_from_blueprint(self.model_cache, model_cache_blueprint)
+        # logger.info("\n============ 초기 모델 로드 완료 ============")
+        #
+        # del model_cache_blueprint
         gc.collect()
 
     def restart(self):
