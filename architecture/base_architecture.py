@@ -63,7 +63,7 @@ class CntGenAPI:
         #     model_cache_blueprint = json.load(file)
         # cache_checkpoint(self.model_cache, model_cache_blueprint, self.args.default_ckpt)
         # update_model_cache_from_blueprint(self.model_cache, model_cache_blueprint)
-        # logger.info("\n============ 초기 모델 로드 완료 ============")
+        logger.info("\n============ 초기 모델 로드 완료 ============")
         #
         # del model_cache_blueprint
         gc.collect()
