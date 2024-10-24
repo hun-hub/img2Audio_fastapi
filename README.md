@@ -200,6 +200,7 @@ Model 종류는 Demo에서 확인 가능.
 * [Segment Anything (coming soon)](#segment-anything)
 * [Gemini](#gemini)
 * [Image-to-Cartoon](#image-to-cartoon-)
+* [Nukki](#nukki)
 ---
 #### FLUX
 Parameter format
@@ -775,3 +776,27 @@ image_base64 = data['image_base64']
 image_face_detail_base64 = data['image_face_detail_base64']
 ```
 ---
+
+#### Nukki
+Parameter format
+**nukki_model list**
+* DIS-TR_TEs.safetensors
+* DIS.safetensors
+
+```python
+class Nukki_RequestData(RequestData):
+    nukki_model: str = 'DIS-TR_TEs.safetensors'
+    init_image: str
+```
+
+```python
+request_body = {
+    'nukki_model': MODEL_NAME,
+    'init_image': IMAGE_BASE64, # RGB 이미지
+}
+
+url = f"http://{ip_addr}/nukki"
+response = requests.post(url, json=request_body)
+data = response.json()
+image_base64 = data['image_base64']
+```
