@@ -21,7 +21,8 @@ from functions.half_inpainting.utils import sned_half_inpainting_request_to_api
 from .ui.half_inpainting_ui import build_half_inpainting_ui
 from functions.sam.utils import sned_sam_request_to_api
 from .ui.sam_ui import build_sam_ui
-
+from functions.nukki.utils import sned_nukki_request_to_api
+from .ui.nukki_ui import build_nukki_ui
 
 from .ui.gemini_ui import build_gemini_ui
 from functions.gemini.utils import send_gemini_request_to_api
@@ -72,6 +73,8 @@ class GradioApp:
                         half_inpainting_inputs, half_inpainting_generate = build_half_inpainting_ui(image, mask, gemini_prompt, self.inference_addr)
                     with gr.Tab("Segment Anything"):
                         sam_inputs, sam_generate = build_sam_ui(image, gemini_prompt, self.inference_addr)
+                    with gr.Tab("Nukki") :
+                        nukki_inputs, nukki_generate = build_nukki_ui(image, self.inference_addr)
                     with gr.Tab("Gemini"):
                         gemini_inputs, (gemini_result, gemini_button) = build_gemini_ui()
 
@@ -109,6 +112,8 @@ class GradioApp:
             half_inpainting_generate.click(fn=sned_half_inpainting_request_to_api, inputs=half_inpainting_inputs, outputs=generated_image)
             # SAM
             sam_generate.click(fn=sned_sam_request_to_api, inputs=sam_inputs, outputs=generated_image)
+            # Nukki
+            nukki_generate.click(fn=sned_nukki_request_to_api, inputs=nukki_inputs, outputs=generated_image)
             # API Restart Button
             # api_restart_button.click(fn=self.restart)
     def launch(self):

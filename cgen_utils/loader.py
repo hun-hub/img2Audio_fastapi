@@ -186,6 +186,21 @@ def load_dwpose_proprecessor() :
     func_name = 'node_wrappers.dwpose.DWPose_Preprocessor'
     pose_processor = get_function_from_comfyui(module_path, func_name)
     return pose_processor()
+
+@torch.inference_mode()
+def load_birefnet(model_name) :
+    module_path = 'ComfyUI/custom_nodes/ComfyUI_BiRefNet_ll'
+    func_name = 'birefnetNode.LoadRembgByBiRefNetModel'
+    birefnet_loader = get_function_from_comfyui(module_path, func_name)
+    birefnet_model = birefnet_loader().load_model(model_name, device='AUTO')[0]
+    return birefnet_model
+
+def load_bg_remover() :
+    module_path = 'ComfyUI/custom_nodes/ComfyUI_BiRefNet_ll'
+    func_name = 'birefnetNode.RembgByBiRefNet'
+    remover = get_function_from_comfyui(module_path, func_name)
+    return remover()
+
 if __name__ == '__main__':
     # module_path = 'ComfyUI/custom_nodes/ComfyUI-LaMA-Preprocessor'
     # func_name = 'annotator.lama.LamaInpainting'

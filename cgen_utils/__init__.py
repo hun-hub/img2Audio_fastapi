@@ -43,6 +43,7 @@ def set_comfyui_packages() :
     COMFYUI_PATH = os.getenv('COMFYUI_PATH')
     if COMFYUI_PATH not in sys.path:
         sys.path.append(os.path.abspath(COMFYUI_PATH))
+        sys.path.insert(0, os.path.join(os.path.abspath(COMFYUI_PATH), 'comfy'))
         print(f'Setting ComfyUI Packages PATH to {COMFYUI_PATH}')
 @torch.inference_mode()
 def update_model_cache_from_blueprint(model_cache, model_cache_blueprint):
