@@ -80,6 +80,7 @@ def construct_controlnet_condition(
         elif 'pose' in controlnet_request.type:
             proprecessor = load_dwpose_proprecessor()
             control_image = proprecessor.estimate_pose(control_image, pose_estimator='dw-ll_ucoco_384_bs5.torchscript.pt')['result'][0]
+            del proprecessor
         else :
             control_image = controlnet_image_preprocess(control_image, controlnet_request.preprocessor_type, 'sd15')
         controlnet = cached_model_dict['controlnet']['sd15'][controlnet_request.type][1]

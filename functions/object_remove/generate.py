@@ -21,7 +21,7 @@ def remove(cached_model_dict, request_data):
     end_base = request_data.steps
 
     init_image = convert_base64_to_image_tensor(request_data.init_image) / 255
-    mask = convert_base64_to_image_tensor(request_data.mask) / 255
+    mask = convert_base64_to_image_tensor(request_data.mask)[:, :, :, 0] / 255
     mask = mask_blur(mask)
     lama_preprocessed = webui_lama_proprecessor(init_image, mask).unsqueeze(0) / 255
     # Gemini prompt
