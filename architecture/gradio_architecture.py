@@ -17,12 +17,14 @@ from functions.iclight.utils import sned_iclight_request_to_api
 from .ui.iclight_ui import build_iclight_ui
 from functions.i2c.utils import sned_i2c_request_to_api
 from .ui.i2c_ui import build_i2c_ui
-from functions.half_inpainting.utils import sned_half_inpainting_request_to_api
-from .ui.half_inpainting_ui import build_half_inpainting_ui
+# from functions.half_inpainting.utils import sned_half_inpainting_request_to_api
+# from .ui.half_inpainting_ui import build_half_inpainting_ui
 from functions.sam.utils import sned_sam_request_to_api
 from .ui.sam_ui import build_sam_ui
 from functions.nukki.utils import sned_nukki_request_to_api
 from .ui.nukki_ui import build_nukki_ui
+from functions.bg_change.utils import sned_bg_change_request_to_api
+from .ui.bg_change_ui import build_bg_change_ui
 
 from .ui.gemini_ui import build_gemini_ui
 from functions.gemini.utils import send_gemini_request_to_api
@@ -69,12 +71,14 @@ class GradioApp:
                         iclight_inputs, iclight_generate = build_iclight_ui(image, mask, gemini_prompt, self.inference_addr)
                     with gr.Tab("Image-to-Cartoon"):
                         i2c_inputs, i2c_generate = build_i2c_ui(self.inference_addr)
-                    with gr.Tab("Half-Inpainting"):
-                        half_inpainting_inputs, half_inpainting_generate = build_half_inpainting_ui(image, mask, gemini_prompt, self.inference_addr)
+                    # with gr.Tab("Half-Inpainting"):
+                    #     half_inpainting_inputs, half_inpainting_generate = build_half_inpainting_ui(image, mask, gemini_prompt, self.inference_addr)
                     with gr.Tab("Segment Anything"):
                         sam_inputs, sam_generate = build_sam_ui(image, gemini_prompt, self.inference_addr)
                     with gr.Tab("Nukki") :
                         nukki_inputs, nukki_generate = build_nukki_ui(image, self.inference_addr)
+                    with gr.Tab("BG Change") :
+                        bg_change_inputs, bg_change_generate = build_bg_change_ui(image, mask, gemini_prompt, self.inference_addr)
                     with gr.Tab("Gemini"):
                         gemini_inputs, (gemini_result, gemini_button) = build_gemini_ui()
 
@@ -109,11 +113,13 @@ class GradioApp:
             # I2C
             i2c_generate.click(fn=sned_i2c_request_to_api, inputs=i2c_inputs, outputs=generated_image)
             # Half-Inpainting
-            half_inpainting_generate.click(fn=sned_half_inpainting_request_to_api, inputs=half_inpainting_inputs, outputs=generated_image)
+            # half_inpainting_generate.click(fn=sned_half_inpainting_request_to_api, inputs=half_inpainting_inputs, outputs=generated_image)
             # SAM
             sam_generate.click(fn=sned_sam_request_to_api, inputs=sam_inputs, outputs=generated_image)
             # Nukki
             nukki_generate.click(fn=sned_nukki_request_to_api, inputs=nukki_inputs, outputs=generated_image)
+            # BG Change
+            bg_change_generate.click(fn=sned_bg_change_request_to_api, inputs=bg_change_inputs, outputs=generated_image)
             # API Restart Button
             # api_restart_button.click(fn=self.restart)
     def launch(self):
