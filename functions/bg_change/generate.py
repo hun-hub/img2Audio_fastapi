@@ -11,6 +11,7 @@ from cgen_utils.comfyui import (encode_prompt,
                                 apply_lora_to_unet,
                                 mask_blur)
 from ComfyUI.comfy_extras.nodes_pag import PerturbedAttentionGuidance
+from ComfyUI.custom_nodes.comfyui_controlnet_aux.node_wrappers.inpaint import InpaintPreprocessor
 import random
 
 @torch.inference_mode()
@@ -22,8 +23,8 @@ def generate_image(cached_model_dict, request_data):
     init_image = convert_base64_to_image_tensor(request_data.init_image) / 255
     mask = convert_base64_to_image_tensor(request_data.mask)[:, :, :, 0] / 255
 
-    control_image = torch.where(mask[:, :, :, None] < 0.5, init_image, 0)
-    control_mask = 1 - mask
+    control_image = InpaintPreprocessor().preprocess(init_image, mask)[0]
+    control_mask = 1.0 - mask
 
     b, h, w, c = init_image.size()
     init_noise = get_init_noise(w, h, 1)
@@ -32,7 +33,6 @@ def generate_image(cached_model_dict, request_data):
     lora_requests = request_data.lora_requests
     controlnet_requests = request_data.controlnet_requests
 
-    seed = random.randint(1, int(1e9)) if request_data.seed == -1 else request_data.seed
     for lora_request in lora_requests :
         unet, clip = apply_lora_to_unet(
             unet,
@@ -45,7 +45,7 @@ def generate_image(cached_model_dict, request_data):
         cached_model_dict,
         ipadapter_request
     )
-
+    prompt_prefix = 'realistic, photography, 4k, HDR, radial, masterpiece, high-quality, super detail, '
     positive_cond, negative_cond = encode_prompt_advance(
         clip,
         request_data.is_retouch,
@@ -54,6 +54,12 @@ def generate_image(cached_model_dict, request_data):
         mask,
         request_data.prompt_retouch)
 
+    # positive_cond, negative_cond = encode_prompt(clip,
+    #                                              request_data.prompt_positive,
+    #                                              request_data.prompt_negative)
+
+    # positive_cond_first, negative_cond_first = positive_cond, negative_cond
+    # positive_cond_second, negative_cond_second = positive_cond, negative_cond
 
     positive_cond_first, negative_cond_first = construct_controlnet_condition(
         cached_model_dict,
@@ -65,18 +71,9 @@ def generate_image(cached_model_dict, request_data):
         True,
         controlnet_requests,
     )
+    #
 
-    positive_cond_second, negative_cond_second = construct_controlnet_condition(
-        cached_model_dict,
-        positive_cond,
-        negative_cond,
-        control_image,
-        control_mask,
-        request_data.is_retouch,
-        False,
-        controlnet_requests,
-    )
-
+    seed = random.randint(1, int(1e9)) if request_data.seed == -1 else request_data.seed
     latent_image = sample_image(
         unet= unet,
         positive_cond= positive_cond_first,
@@ -90,14 +87,26 @@ def generate_image(cached_model_dict, request_data):
         start_at_step= 0,
         end_at_step= 1000,)
 
+    positive_cond_second, negative_cond_second = construct_controlnet_condition(
+        cached_model_dict,
+        positive_cond,
+        negative_cond,
+        control_image,
+        control_mask,
+        request_data.is_retouch,
+        False,
+        controlnet_requests,
+    )
+
     unet = PerturbedAttentionGuidance().patch(unet, 3)[0]
+    seed = random.randint(1, int(1e9)) if request_data.seed == -1 else request_data.seed
     latent_image = sample_image(
         unet= unet,
         positive_cond= positive_cond_second,
         negative_cond= negative_cond_second,
         latent_image= latent_image,
         seed= seed,
-        steps= 25,
+        steps= 26,
         cfg= 7,
         sampler_name= request_data.sampler_name,
         scheduler= request_data.scheduler,

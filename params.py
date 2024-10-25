@@ -16,9 +16,9 @@ class IPAdapter_RequestData(BaseModel):
 
 class ControlNet_RequestData(BaseModel):
     controlnet: str
-    type: Literal['canny', 'inpaint', 'depth', 'normal', 'pose']
+    type: Literal['canny', 'inpaint', 'depth', 'normal', 'pose', 'scribble']
     image: Optional[str]
-    preprocessor_type: Literal['canny', 'lineart', 'dwpose', 'normalmap_bae', 'normalmap_midas', 'depth_midas', 'depth', 'depth_zoe']
+    preprocessor_type: Literal['canny', 'lineart', 'dwpose', 'normalmap_bae', 'normalmap_midas', 'depth_midas', 'depth', 'depth_zoe', 'scribble']
     # Params
     strength: float = 0.7
     start_percent: float = 0

@@ -1,7 +1,7 @@
 from params import RequestData, ControlNet_RequestData, IPAdapter_RequestData, LoRA_RequestData
 from typing import Optional, Literal, List
 
-prompt_negative = """EasyNegative,bad_prompt_version2-neg,NSFW,(worst quality:2),(low quality:2),(normal quality:2),normal quality,((grayscale)), (duplicate:1.331),(mutilated:1.21),blurry,(disfigured:1.331),lowers,extra digit"""
+prompt_negative = "EasyNegative,bad_prompt_version2-neg,NSFW,(worst quality:2),(low quality:2),(normal quality:2),normal quality,((grayscale)), (duplicate:1.331),(mutilated:1.21),blurry,(disfigured:1.331),lowers,extra digit"
 class ControlNet_ControlNet_RequestData(ControlNet_RequestData):
     image: str = None
     base_multiplier: float = 1

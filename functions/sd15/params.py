@@ -1,11 +1,7 @@
 from params import RequestData, ControlNet_RequestData, IPAdapter_RequestData, LoRA_RequestData
 from typing import Optional, Literal, List
 
-prompt_negative = """boring_e621_v4, (((text, watermark, logo, phrases, person, face))), 
-(deformed iris, deformed pupils, semi-realistic, cgi, 3d, render, sketch, cartoon, drawing, anime), cropped, out of frame, 
-worst quality, low quality, jpeg artifacts, ugly, duplicate, morbid, mutilated, extra fingers, mutated hands, poorly drawn hands, 
-poorly drawn face, mutation, deformed, blurry, dehydrated, bad anatomy, bad proportions, extra limbs, cloned face, disfigured, 
-gross proportions, malformed limbs, missing arms, missing legs, extra arms, extra legs, fused fingers, too many fingers, long neck, UnrealisticDream"""
+prompt_negative = ""
 
 class SD15_RequestData(RequestData):
     checkpoint: str = 'SD15_realisticVisionV51_v51VAE.safetensors'

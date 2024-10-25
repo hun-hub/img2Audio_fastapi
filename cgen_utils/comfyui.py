@@ -79,6 +79,18 @@ def apply_controlnet(positive, negative, controlnet, image, strength, start_perc
     positive, negative = controlnet_applier.apply_controlnet(positive, negative, controlnet, image, strength, start_percent, end_percent)
     return positive, negative
 
+
+
+def get_default_args(input_types) :
+    args = input_types['required']
+    for key, val in args.items():
+        if len(val) != 2 : continue
+        input_type, info = val
+        if 'default' not in info : continue
+        args[key] = info['default']
+
+    return args
+
 @torch.inference_mode()
 def apply_ipadapter(
         unet,

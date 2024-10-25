@@ -22,6 +22,8 @@ from functions.sam.params import SAM_RequestData
 import functions.sam.generate
 from functions.nukki.params import Nukki_RequestData
 import functions.nukki.generate
+from functions.bg_change.params import BGChange_RequestData
+import functions.bg_change.generate
 
 from .basic_function_architecture import BaseFunction_API
 
@@ -43,6 +45,7 @@ class Inference_API(BaseFunction_API):
         self.app.post('/i2c/generate')(self.i2c_generate)
         self.app.post('/sdxl/half_inpainting')(self.half_inpainting_generate)
         self.app.post('/nukki')(self.nukki_generate)
+        self.app.post('/sd15/bg_change')(self.bg_change_generate)
         self.app.post('/gemini')(self.gemini_generate)
         self.app.post('/sam')(self.sam)
 
@@ -92,6 +95,10 @@ class Inference_API(BaseFunction_API):
     def nukki_generate(self, request_data:Nukki_RequestData):
         image_base64 = self.generate_blueprint(functions.nukki.generate.generate, request_data)
         return {"image_base64": image_base64}
+
+    def bg_change_generate(self, request_data:BGChange_RequestData):
+        image_base64, image_blend_base64 = self.generate_blueprint(functions.bg_change.generate.generate_image, request_data)
+        return {"image_base64": image_base64, "image_blend_base64": image_blend_base64}
 
     def gemini_generate(self, request_data: Gemini_RequestData):
         prompt = self.gemini(functions.gemini.generate.generate_prompt, request_data)
