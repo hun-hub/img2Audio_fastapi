@@ -2,9 +2,9 @@ from .utils import *
 import os
 checkpoint_root = os.getenv('CHECKPOINT_ROOT')
 
-flux_unet_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'unet')) if 'FLUX' in x]
-flux_vae_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'vae')) if 'FLUX' in x]
-flux_clip_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'clip')) if x.endswith('safetensors')]
+flux_unet_list = ['None'] + [x for x in os.listdir(os.path.join(checkpoint_root, 'unet')) if 'FLUX' in x]
+flux_vae_list = ['None'] + [x for x in os.listdir(os.path.join(checkpoint_root, 'vae')) if 'FLUX' in x]
+flux_clip_list = ['None'] + [x for x in os.listdir(os.path.join(checkpoint_root, 'clip')) if x.endswith('safetensors')]
 flux_unet_list.sort()
 flux_vae_list.sort()
 flux_clip_list.sort()

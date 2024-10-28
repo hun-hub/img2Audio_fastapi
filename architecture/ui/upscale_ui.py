@@ -3,7 +3,7 @@ from cgen_utils import resolution_list
 import os
 checkpoint_root = os.getenv('CHECKPOINT_ROOT')
 
-upscale_model_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'upscale_models'))]
+upscale_model_list = ['None'] + [x for x in os.listdir(os.path.join(checkpoint_root, 'upscale_models'))]
 upscale_model_list.sort()
 upscale_methods = ['nearest-exact', 'bilinear', 'area', 'bicubic', 'lanczos']
 

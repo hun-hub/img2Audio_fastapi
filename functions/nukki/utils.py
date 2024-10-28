@@ -32,23 +32,31 @@ def sned_nukki_request_to_api(
 ) :
     background, layers, composite = nukki.values()
     if background.sum() != 0:
-        nukki = background[:, :, 0]
-        edit_array = layers[0][:, :, 3]
-        edit_value = 255 if edit_mode == 'add_white' else 0
-        nukki = np.where(edit_array == 255, edit_value, nukki)
-        return [nukki]
+        image = background[:, :, 0]
+        mask = layers[0][:, :, 3]
 
-    if isinstance(image, NoneType):
-        raise ValueError("image가 None입니다. 올바른 이미지 객체를 전달하세요.")
+        image = convert_image_to_base64(Image.fromarray(image))
+        mask = convert_image_to_base64(Image.fromarray(mask))
+        request_body = {
+            'image': image,
+            'mask': mask,
+            'edit_mode': edit_mode
+        }
 
-    image = convert_image_to_base64(Image.fromarray(image))
+        url = f"http://{ip_addr}/functions/mask_edit"
+    else :
+        if isinstance(image, NoneType):
+            raise ValueError("image가 None입니다. 올바른 이미지 객체를 전달하세요.")
 
-    request_body = {
-        'nukki_model': model_name,
-        'init_image': image,
-    }
+        image = convert_image_to_base64(Image.fromarray(image))
 
-    url = f"http://{ip_addr}/nukki"
+        request_body = {
+            'nukki_model': model_name,
+            'init_image': image,
+        }
+
+        url = f"http://{ip_addr}/nukki"
+
     response = requests.post(url, json=request_body)
     data = handle_response(response)
     image_base64 = data['image_base64']

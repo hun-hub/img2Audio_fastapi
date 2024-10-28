@@ -54,7 +54,12 @@ class RequestData(BaseModel):
     denoise: float= 1.0
     gen_type: Literal['t2i', 'i2i', 'inpaint', 'iclight'] = 't2i'
 
-class BaseFunctionRequestData(BaseModel):
+class Resize_RequestData(BaseModel):
     image: str
     resize_type: Literal['sd15', 'sdxl'] = 'sdxl'
     is_mask: bool = False
+
+class MaskEdit_RequestData(BaseModel) :
+    image:str
+    mask: str
+    edit_mode: Literal['add_white', 'add_black'] = 'add_white'

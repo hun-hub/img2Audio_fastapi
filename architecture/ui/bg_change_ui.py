@@ -2,7 +2,7 @@ from .utils import *
 import os
 
 checkpoint_root = os.getenv('CHECKPOINT_ROOT')
-sd15_checkpoint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'checkpoints')) if 'SD15' in x]
+sd15_checkpoint_list = ['None'] + [x for x in os.listdir(os.path.join(checkpoint_root, 'checkpoints')) if 'SD15' in x]
 sd15_checkpoint_list.sort()
 
 def detach_mask_from_canvas(canvas) :

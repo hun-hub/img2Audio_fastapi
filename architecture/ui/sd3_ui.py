@@ -2,7 +2,7 @@ from .utils import *
 import os
 
 checkpoint_root = os.getenv('CHECKPOINT_ROOT')
-sd3_checkpoint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'checkpoints')) if 'SD3' in x]
+sd3_checkpoint_list = ['None'] + [x for x in os.listdir(os.path.join(checkpoint_root, 'checkpoints')) if 'SD3' in x]
 sd3_checkpoint_list.sort()
 
 controlnet_canny_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'controlnet')) if 'SD3_Canny' in x]
