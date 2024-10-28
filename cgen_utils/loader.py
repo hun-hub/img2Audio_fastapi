@@ -64,7 +64,7 @@ def load_checkpoint(model_name) :
 
 @torch.inference_mode()
 def load_controlnet(model_name) :
-    from ComfyUI.comfy.controlnet import load_controlnet
+    from comfy.controlnet import load_controlnet
     model_path = os.path.join(CHECKPOINT_ROOT, 'controlnet', model_name)
     if not os.path.exists(model_path):
         raise Exception(f"ControlNet model path wrong: {model_path}")
@@ -200,6 +200,42 @@ def load_bg_remover() :
     func_name = 'birefnetNode.RembgByBiRefNet'
     remover = get_function_from_comfyui(module_path, func_name)
     return remover()
+
+def load_text_encoder_advanced() :
+    module_path = 'ComfyUI/custom_nodes/ComfyUI_smZNodes'
+    func_name = 'nodes.smZ_CLIPTextEncode'
+    encoder = get_function_from_comfyui(module_path, func_name)
+    return encoder()
+
+def load_condition_combiner() :
+    module_path = 'ComfyUI/custom_nodes/ComfyUI-KJNodes'
+    func_name = 'nodes.nodes.ConditioningMultiCombine'
+    combiner = get_function_from_comfyui(module_path, func_name)
+    return combiner()
+
+def load_mask_outliner() :
+    module_path = 'ComfyUI/custom_nodes/comfyui-mixlab-nodes'
+    func_name = 'nodes.Mask.OutlineMask'
+    mask_outliner = get_function_from_comfyui(module_path, func_name)
+    return mask_outliner()
+
+def load_mask_resizer() :
+    module_path = 'ComfyUI/custom_nodes/ComfyUI-KJNodes'
+    func_name = 'nodes.mask_nodes.ResizeMask'
+    mask_resizer = get_function_from_comfyui(module_path, func_name)
+    return mask_resizer()
+
+def load_advanced_controlnet_applier() :
+    module_path = 'ComfyUI/custom_nodes/ComfyUI-Advanced-ControlNet'
+    func_name = 'adv_control.nodes.AdvancedControlNetApply'
+    controlnet_applier = get_function_from_comfyui(module_path, func_name)
+    return controlnet_applier()
+
+def load_timestep_kf() :
+    module_path = 'ComfyUI/custom_nodes/ComfyUI-Advanced-ControlNet'
+    func_name = 'adv_control.nodes_weight.ScaledSoftUniversalWeights'
+    timestep_kf = get_function_from_comfyui(module_path, func_name)
+    return timestep_kf()
 
 if __name__ == '__main__':
     # module_path = 'ComfyUI/custom_nodes/ComfyUI-LaMA-Preprocessor'

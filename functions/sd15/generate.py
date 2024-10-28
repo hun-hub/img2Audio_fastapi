@@ -12,8 +12,6 @@ from cgen_utils.comfyui import (encode_prompt,
                                 mask_blur)
 import random
 
-# prompt_post_fix = ", RAW photo, subject, 8k uhd, dslr, soft lighting, high quality, film grain, Fujifilm XT3"
-scale_factor = 0.18215
 @torch.inference_mode()
 def generate_image(cached_model_dict, request_data):
     unet = cached_model_dict['unet']['sd15']['base'][1]

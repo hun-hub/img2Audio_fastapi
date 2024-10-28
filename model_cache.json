@@ -83,7 +83,8 @@
       "inpaint": null,
       "depth": null,
       "normal": null,
-      "pose": null
+      "pose": null,
+      "scribble": null
     },
     "sdxl" :
     {
@@ -91,7 +92,8 @@
       "inpaint": null,
       "depth": null,
       "normal": null,
-      "pose": null
+      "pose": null,
+      "scribble": null
     },
     "sd3" :
     {
@@ -99,7 +101,8 @@
       "inpaint": null,
       "depth": null,
       "normal": null,
-      "pose": null
+      "pose": null,
+      "scribble": null
     },
     "flux" :
     {
@@ -107,7 +110,8 @@
       "inpaint": null,
       "depth": null,
       "normal": null,
-      "pose": null
+      "pose": null,
+      "scribble": null
     }
   },
   "ipadapter":

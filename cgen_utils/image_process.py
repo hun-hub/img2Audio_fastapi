@@ -3,6 +3,7 @@ import io, base64
 import torch
 from PIL import Image, ExifTags
 from cgen_utils.loader import load_controlnet_preprocessor
+import matplotlib.pyplot as plt
 
 
 def convert_image_to_base64(image):
@@ -102,6 +103,11 @@ def controlnet_image_preprocess(images, preprocessor_type, sd_version, resolutio
     preprocessor = load_controlnet_preprocessor()
     image_preprocessed, _ = preprocessor.detect_controlnet(images, preprocessor_type, sd_version=sd_version, resolution=resolution)
     return image_preprocessed
+
+def print_image_tensor(image_tensor) :
+    image_arr = (image_tensor * 255).squeeze().cpu().detach().numpy().astype(np.uint8)
+    plt.imshow(image_arr)
+    plt.show()
 
 if __name__ == '__main__':
     image = ''

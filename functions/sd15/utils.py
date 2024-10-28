@@ -29,7 +29,7 @@ def construct_controlnet_condition(
         if controlnet_request.type == 'inpaint':
             control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
             control_image, control_mask = control_image[:, :, :, :3], control_image[:, :, :, 3]
-            control_image = torch.where(control_mask[:, :, :, None] > 0.5, 1, control_image)
+            control_image = torch.where(control_mask[:, :, :, None] > 0.5, 1, control_image) * 2 -1
         else :
             control_image = convert_base64_to_image_tensor(controlnet_request.image) / 255
             control_image = controlnet_image_preprocess(control_image, controlnet_request.preprocessor_type, 'sd15')
