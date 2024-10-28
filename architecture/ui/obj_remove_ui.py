@@ -3,8 +3,8 @@ from cgen_utils import resolution_list
 import os
 checkpoint_root = os.getenv('CHECKPOINT_ROOT')
 
-sdxl_checkpoint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'checkpoints')) if 'SDXL' in x]
-inpaint_model_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'inpaint')) if not x.endswith('pth') ]
+sdxl_checkpoint_list = ['None'] + [x for x in os.listdir(os.path.join(checkpoint_root, 'checkpoints')) if 'SDXL' in x]
+inpaint_model_list = ['None'] + [x for x in os.listdir(os.path.join(checkpoint_root, 'inpaint')) if not x.endswith('pth') ]
 
 sdxl_checkpoint_list.sort()
 inpaint_model_list.sort()

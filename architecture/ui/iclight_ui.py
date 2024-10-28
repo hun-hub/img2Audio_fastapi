@@ -8,8 +8,8 @@ from PIL import Image
 from cgen_utils.image_process import resize_image_for_sd
 
 checkpoint_root = os.getenv('CHECKPOINT_ROOT')
-sd15_checkpoint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'checkpoints')) if 'SD15' in x]
-iclight_model_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'unet')) if 'SD15_iclight' in x]
+sd15_checkpoint_list = ['None'] + [x for x in os.listdir(os.path.join(checkpoint_root, 'checkpoints')) if 'SD15' in x]
+iclight_model_list = ['None'] + [x for x in os.listdir(os.path.join(checkpoint_root, 'unet')) if 'SD15_iclight' in x]
 
 sd15_checkpoint_list.sort()
 iclight_model_list.sort()

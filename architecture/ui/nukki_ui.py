@@ -2,7 +2,7 @@ import gradio as gr
 import os
 checkpoint_root = os.getenv('CHECKPOINT_ROOT')
 
-nukki_model_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'BiRefNet'))]
+nukki_model_list = ['None'] + [x for x in os.listdir(os.path.join(checkpoint_root, 'BiRefNet'))]
 nukki_model_list.sort()
 
 def build_nukki_ui(image, ip_addr) :

@@ -2,7 +2,7 @@ from .utils import *
 import os
 
 checkpoint_root = os.getenv('CHECKPOINT_ROOT')
-sdxl_checkpoint_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'checkpoints')) if 'SDXL' in x]
+sdxl_checkpoint_list = ['None'] + [x for x in os.listdir(os.path.join(checkpoint_root, 'checkpoints')) if 'SDXL' in x]
 sdxl_checkpoint_list.sort()
 
 def build_sdxl_ui(image, mask, prompt, ip_addr) :
