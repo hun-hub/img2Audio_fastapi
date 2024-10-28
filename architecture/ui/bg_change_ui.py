@@ -101,3 +101,43 @@ def build_bg_change_ui(image, mask, prompt, ip_addr) :
     image_retouch.change(fn=detach_mask_from_canvas, inputs=image_retouch, outputs=[mask_retouch])
 
     return base_inputs +ipadapter_inputs +  extra_inputs, generate
+
+
+def build_bg_change_sdxl_ui(image, mask, prompt, ip_addr):
+    do_retouch = gr.Radio(choices=['True', 'False'],
+                          value='False',
+                          label="Do Retouch",
+                          type='value')
+
+    with gr.Row():
+        with gr.Column():
+            image_retouch = gr.ImageMask(type="numpy", label="Masking to Retouch Area", visible=False)
+        with gr.Column():
+            mask_retouch = gr.Image(type="numpy", label="Masking to Retouch Area", visible=False)
+        prompt_retouch = gr.Textbox(label="Retouch Prompt", visible=False)
+
+    extra_inputs = [gr.Textbox(ip_addr, visible=False)]
+
+    base_inputs = [image, mask, mask_retouch, prompt, prompt_retouch, do_retouch]
+
+    # with gr.Group():
+    #     with gr.Row():
+    #         with gr.Column():
+    #             canny_inputs = generate_advanced_controlnet_ui('SD15', 'Canny', checkpoint_root, 0.9, 'false', 1)
+    #             depth_inputs = generate_advanced_controlnet_ui('SD15', 'Depth', checkpoint_root, 0.9, 'false', 1)
+    #         with gr.Column():
+    #             inpaint_inputs = generate_advanced_controlnet_ui('SD15', 'Inpaint', checkpoint_root, 0.87, 'true', 1)
+    #             scribble_inputs = generate_advanced_controlnet_ui('SD15', 'Scribble', checkpoint_root, 0.9, 'false', 1)
+
+    ipadapter_inputs = generate_ipadapter_ui('SDXL', checkpoint_root)
+
+    # lora_inputs = generate_lora_ui('SD15', checkpoint_root)
+
+    with gr.Row():
+        generate = gr.Button("Generate!")
+
+    do_retouch.change(fn=change_mode, inputs=do_retouch, outputs=[image_retouch, mask_retouch, prompt_retouch])
+    image.change(fn=change_canvas, inputs=image, outputs=[image_retouch])
+    image_retouch.change(fn=detach_mask_from_canvas, inputs=image_retouch, outputs=[mask_retouch])
+
+    return base_inputs + ipadapter_inputs + extra_inputs, generate

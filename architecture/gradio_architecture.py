@@ -23,8 +23,8 @@ from functions.sam.utils import sned_sam_request_to_api
 from .ui.sam_ui import build_sam_ui
 from functions.nukki.utils import sned_nukki_request_to_api
 from .ui.nukki_ui import build_nukki_ui
-from functions.bg_change.utils import sned_bg_change_request_to_api
-from .ui.bg_change_ui import build_bg_change_ui
+from functions.bg_change.utils import sned_bg_change_request_to_api, sned_bg_change_sdxl_request_to_api
+from .ui.bg_change_ui import build_bg_change_ui, build_bg_change_sdxl_ui
 
 from .ui.gemini_ui import build_gemini_ui
 from functions.gemini.utils import send_gemini_request_to_api
@@ -79,6 +79,8 @@ class GradioApp:
                         nukki_inputs, nukki_generate = build_nukki_ui(image, self.inference_addr)
                     with gr.Tab("BG Change") :
                         bg_change_inputs, bg_change_generate = build_bg_change_ui(image, mask, gemini_prompt, self.inference_addr)
+                    with gr.Tab("BG Change SDXL") :
+                        bg_change_sdxl_inputs, bg_change_sdxl_generate = build_bg_change_sdxl_ui(image, mask, gemini_prompt, self.inference_addr)
                     with gr.Tab("Gemini"):
                         gemini_inputs, (gemini_result, gemini_button) = build_gemini_ui()
 
@@ -120,6 +122,7 @@ class GradioApp:
             nukki_generate.click(fn=sned_nukki_request_to_api, inputs=nukki_inputs, outputs=generated_image)
             # BG Change
             bg_change_generate.click(fn=sned_bg_change_request_to_api, inputs=bg_change_inputs, outputs=generated_image)
+            bg_change_sdxl_generate.click(fn=sned_bg_change_sdxl_request_to_api, inputs=bg_change_sdxl_inputs, outputs=generated_image)
             # API Restart Button
             # api_restart_button.click(fn=self.restart)
     def launch(self):
