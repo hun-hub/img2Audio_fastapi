@@ -49,7 +49,7 @@ def generate_refiner_checkpoint_ui(checkpoint_list) :
     return inputs
 
 def generate_controlnet_ui(sd_type: str, controlnet_type: str, checkpoint_root: str) :
-    controlnet_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'controlnet')) if f'{sd_type}_{controlnet_type}' in x]
+    controlnet_list = ['None'] + [x for x in os.listdir(os.path.join(checkpoint_root, 'controlnet')) if f'{sd_type}_{controlnet_type}' in x]
     controlnet_list.sort()
     if len(controlnet_list) == 0 :
         controlnet_list = ['None']
@@ -87,7 +87,7 @@ def generate_controlnet_ui(sd_type: str, controlnet_type: str, checkpoint_root: 
     return inputs
 
 def generate_ipadapter_ui(sd_type: str, checkpoint_root: str) :
-    ipadapter_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'ipadapter')) if sd_type in x]
+    ipadapter_list = ['None'] + [x for x in os.listdir(os.path.join(checkpoint_root, 'ipadapter')) if sd_type in x]
 
     with gr.Accordion("IP-Adapter", open=False):
         ipadapter_enable = gr.Checkbox(label="Enable IP-Adapter")
@@ -112,7 +112,7 @@ def generate_ipadapter_ui(sd_type: str, checkpoint_root: str) :
     return inputs
 
 def generate_lora_ui(sd_type: str, checkpoint_root: str) :
-    lora_list = [x for x in os.listdir(os.path.join(checkpoint_root, 'loras')) if sd_type in x]
+    lora_list = ['None'] + [x for x in os.listdir(os.path.join(checkpoint_root, 'loras')) if sd_type in x]
     lora_list.sort()
     lora_list = ['None'] + lora_list
 
