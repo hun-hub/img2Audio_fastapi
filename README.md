@@ -201,6 +201,7 @@ Model 종류는 Demo에서 확인 가능.
 * [Gemini](#gemini)
 * [Image-to-Cartoon](#image-to-cartoon-)
 * [Nukki](#nukki)
+* [BG change](#bg-change)
 ---
 #### FLUX
 Parameter format
@@ -799,4 +800,219 @@ url = f"http://{ip_addr}/nukki"
 response = requests.post(url, json=request_body)
 data = response.json()
 image_base64 = data['image_base64']
+```
+
+#### BG change
+
+**SD15**
+```python
+request_body = {
+    'checkpoint': 'SD15_LEOSAMMoonFilm2.0.safetensors',
+    'vae': 'SD15_vae-ft-mse-840000-ema-pruned.safetensors',
+    'init_image': IMAGE_BASE64, # RGB
+    'mask': IMAGE_BASE64, # RGB
+    "prompt_positive": PROMPT,
+    "prompt_retouch": PROMPT_RETOUCH,
+    'is_retouch': do_retouch == 'True',
+    'steps': 25,
+    'cfg': 7,
+    'denoise': 1,
+    'seed': -1,
+    'controlnet_requests': [],
+    'lora_requests': [],
+}
+
+canny_body = {
+    'controlnet': 'SD15_Canny_control_v11p_sd15_lineart.pth',
+    'type': 'canny',
+    'preprocessor_type': 'lineart',
+    'strength': 0.95,
+    'start_percent': 0,
+    'end_percent': 1,
+    'base_multiplier': 0.9,
+    'uncond_multiplier': 1,
+    'flip_weights': False,
+}
+
+inpaint_body = {
+    'controlnet': 'SD15_Inpaint_control_v11p_sd15_inpaint.pth',
+    'type': 'inpaint',
+    'preprocessor_type': 'canny',
+    'strength': 0.9,
+    'start_percent': 0,
+    'end_percent': 1,
+    'base_multiplier': 0.87,
+    'uncond_multiplier': 1,
+    'flip_weights': True,
+}
+
+depth_body = {
+    'controlnet': 'SD15_Depth_control_sd15_depth.pth',
+    'type': 'depth',
+    'preprocessor_type': 'depth_zoe',
+    'strength': 0.85,
+    'start_percent': 0,
+    'end_percent': 1,
+    'base_multiplier': 0.9,
+    'uncond_multiplier': 1,
+    'flip_weights': False,
+}
+
+scribble_body = {
+    'controlnet': 'SD15_Scribble_control_v11p_sd15_scribble.pth',
+    'type': 'scribble',
+    'preprocessor_type': 'scribble',
+    'strength': 0.5,
+    'start_percent': 0,
+    'end_percent': 0.85,
+    'base_multiplier': 0.9,
+    'uncond_multiplier': 1,
+    'flip_weights': False,
+}
+
+ipadapter_body = {
+    'ipadapter': 'SD15_ip-adapter_sd15_plus.pth',
+    'clip_vision': 'CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors',
+    'images': [IMAGE_REF_BASE64],
+    'weight': 0.8,
+    'start_at': 0,
+    'end_at': 0.5,
+}
+
+lora_requests_sorted = sorted([['SD15_Background_Detail_v3.safetensors', 0.3, 0.3],
+                               ['SD15_more_details.safetensors', 0.2, 0.2]])
+lora_body_list = []
+
+for lora_request_sorted in lora_requests_sorted:
+    if lora_request_sorted[0] == 'None': continue
+    lora_body = {'lora': lora_request_sorted[0],
+                 'strength_model': lora_request_sorted[1],
+                 'strength_clip': lora_request_sorted[2], }
+    lora_body_list.append(lora_body)
+
+request_body['controlnet_requests'].append(canny_body)
+request_body['controlnet_requests'].append(inpaint_body)
+request_body['controlnet_requests'].append(depth_body)
+# TODO: 그냥 extend 한줄로 해도 될듯. 위에서 None 걸러내서.
+for lora_body in lora_body_list:
+    if lora_body['lora'] != 'None' :
+        request_body['lora_requests'].append(lora_body)
+if ipadapter_enable :
+    request_body['ipadapter_request'] = ipadapter_body
+if do_retouch == 'True'  :
+    request_body['controlnet_requests'].append(scribble_body)
+
+url = f"http://{ip_addr}/sd15/bg_change"
+response = requests.post(url, json=request_body)
+data = response.json()
+image_base64 = data['image_base64']
+image_blend_base64 = data['image_blend_base64']
+image = convert_base64_to_image_array(image_base64)
+image_blend = convert_base64_to_image_array(image_blend_base64)
+```
+
+**SDXL**
+```python
+request_body = {
+    'checkpoint': 'SDXL_RealVisXL_V40.safetensors',
+    'init_image': IMAGE_BASE64, # RGB
+    'mask': IMAGE_BASE64, # RGB
+    "prompt_positive": PROMPT,
+    "prompt_retouch": PROMPT_RETOUCH,
+    'is_retouch': do_retouch == 'True',
+    'steps': 25,
+    'cfg': 7,
+    'denoise': 1,
+    'seed': -1,
+    'controlnet_requests': [],
+    'lora_requests': [],
+}
+
+canny_body = {
+    'controlnet': 'SDXL_Canny_sai_xl_canny_256lora.safetensors',
+    'type': 'canny',
+    'preprocessor_type': 'canny',
+    'strength': 0.95,
+    'start_percent': 0,
+    'end_percent': 1,
+    'base_multiplier': 0.9,
+    'uncond_multiplier': 1,
+    'flip_weights': False,
+}
+
+inpaint_body = {
+    'controlnet': 'SDXL_Inpaint_dreamerfp16.safetensors',
+    'type': 'inpaint',
+    'preprocessor_type': 'canny',
+    'strength': 0.9,
+    'start_percent': 0,
+    'end_percent': 1,
+    'base_multiplier': 0.87,
+    'uncond_multiplier': 1,
+    'flip_weights': True,
+}
+
+depth_body = {
+    'controlnet': 'SDXL_Depth_sai_xl_depth_256lora.safetensors',
+    'type': 'depth',
+    'preprocessor_type': 'depth_zoe',
+    'strength': 0.85,
+    'start_percent': 0,
+    'end_percent': 1,
+    'base_multiplier': 0.9,
+    'uncond_multiplier': 1,
+    'flip_weights': False,
+}
+
+scribble_body = {
+    'controlnet': 'SDXL_Scribble_controlnet-scribble-sdxl-1.0.safetensors',
+    'type': 'scribble',
+    'preprocessor_type': 'scribble',
+    'strength': 0.5,
+    'start_percent': 0,
+    'end_percent': 0.85,
+    'base_multiplier': 0.9,
+    'uncond_multiplier': 1,
+    'flip_weights': False,
+}
+
+ipadapter_body = {
+    'ipadapter': 'SDXL_ip-adapter-plus_sdxl_vit-h.safetensors',
+    'clip_vision': 'CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors',
+    'images': [IMAGE_REF_BASE64],
+    'weight': 0.8,
+    'start_at': 0,
+    'end_at': 0.5,
+}
+
+lora_requests_sorted = sorted([['SDXL_MJ52.safetensors', 0.3, 0.3],
+                               ['SDXL_add-detail-xl.safetensors', 0.2, 0.2]])
+lora_body_list = []
+
+for lora_request_sorted in lora_requests_sorted:
+    if lora_request_sorted[0] == 'None': continue
+    lora_body = {'lora': lora_request_sorted[0],
+                 'strength_model': lora_request_sorted[1],
+                 'strength_clip': lora_request_sorted[2], }
+    lora_body_list.append(lora_body)
+
+request_body['controlnet_requests'].append(canny_body)
+request_body['controlnet_requests'].append(inpaint_body)
+request_body['controlnet_requests'].append(depth_body)
+# TODO: 그냥 extend 한줄로 해도 될듯. 위에서 None 걸러내서.
+for lora_body in lora_body_list:
+    if lora_body['lora'] != 'None' :
+        request_body['lora_requests'].append(lora_body)
+if ipadapter_enable :
+    request_body['ipadapter_request'] = ipadapter_body
+if do_retouch == 'True'  :
+    request_body['controlnet_requests'].append(scribble_body)
+
+url = f"http://{ip_addr}/sdxl/bg_change"
+response = requests.post(url, json=request_body)
+data = response.json()
+image_base64 = data['image_base64']
+image_blend_base64 = data['image_blend_base64']
+image = convert_base64_to_image_array(image_base64)
+image_blend = convert_base64_to_image_array(image_blend_base64)
 ```
