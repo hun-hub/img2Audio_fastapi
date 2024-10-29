@@ -148,12 +148,12 @@ class Inference_API(BaseFunction_API):
 
     async def nukki_generate(self, request_data:Nukki_RequestData):
         logging.info("\nnukki_generate API called\n")
-        image_base64 = await self.add_to_queue(
+        image_base64, nukki_base64 = await self.add_to_queue(
             functions.nukki.generate.generate,  # 첫 번째 인자 (gen_function)
             request_data  # 두 번째 인자 (request_data)
         )
 
-        return {"image_base64": image_base64}
+        return {"image_base64": image_base64, "nukki_base64": nukki_base64}
 
     async def bg_change_generate(self, request_data:BGChange_RequestData):
         logging.info("\nbg_change_sd15_generate API called\n")

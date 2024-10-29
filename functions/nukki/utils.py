@@ -63,5 +63,7 @@ async def sned_nukki_request_to_api(
         response = await client.post(url, json=request_body)
         data = handle_response(response)
         image_base64 = data['image_base64']
+        nukki_base64 = data['nukki_base64']
         image = convert_base64_to_image_array(image_base64)
-        return [image]
+        nukki = convert_base64_to_image_array(nukki_base64)
+        return [image, nukki]

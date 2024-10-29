@@ -29,8 +29,10 @@ def generate(cached_model_dict, request_data):
     with torch.no_grad():
         mask = biref_model(im_tensor.to(deviceType))[-1].sigmoid().cpu()
     mask = common_upscale(mask, w, h, 'bilinear', "disabled")
-    mask = normalize_mask(mask)
+    mask = normalize_mask(mask).permute(0, 2, 3, 1)
+    nukki = torch.where(mask > 0.5, init_image, 1)
 
     image_base64 = convert_image_tensor_to_base64((1 - mask) * 255)
+    nukki_base64 = convert_image_tensor_to_base64(nukki * 255)
 
-    return image_base64
+    return image_base64, nukki_base64

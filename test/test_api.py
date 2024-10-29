@@ -91,7 +91,7 @@ async def main():
 
     # 10명의 사용자가 랜덤으로 요청을 보내는 것을 시뮬레이션
     tasks = []
-    for i in range(2):  # 여기서 10은 사용자 수를 의미 (원하는 대로 조절 가능)
+    for i in range(3):  # 여기서 10은 사용자 수를 의미 (원하는 대로 조절 가능)
         style_type = random.choice(['type_1', 'type_2'])  # 랜덤으로 스타일 선택
         tasks.append(test_process(style_type, image_base64, i))
 
