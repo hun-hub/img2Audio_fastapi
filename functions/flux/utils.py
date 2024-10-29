@@ -14,6 +14,9 @@ from cgen_utils.comfyui import (apply_controlnet,
 
 from types import NoneType
 from PIL import Image
+import httpx
+import asyncio
+
 @torch.inference_mode()
 def flux_guidance(text_embed, cfg) :
     from ComfyUI.comfy_extras.nodes_flux import FluxGuidance
@@ -66,7 +69,7 @@ def construct_controlnet_condition(
 
 
 
-def sned_flux_request_to_api(
+async def sned_flux_request_to_api(
         unet_name,
         vae_name,
         clip_1,
@@ -187,8 +190,9 @@ def sned_flux_request_to_api(
                 request_body['lora_requests'].append(lora_body)
 
     url = f"http://{ip_addr}/flux/generate"
-    response = requests.post(url, json=request_body)
-    data = handle_response(response)
-    image_base64 = data['image_base64']
-    image = convert_base64_to_image_array(image_base64)
-    return [image]
+    async with httpx.AsyncClient(timeout=300) as client:
+        response = await client.post(url, json=request_body)
+        data = handle_response(response)
+        image_base64 = data['image_base64']
+        image = convert_base64_to_image_array(image_base64)
+        return [image]

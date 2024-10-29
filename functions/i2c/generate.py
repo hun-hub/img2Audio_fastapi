@@ -46,7 +46,7 @@ def generate_image(cached_model_dict, request_data):
     seed = random.randint(1, int(1e9)) if request_data.seed == -1 else request_data.seed
 
     prompt_positive_prefix = 'Modisn disney, pixar 3d animation style image.\n'
-    prompt_positive_base = prompt_positive_prefix + send_gemini_request_to_api(query_type='i2c_description', image=init_image * 255)
+    prompt_positive_base = prompt_positive_prefix +  send_gemini_request_to_api(query_type='i2c_description', image=init_image * 255)
 
     prompt_positive_refine = prompt_positive_base if is_animation_style else 'best quality,masterpiece,'
     prompt_negative = request_data.prompt_negative

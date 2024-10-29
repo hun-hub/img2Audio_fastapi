@@ -12,6 +12,8 @@ import numpy as np
 import os
 import torch
 from cgen_utils.handler import handle_response
+import httpx
+import asyncio
 
 def send_gemini_request_to_api(
         query_type,
@@ -40,8 +42,7 @@ def send_gemini_request_to_api(
 
     gamini_addr = os.getenv('GEMINI_ADDR')
     url = f"http://{gamini_addr}/gemini"
-
-    response = requests.post(url, json=request_body)
+    response =  requests.post(url, json=request_body)
     data = handle_response(response)
     prompt = data['prompt']
     return prompt

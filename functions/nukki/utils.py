@@ -7,6 +7,8 @@ from types import NoneType
 from PIL import Image
 import torch
 import numpy as np
+import httpx
+import asyncio
 
 def tensor_to_pil(image):
     return Image.fromarray(np.clip(255. * image.cpu().numpy().squeeze(), 0, 255).astype(np.uint8))
@@ -22,7 +24,7 @@ def normalize_mask(mask_tensor):
 
     return normalized_mask
 
-def sned_nukki_request_to_api(
+async def sned_nukki_request_to_api(
         model_name,
         image,
         nukki,
@@ -57,8 +59,9 @@ def sned_nukki_request_to_api(
 
         url = f"http://{ip_addr}/nukki"
 
-    response = requests.post(url, json=request_body)
-    data = handle_response(response)
-    image_base64 = data['image_base64']
-    image = convert_base64_to_image_array(image_base64)
-    return [image]
+    async with httpx.AsyncClient(timeout=300) as client:
+        response = await client.post(url, json=request_body)
+        data = handle_response(response)
+        image_base64 = data['image_base64']
+        image = convert_base64_to_image_array(image_base64)
+        return [image]

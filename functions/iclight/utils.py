@@ -13,6 +13,8 @@ from PIL import Image
 import numpy as np
 import scipy
 import os
+import httpx
+import asyncio
 
 def generate_gradation(light_condition, image_array):
     if isinstance(image_array, np.ndarray):
@@ -129,7 +131,7 @@ def remap_image(image_tensor, min=-0.15, max=1.14) :
     image_tensor = torch.clamp(image_tensor, min=0.0, max=1.0)
     return image_tensor
 
-def sned_iclight_request_to_api(
+async def sned_iclight_request_to_api(
         checkpoint,
         image,
         mask,
@@ -188,8 +190,9 @@ def sned_iclight_request_to_api(
     }
 
     url = f"http://{ip_addr}/iclight/generate"
-    response = requests.post(url, json=request_body)
-    data = handle_response(response)
-    image_base64 = data['image_base64']
-    image = convert_base64_to_image_array(image_base64)
-    return [image]
+    async with httpx.AsyncClient(timeout=300) as client:
+        response = await client.post(url, json=request_body)
+        data = handle_response(response)
+        image_base64 = data['image_base64']
+        image = convert_base64_to_image_array(image_base64)
+        return [image]
