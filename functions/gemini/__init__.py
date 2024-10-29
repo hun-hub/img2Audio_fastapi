@@ -1,13 +1,12 @@
 
 product_description = f"""
 From the given image, give me  simple description of the object. Do not include anything about the background. Even if the background is simple plain colored, do not say anything about it.
-Give me the result in the format of "object: ~~~ " like that.
+Give me the result in less than 4 words.
 """
 
 image_description = """
-give a detailed description of a given image. description will be used as a dataset to train an image generative ai model.
-So it's really important for detailed and quality prompt from the image. 
-Your description should be less than 60 words. Do not leave any items in the image or detailes behind. 
+give a simple description of a given image.
+Your description should be less than 10 words. 
 Do not just list the items in the image. Describe them like a prompt for image generation.
 Your description will be used as image generation prompt. So give me prompt that would work great when generating image. 
 """
@@ -150,3 +149,39 @@ People should never be depicted under any circumstances.
 Your result should create artistic and visually striking illustrations, not realistic photographs. These images must be suitable for use as computer wallpapers.
 And it should only be in English. So give your best prompt!"""
 
+sentence_to_keywords = """Generate approximately 10 korean  keywords related to the given Short sentence(s) below. The keywords should not be related to people.
+
+Example: 
+
+Given sentence(s): "여름날 여자친구랑 있을 때 틀어놓기 좋은 이미지," 
+answer:  "로맨틱, 밤, 바다, 에어컨, 사랑" 
+
+Given sentence(s): "아 배고프다," 
+answer:  "치킨, 맥주, 짜장면, 국밥, 피자, 햄버거."
+
+Given sentence(s): "다이어트 해야겠다" 
+answer:  "헬스, 러닝, 크로스핏, 복싱, 고강도 훈련"
+
+Note: The given sentence(s) may be in Korean or English.
+
+Given sentence(s): {user_prompt}
+
+Output Format: Provide keywords in the same language as the Given Word(s). If the Given Word(s) is in Korean, provide only Korean keywords, and if it is in English, provide only English keywords. The keywords should not be related to people."""
+
+combine_sentence_keywords = """Generate great quality prompt for text-to-image generation task to the given uncompleted sentence(s) below. 
+
+Example: 
+
+Given sentence(s):  여름날 여자친구랑 있을 때 틀어놓기 좋은 이미지, 로맨틱, 밤, 에어컨
+answer:  A romantic summer night setting: cool air from the AC fills the room as a couple relaxes together, surrounded by soft, dim lighting, creating a cozy and intimate atmosphere perfect for unwinding and enjoying each other's company."
+
+Given sentence(s): 아 배고프다, 맥주, 피자, 햄버거
+answer:  Late-night cravings hit hard: envisioning a table filled with cold, refreshing beer, hot cheesy pizza slices, and juicy hamburgers, all in a cozy setting that invites indulgence and comfort.
+
+Given sentence(s): 다이어트 해야겠다, 헬스, 복싱
+answer:  Focused on a journey of transformation: a strict diet, powerful gym workouts, and intense boxing sessions in a vibrant, energetic atmosphere. Aiming to build strength, endurance, and a resilient mindset in a modern fitness environment filled with determination and drive. 
+
+Note: The Given sentence(s) maybe in Korean or English.
+
+Given sentence(s):  {user_prompt}
+"""

@@ -13,7 +13,9 @@ query_dict = {'product_description': product_description,
               'i2c_description': i2c_description,
               'lg_base': lg_base,
               'lg_aniv': lg_aniv,
-              'lg_artwork': lg_artwork}
+              'lg_artwork': lg_artwork,
+              'sentence_to_keywords': sentence_to_keywords,
+              'combine_sentence_keywords': combine_sentence_keywords}
 
 @torch.inference_mode()
 def generate_prompt(request_data):

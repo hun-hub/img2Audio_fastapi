@@ -18,6 +18,7 @@ from cgen_utils.comfyui import (encode_prompt,
                                 get_init_noise,
                                 mask_blur)
 import random
+import torch.nn.functional as F
 
 
 # prompt_post_fix = ", RAW photo, subject, 8k uhd, dslr, soft lighting, high quality, film grain, Fujifilm XT3"
@@ -33,12 +34,18 @@ def generate_image(cached_model_dict, request_data):
     init_image = convert_base64_to_image_tensor(request_data.init_image) / 255
     mask = convert_base64_to_image_tensor(request_data.mask)[:, :, :, 0] / 255
     mask = mask_blur(mask)
+
     light = None
     if not isinstance(request_data.light_condition, NoneType) :
         light_strength = int((request_data.light_strength - 0.5) * 200)
         light = convert_base64_to_image_tensor(request_data.light_condition)
         light = expand_mask(light.numpy()[0], light_strength) / 255
         light = torch.Tensor(light).unsqueeze(0)
+
+        b, h, w, c = init_image.size()
+        light = light.permute(0, 3, 1, 2)
+        light = F.interpolate(light, size=(h, w), mode='bilinear', align_corners=False)
+        light = light.permute(0, 2, 3, 1)
 
     if not request_data.keep_background  :
         init_image = torch.where(mask.unsqueeze(-1) > 0.5, 0.5, init_image)
