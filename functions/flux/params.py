@@ -9,7 +9,7 @@ class FLUX_RequestData(RequestData):
     steps: int = 20
     cfg: float = 3.5
     sampler_name: str = 'euler'
-    scheduler: str = 'simple'
+    scheduler: str = 'ddim_uniform'
     init_image: Optional[str]= None
     mask: Optional[str]= None
     controlnet_requests: Optional[List[ControlNet_RequestData]] = []
