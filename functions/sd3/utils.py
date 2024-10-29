@@ -10,6 +10,8 @@ from cgen_utils.image_process import (convert_base64_to_image_array,
                                       )
 from types import NoneType
 from PIL import Image
+import httpx
+import asyncio
 
 
 
@@ -67,7 +69,7 @@ def construct_controlnet_condition(
 
 
 
-def sned_sd3_request_to_api(
+async def sned_sd3_request_to_api(
         checkpoint,
         image,
         mask,
@@ -130,11 +132,12 @@ def sned_sd3_request_to_api(
         request_body['controlnet_requests'].append(canny_body)
 
     url = f"http://{ip_addr}/sd3/generate"
-    response = requests.post(url, json=request_body)
-    data = handle_response(response)
-    image_base64 = data['image_base64']
-    image = convert_base64_to_image_array(image_base64)
-    return [image]
+    async with httpx.AsyncClient(timeout=300) as client:
+        response = await client.post(url, json=request_body)
+        data = handle_response(response)
+        image_base64 = data['image_base64']
+        image = convert_base64_to_image_array(image_base64)
+        return [image]
 
 if __name__ == "__main__":
     ip_addr = '117.52.72.83'

@@ -19,9 +19,11 @@ from types import NoneType
 from PIL import Image
 import numpy as np
 import torch.nn.functional as F
+import httpx
+import asyncio
 
 
-def sned_sam_request_to_api(
+async def sned_sam_request_to_api(
         image,
         prompt,
         threshold,
@@ -40,15 +42,16 @@ def sned_sam_request_to_api(
     }
 
     url = f"http://{ip_addr}/sam"
-    response = requests.post(url, json=request_body)
-    data = handle_response(response)
-    image_base64 = data['image_base64']
-    mask_base64 = data['mask_base64']
-    mask_inv_base64 = data['mask_inv_base64']
+    async with httpx.AsyncClient(timeout=300) as client:
+        response = await client.post(url, json=request_body)
+        data = handle_response(response)
+        image_base64 = data['image_base64']
+        mask_base64 = data['mask_base64']
+        mask_inv_base64 = data['mask_inv_base64']
 
-    image = convert_base64_to_image_array(image_base64)
-    mask = convert_base64_to_image_array(mask_base64)
-    mask_inv = convert_base64_to_image_array(mask_inv_base64)
+        image = convert_base64_to_image_array(image_base64)
+        mask = convert_base64_to_image_array(mask_base64)
+        mask_inv = convert_base64_to_image_array(mask_inv_base64)
 
-    return [image, mask, mask_inv]
+        return [image, mask, mask_inv]
 

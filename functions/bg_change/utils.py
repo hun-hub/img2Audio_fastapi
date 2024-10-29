@@ -24,6 +24,10 @@ from types import NoneType
 from PIL import Image
 import numpy as np
 import scipy
+import httpx
+import asyncio
+
+
 
 def make_empty_mask(width, height, color = 16777215) :
     empty_image= EmptyImage().generate(width, height, color=color)[0]
@@ -314,7 +318,7 @@ def construct_ipadapter_condition(
                                embeds_scaling= ipadapter_request.embeds_scaling,)
     return unet
 
-def sned_bg_change_request_to_api(
+async def sned_bg_change_request_to_api(
         image,
         mask,
         mask_retouch,
@@ -447,16 +451,17 @@ def sned_bg_change_request_to_api(
         request_body['controlnet_requests'].append(scribble_body)
 
     url = f"http://{ip_addr}/sd15/bg_change"
-    response = requests.post(url, json=request_body)
-    data = handle_response(response)
-    image_base64 = data['image_base64']
-    image_blend_base64 = data['image_blend_base64']
-    image = convert_base64_to_image_array(image_base64)
-    image_blend = convert_base64_to_image_array(image_blend_base64)
-    return [image, image_blend]
+    async with httpx.AsyncClient(timeout=300) as client:
+        response = await client.post(url, json=request_body)
+        data = handle_response(response)
+        image_base64 = data['image_base64']
+        image_blend_base64 = data['image_blend_base64']
+        image = convert_base64_to_image_array(image_base64)
+        image_blend = convert_base64_to_image_array(image_blend_base64)
+        return [image, image_blend]
 
 
-def sned_bg_change_sdxl_request_to_api(
+async def sned_bg_change_sdxl_request_to_api(
         image,
         mask,
         mask_retouch,
@@ -589,10 +594,11 @@ def sned_bg_change_sdxl_request_to_api(
         request_body['controlnet_requests'].append(scribble_body)
 
     url = f"http://{ip_addr}/sdxl/bg_change"
-    response = requests.post(url, json=request_body)
-    data = handle_response(response)
-    image_base64 = data['image_base64']
-    image_blend_base64 = data['image_blend_base64']
-    image = convert_base64_to_image_array(image_base64)
-    image_blend = convert_base64_to_image_array(image_blend_base64)
-    return [image, image_blend]
+    async with httpx.AsyncClient(timeout=300) as client:
+        response = await client.post(url, json=request_body)
+        data = handle_response(response)
+        image_base64 = data['image_base64']
+        image_blend_base64 = data['image_blend_base64']
+        image = convert_base64_to_image_array(image_base64)
+        image_blend = convert_base64_to_image_array(image_blend_base64)
+        return [image, image_blend]

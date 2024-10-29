@@ -54,12 +54,6 @@ class Inference_API(BaseFunction_API):
         self.app.post('/gemini')(self.gemini_generate)
         self.app.post('/sam')(self.sam)
 
-    async def add_to_queue(self, gen_function, request_data):
-        async with self._queue_semaphore:  # 세마포어를 사용해 한 번에 하나의 작업만 큐에 추가되도록 보장
-            future = asyncio.get_event_loop().create_future()
-            await self._queue.put((gen_function, request_data, future))
-            return await future
-
     async def flux_generate(self, request_data: FLUX_RequestData):
         logging.info("\nflux_generate API called\n")
         image_base64 = await self.add_to_queue(functions.flux.generate.generate_image, request_data)
@@ -179,7 +173,7 @@ class Inference_API(BaseFunction_API):
 
         return {"image_base64": image_base64, "image_blend_base64": image_blend_base64}
 
-    def gemini_generate(self, request_data: Gemini_RequestData):
+    async def gemini_generate(self, request_data: Gemini_RequestData):
         logging.info("\ngemini API called\n")
-        prompt = self.gemini(functions.gemini.generate.generate_prompt, request_data)
+        prompt = await self.gemini(functions.gemini.generate.generate_prompt, request_data)
         return {"prompt": prompt}

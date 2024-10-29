@@ -22,6 +22,8 @@ from PIL import Image
 import numpy as np
 import os
 import cv2
+import httpx
+import asyncio
 
 @torch.inference_mode()
 def apply_fooocus_inpaint(unet, patch, latent) :
@@ -73,7 +75,7 @@ def construct_condition(unet,
 
     return unet
 
-def sned_object_remove_request_to_api(
+async def sned_object_remove_request_to_api(
         checkpoint,
         prompt,
         num_inference_steps,
@@ -107,8 +109,9 @@ def sned_object_remove_request_to_api(
     }
 
     url = f"http://{ip_addr}/object_remove"
-    response = requests.post(url, json=request_body)
-    data = handle_response(response)
-    image_base64 = data['image_base64']
-    image = convert_base64_to_image_array(image_base64)
-    return [image]
+    async with httpx.AsyncClient(timeout=300) as client:
+        response = await client.post(url, json=request_body)
+        data = handle_response(response)
+        image_base64 = data['image_base64']
+        image = convert_base64_to_image_array(image_base64)
+        return [image]

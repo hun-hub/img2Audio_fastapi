@@ -6,6 +6,8 @@ from cgen_utils.image_process import (convert_base64_to_image_array,
 from types import NoneType
 from PIL import Image
 import torch
+import httpx
+import asyncio
 
 @torch.inference_mode()
 def upscale_with_model(upscale_model, image) :
@@ -20,7 +22,7 @@ def image_scale_by(image, method, scale) :
     image_scaled = image_scaler.upscale(image, method, scale)[0]
     return image_scaled
 
-def sned_upscale_request_to_api(
+async def sned_upscale_request_to_api(
         model_name,
         image,
         method,
@@ -41,8 +43,9 @@ def sned_upscale_request_to_api(
     }
 
     url = f"http://{ip_addr}/upscale"
-    response = requests.post(url, json=request_body)
-    data = handle_response(response)
-    image_base64 = data['image_base64']
-    image = convert_base64_to_image_array(image_base64)
-    return [image]
+    async with httpx.AsyncClient(timeout=300) as client:
+        response = await client.post(url, json=request_body)
+        data = handle_response(response)
+        image_base64 = data['image_base64']
+        image = convert_base64_to_image_array(image_base64)
+        return [image]

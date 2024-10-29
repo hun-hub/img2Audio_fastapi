@@ -32,14 +32,13 @@ logger = logging.getLogger(__name__)
 
 
 class CntGenAPI:
-    _lock = threading.Lock()
-    _executor = ThreadPoolExecutor(max_workers=1)  # 한 번에 하나의 작업만 처리하도록 설정
-    _queue = asyncio.Queue()   # 한 번에 하나의 작업만 실행되도록 세마포어 사용
-    _queue_semaphore = asyncio.Semaphore(1)  # 한 번에 하나의 작업만 큐에 추가되도록 제한
-
     def __init__(self, args):
         self.args = args
-        self.queue = Queue()
+
+        self._lock = asyncio.Lock()
+        self._executor = ThreadPoolExecutor(max_workers=1)
+        self._queue = asyncio.Queue()
+
         self.app = FastAPI()
         self.app.add_middleware(LogRequestMiddleware)
         self.app.add_middleware(
@@ -57,17 +56,12 @@ class CntGenAPI:
         self.app.on_event("startup")(self.start_queue_processing)  # 큐 처리를 위한 이벤트 추가
         self.app.post('/restart')(self.restart)
 
+    # 작업 큐에서 작업 처리하기 위한 소비자 함수
     async def process_queue(self):
         while True:
             gen_function, request_data, future = await self._queue.get()
             try:
-                loop = asyncio.get_event_loop()
-                result = await loop.run_in_executor(
-                    self._executor,
-                    self.generate_blueprint,
-                    gen_function,
-                    request_data
-                )
+                result = await self.generate_blueprint(gen_function, request_data)
                 future.set_result(result)
             except Exception as e:
                 future.set_exception(e)
@@ -78,31 +72,49 @@ class CntGenAPI:
     async def start_queue_processing(self):
         asyncio.create_task(self.process_queue())
 
-    # 동기 함수로 모델 생성 및 청소 과정 관리
-    def generate_blueprint(self, gen_function, request_data):
-        with self._lock:  # threading.Lock()을 사용하여 동기 락 적용
-            try:
-                self._cached_model_update(request_data)
-                generate_output = gen_function(self.model_cache, request_data)
-
-                # 메모리 관리
-                comfy.model_management.unload_all_models()
-                comfy.model_management.cleanup_models()
-                gc.collect()
-                comfy.model_management.soft_empty_cache()
-            except Exception as e:
-                # 에러 시 메모리 정리
-                comfy.model_management.unload_all_models()
-                comfy.model_management.cleanup_models()
-                gc.collect()
-                comfy.model_management.soft_empty_cache()
-                raise HTTPException(status_code=500, detail=str(e))
-            return generate_output
-
-
-    def gemini(self, gen_function, request_data):
+    async def generate_blueprint(self, gen_function, request_data):
         try:
-            gemini_output = gen_function(request_data)
+            # 모델 업데이트 (락 필요)
+            async with self._lock:
+                self._cached_model_update(request_data)
+
+            # 모델 생성 (락 없이 실행)
+            generate_output = await asyncio.get_event_loop().run_in_executor(
+                self._executor,
+                gen_function,
+                self.model_cache,
+                request_data
+            )
+
+            # 메모리 관리 (락 필요)
+            async with self._lock:
+                comfy.model_management.unload_all_models()
+                comfy.model_management.cleanup_models()
+                gc.collect()
+                comfy.model_management.soft_empty_cache()
+        except Exception as e:
+            # 에러 발생 시 메모리 관리 (락 필요)
+            async with self._lock:
+                comfy.model_management.unload_all_models()
+                comfy.model_management.cleanup_models()
+                gc.collect()
+                comfy.model_management.soft_empty_cache()
+            raise HTTPException(status_code=500, detail=str(e))
+        return generate_output
+
+    async def add_to_queue(self, gen_function, request_data):
+        future = asyncio.get_event_loop().create_future()
+        await self._queue.put((gen_function, request_data, future))
+        return await future
+
+    async def gemini(self, gen_function, request_data):
+        try:
+            loop = asyncio.get_event_loop()
+            gemini_output = await loop.run_in_executor(
+                None,  # 기본 ThreadPoolExecutor 사용
+                gen_function,
+                request_data
+            )
 
             torch.cuda.empty_cache()
             gc.collect()

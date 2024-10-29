@@ -16,6 +16,8 @@ from cgen_utils.loader import load_clip_vision
 from types import NoneType
 from PIL import Image
 import numpy as np
+import httpx
+import asyncio
 
 @torch.inference_mode()
 def construct_controlnet_condition(
@@ -66,7 +68,7 @@ def construct_ipadapter_condition(
                                embeds_scaling= ipadapter_request.embeds_scaling,)
     return unet
 
-def sned_half_inpainting_request_to_api(
+async def sned_half_inpainting_request_to_api(
         checkpoint,
         image,
         mask,
@@ -218,8 +220,9 @@ def sned_half_inpainting_request_to_api(
         request_body['ipadapter_request'] = ipadapter_body
 
     url = f"http://{ip_addr}/sdxl/half_inpainting"
-    response = requests.post(url, json=request_body)
-    data = handle_response(response)
-    image_base64 = data['image_base64']
-    image = convert_base64_to_image_array(image_base64)
-    return [image]
+    async with httpx.AsyncClient(timeout=300) as client:
+        response = await client.post(url, json=request_body)
+        data = handle_response(response)
+        image_base64 = data['image_base64']
+        image = convert_base64_to_image_array(image_base64)
+        return [image]
