@@ -49,7 +49,7 @@ def generate_image(cached_model_dict, request_data):
     positive_cond, negative_cond = encode_prompt_advance(
         clip,
         request_data.is_retouch,
-        request_data.prompt_positive,
+        prompt_prefix + request_data.prompt_positive,
         request_data.prompt_negative,
         mask,
         request_data.prompt_retouch)
