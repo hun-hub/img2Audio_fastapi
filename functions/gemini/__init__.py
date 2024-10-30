@@ -199,4 +199,5 @@ answer:  white background, nuddle, marble floor.
 Note: The given keyword(s) may be in Korean or English. just give me translated keywords.
 
 Given sentence(s):  {user_prompt}
+answer:
 """
