@@ -185,3 +185,18 @@ Note: The Given sentence(s) maybe in Korean or English.
 
 Given sentence(s):  {user_prompt}
 """
+
+translate_keywords = """translate  korean and english keywords to english keyword(s) given Short keywords(s) below. 
+
+Example: 
+
+Given keyword(s): Fried potato balls. 보라색 배경,  식탁보,  젓가락,
+answer:  Fried potato balls. purple background,  tablecloth, chopstick
+
+Given keyword(s): white 배경, 면요리, 대리석 바닥
+answer:  white background, nuddle, marble floor.
+
+Note: The given keyword(s) may be in Korean or English. just give me translated keywords.
+
+Given sentence(s):  {user_prompt}
+"""
