@@ -1,5 +1,5 @@
 import torch
-from .utils import construct_ipadapter_condition, construct_controlnet_condition, construct_sdxl_controlnet_condition, encode_prompt_advance
+from .utils import construct_ipadapter_condition, construct_controlnet_condition, construct_sdxl_controlnet_condition, construct_sdxl_ipadapter_condition, encode_prompt_advance
 from cgen_utils.image_process import convert_image_tensor_to_base64, convert_base64_to_image_tensor
 from cgen_utils.comfyui import (encode_prompt,
                                 sample_image,
@@ -147,7 +147,7 @@ def sdxl_generate_image(cached_model_dict, request_data):
             cached_model_dict,
             lora_request)
 
-    unet = construct_ipadapter_condition(
+    unet = construct_sdxl_ipadapter_condition(
         unet,
         cached_model_dict,
         ipadapter_request

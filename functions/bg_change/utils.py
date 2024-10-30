@@ -318,6 +318,32 @@ def construct_ipadapter_condition(
                                embeds_scaling= ipadapter_request.embeds_scaling,)
     return unet
 
+@torch.inference_mode()
+def construct_sdxl_ipadapter_condition(
+        unet,
+        cached_model_dict,
+        ipadapter_request,
+):
+
+    if ipadapter_request is not None:
+        clip_vision = load_clip_vision(ipadapter_request.clip_vision)
+        ipadapter = cached_model_dict['ipadapter']['sdxl'][1]
+        ipadapter_images = [convert_base64_to_image_tensor(image) / 255 for image in ipadapter_request.images]
+        image_batch = make_image_batch(ipadapter_images)
+
+        unet = apply_ipadapter(
+                               unet= unet,
+                               ipadapter=ipadapter,
+                               clip_vision=clip_vision,
+                               image= image_batch,
+                               weight= ipadapter_request.weight,
+                               start_at = ipadapter_request.start_at,
+                               end_at = ipadapter_request.end_at,
+                               weight_type = ipadapter_request.weight_type,
+                               combine_embeds = ipadapter_request.combine_embeds,
+                               embeds_scaling= ipadapter_request.embeds_scaling,)
+    return unet
+
 async def sned_bg_change_request_to_api(
         image,
         mask,
@@ -498,7 +524,7 @@ async def sned_bg_change_sdxl_request_to_api(
         ipadapter_images = [convert_image_to_base64(ipadapter_image) for ipadapter_image in ipadapter_images]
 
     request_body = {
-        'checkpoint': 'SDXL_RealVisXL_V40.safetensors',
+        'checkpoint': 'SDXL_copaxTimelessxlSDXL1_v12.safetensors',
         'init_image': image,
         'mask': mask,
         "prompt_positive": prompt,
