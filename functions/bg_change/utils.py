@@ -289,7 +289,7 @@ def encode_prompt_advance(
             condition_combiner = load_condition_combiner()
         except :
             condition_combiner = load_condition_combiner()
-        positive_cond = condition_combiner.combine(2, conditioning_1= positive_cond, conditioning_2=retouch_cond)[0]
+        positive_cond = condition_combiner.combine(inputcount=2, conditioning_1= positive_cond, conditioning_2=retouch_cond)[0]
 
     return positive_cond, negative_cond
 @torch.inference_mode()
