@@ -16,11 +16,12 @@ query_dict = {'product_description': product_description,
               'lg_artwork': lg_artwork,
               'sentence_to_keywords': sentence_to_keywords,
               'combine_sentence_keywords': combine_sentence_keywords,
-              'translate_keywords': translate_keywords}
+              'translate_keywords': translate_keywords,
+              'lg_audio': lg_audio}
 
 @torch.inference_mode()
 def generate_prompt(request_data):
-
+    print(request_data.query_type)
     if request_data.query_type not in query_dict: # 자유 형식의 query문
         query = request_data.query_type
     else :
@@ -43,3 +44,4 @@ def generate_prompt(request_data):
         prompt = gemini_with_prompt(query)
 
     return prompt
+

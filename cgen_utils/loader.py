@@ -2,7 +2,7 @@ import importlib, sys, os
 import torch
 import numpy as np
 import yaml, os
-import folder_paths
+# import folder_paths
 
 CHECKPOINT_ROOT = os.getenv('CHECKPOINT_ROOT')
 
@@ -23,7 +23,7 @@ def load_extra_path_config(yaml_path):
                 full_path = y
                 if base_path is not None:
                     full_path = os.path.join(base_path, full_path)
-                folder_paths.add_model_folder_path(x, full_path)
+                # folder_paths.add_model_folder_path(x, full_path)
 
 def import_module_from_path(module_name, module_path):
     if module_name in sys.modules:

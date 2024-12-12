@@ -15,6 +15,8 @@ from cgen_utils.handler import handle_response
 import httpx
 import asyncio
 
+
+
 def send_gemini_request_to_api(
         query_type,
         image = None,
@@ -40,10 +42,11 @@ def send_gemini_request_to_api(
         'image': image
     }
 
-    gamini_addr = os.getenv('GEMINI_ADDR')
+    gamini_addr = '34.64.54.100:7861'
     url = f"http://{gamini_addr}/gemini"
+
     response =  requests.post(url, json=request_body)
     data = handle_response(response)
+    print("Response Data:", data)
     prompt = data['prompt']
     return prompt
-
